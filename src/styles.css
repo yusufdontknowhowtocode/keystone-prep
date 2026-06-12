@@ -1,0 +1,32 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+@import "tailwindcss";
+
+:root{
+  --paper:#FAFAF8; --card:#FFFFFF; --ink:#16181D; --sub:#5C5F66;
+  --line:#DDDBD4; --accent:#FF4F00; --ok:#0E8A3E; --warn:#B45309; --bad:#C81E1E;
+}
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--paper); color: var(--ink); font-family:'Inter',sans-serif; }
+button, input, textarea, select { font: inherit; }
+.pp-root{ background:var(--paper); color:var(--ink); font-family:'Inter',sans-serif; min-height:100vh; }
+.pp-display{ font-family:'Barlow Condensed',sans-serif; }
+.pp-mono{ font-family:'IBM Plex Mono',monospace; }
+.pp-card{ background:var(--card); border:1px solid var(--line); border-radius:10px; }
+.pp-line{ border-color:var(--line); }
+.pp-sub{ color:var(--sub); }
+.pp-accent{ color:var(--accent); }
+.pp-btn{ background:var(--ink); color:#fff; border-radius:8px; font-weight:600; transition:opacity .15s; }
+.pp-btn:hover{ opacity:.85; }
+.pp-btn-accent{ background:var(--accent); }
+.pp-btn-ghost{ background:transparent; color:var(--ink); border:1px solid var(--line); border-radius:8px; font-weight:600; }
+.pp-btn-ghost:hover{ background:#F1F0EC; }
+.pp-stamp{ font-family:'Barlow Condensed',sans-serif; font-weight:700; letter-spacing:.08em;
+  border:2px solid currentColor; border-radius:4px; padding:1px 8px; font-size:13px;
+  display:inline-block; transform:rotate(-1.5deg); text-transform:uppercase; }
+.pp-navbtn{ border-radius:8px; font-weight:600; }
+.pp-navbtn.active{ background:var(--ink); color:#fff; }
+.pp-navbtn:not(.active):hover{ background:#EFEDE8; }
+.pp-row:hover{ background:#FBFAF7; }
+.pp-input{ width:100%; border:1px solid var(--line); border-radius:8px; padding:10px 12px; background:#fff; outline:none; }
+.pp-input:focus{ border-color:var(--accent); box-shadow:0 0 0 3px rgba(255,79,0,.12); }
+@media (prefers-reduced-motion: reduce){ *{ transition:none !important; animation:none !important; scroll-behavior:auto !important; } }
