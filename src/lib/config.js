@@ -1,6 +1,6 @@
 export const SITE = {
   name: import.meta.env.VITE_SITE_NAME || 'Keystone Prep',
-  contactEmail: import.meta.env.VITE_CONTACT_EMAIL || 'hello@keystoneprep.co',
+  contactEmail: import.meta.env.VITE_CONTACT_EMAIL || 'ykaymakusa@gmail.com',
   location: 'Lansdale, PA',
-  positioning: 'East Coast FBA prep in Lansdale, PA — every unit photographed, live client portal, and fast freight access to the PA/NJ fulfillment cluster.',
+  positioning: 'Pilot East Coast FBA prep for wholesale and private-label sellers in Lansdale, PA — photo check-ins, separated storage, and a live client portal.',
 }
