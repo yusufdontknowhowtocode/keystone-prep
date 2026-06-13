@@ -115,6 +115,7 @@ export default function Landing() {
           <div>
             <SectionHeading eyebrow="Simple pricing" title="Clear pilot pricing." />
             <p className="pp-sub mt-3">Simple per-unit pricing for pilot accounts. Final rates depend on SKU complexity, packaging requirements, and monthly volume.</p>
+            <p className="text-sm pp-sub mt-3">Shipping, Amazon fees, and special packaging materials are billed separately or paid directly by the client. </p>
           </div>
           <div className="pp-card overflow-hidden">
             {PRICING.map(([name, price], i) => (
