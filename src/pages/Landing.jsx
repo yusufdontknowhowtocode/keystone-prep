@@ -6,11 +6,19 @@ const PILOT_EMAIL_SUBJECT = 'Keystone Prep Pilot Account'
 const PILOT_EMAIL_BODY = `Hi Keystone Prep,\n\nI'm interested in the first 100 units free pilot.\n\nMonthly unit volume:\nProduct type:\nAmazon / Shopify / both:\nWhat city/state do you ship from:\n\nThanks.`
 const pilotMailto = `mailto:${SITE.contactEmail}?subject=${encodeURIComponent(PILOT_EMAIL_SUBJECT)}&body=${encodeURIComponent(PILOT_EMAIL_BODY)}`
 
-const PRICING = [
-  ['Receiving + inspection', '$0.35/unit'],
-  ['FNSKU labeling', '$0.30/unit'],
+// Standard prep is one all-in per-unit rate that covers receiving, inspection,
+// FNSKU labeling, and outbound box prep. Discounts are earned at volume.
+const STANDARD_PREP = [
+  ['Up to 1,000 units / mo', '$0.65/unit'],
+  ['1,001–5,000 units / mo', '$0.60/unit'],
+  ['5,001+ units / mo', '$0.55/unit'],
+]
+
+// Opt-in extras, only billed when a SKU actually needs them.
+const ADD_ONS = [
   ['Polybagging', '$0.25/unit'],
-  ['Bubble/bundle/custom prep', 'quoted per SKU'],
+  ['Bubble wrap', '$0.40/unit'],
+  ['Bundling / kitting / custom prep', 'from $0.50/unit'],
   ['Pallet storage', '$25/pallet/mo'],
 ]
 
@@ -113,17 +121,45 @@ export default function Landing() {
 
         <section id="pricing" className="max-w-6xl mx-auto px-4 py-14 grid lg:grid-cols-[.8fr_1.2fr] gap-8">
           <div>
-            <SectionHeading eyebrow="Simple pricing" title="Clear pilot pricing." />
-            <p className="pp-sub mt-3">Simple per-unit pricing for pilot accounts. Final rates depend on SKU complexity, packaging requirements, and monthly volume.</p>
-            <p className="text-sm pp-sub mt-3">Shipping, Amazon fees, and special packaging materials are billed separately or paid directly by the client. </p>
+            <SectionHeading eyebrow="Simple pricing" title="One rate. Fully compliant." />
+            <p className="pp-sub mt-3">
+              Amazon ended in-house FBA prep in January 2026 — every unit now has to arrive labeled and compliant, or you eat $0.32–$8.25/unit in defect fees. One per-unit rate covers the whole standard flow: receiving, inspection, FNSKU label, and outbound box prep.
+            </p>
+            <p className="text-sm pp-sub mt-3">
+              Shipping, Amazon fees, and special packaging materials are billed separately or paid directly by the client. Final rates depend on SKU complexity and monthly volume.
+            </p>
           </div>
-          <div className="pp-card overflow-hidden">
-            {PRICING.map(([name, price], i) => (
-              <div key={name} className={`flex items-center justify-between gap-4 p-4 ${i ? 'border-t' : ''}`} style={{ borderColor: 'var(--line)' }}>
-                <span className="font-medium">{name}</span>
-                <span className="pp-mono font-semibold">{price}</span>
+
+          <div className="space-y-4">
+            <div className="pp-card overflow-hidden">
+              <div className="px-4 py-3 border-b flex items-center justify-between gap-4" style={{ borderColor: 'var(--line)' }}>
+                <span className="font-semibold">Standard prep — all-in per unit</span>
+                <span className="text-xs pp-sub font-semibold uppercase tracking-wider hidden sm:block">Receive · inspect · label · box</span>
               </div>
-            ))}
+              {STANDARD_PREP.map(([name, price], i) => (
+                <div key={name} className={`flex items-center justify-between gap-4 p-4 ${i ? 'border-t' : ''}`} style={{ borderColor: 'var(--line)' }}>
+                  <span className="font-medium">{name}</span>
+                  <span className="pp-mono font-semibold">{price}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="pp-card overflow-hidden">
+              <div className="px-4 py-3 border-b" style={{ borderColor: 'var(--line)' }}>
+                <span className="font-semibold">Add-ons</span>
+                <span className="pp-sub text-sm"> — only if your SKU needs them</span>
+              </div>
+              {ADD_ONS.map(([name, price], i) => (
+                <div key={name} className={`flex items-center justify-between gap-4 p-4 ${i ? 'border-t' : ''}`} style={{ borderColor: 'var(--line)' }}>
+                  <span className="font-medium">{name}</span>
+                  <span className="pp-mono font-semibold">{price}</span>
+                </div>
+              ))}
+            </div>
+
+            <p className="text-sm pp-sub">
+              Shipping large wholesale lots? Ask about flat per-carton receiving — cheaper for cases of many low-cost units.
+            </p>
           </div>
         </section>
 
