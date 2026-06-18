@@ -1,5 +1,5 @@
 import React from 'react'
-import { ArrowRight, Barcode, Boxes, Camera, CheckCircle2, Clock, MapPin, ShieldCheck, Truck, Warehouse } from 'lucide-react'
+import { ArrowRight, Barcode, Boxes, Camera, CheckCircle2, Clock, MapPin, Package, ShieldCheck, ShoppingBag, Store, Truck, Warehouse } from 'lucide-react'
 import { SITE } from '../lib/config.js'
 
 const PILOT_EMAIL_SUBJECT = 'Keystone Prep Pilot Account'
@@ -37,9 +37,10 @@ export default function Landing() {
             <Boxes size={24} /> {SITE.name}
           </a>
           <nav className="hidden md:flex items-center gap-6 text-sm font-semibold">
+            <a href="#services" className="hover:underline">Services</a>
             <a href="#process" className="hover:underline">Process</a>
             <a href="#pricing" className="hover:underline">Pricing</a>
-            <a href="#fit" className="hover:underline">Pilot fit</a>
+            <a href="#fit" className="hover:underline">Fit</a>
             <a href="/portal" className="hover:underline">Portal demo</a>
           </nav>
           <a href={pilotMailto} className="pp-btn pp-btn-accent px-4 py-2 text-sm">Apply for pilot</a>
@@ -50,24 +51,24 @@ export default function Landing() {
         <section className="max-w-6xl mx-auto px-4 py-16 md:py-24 grid lg:grid-cols-[1.1fr_.9fr] gap-10 items-center">
           <div>
             <div className="inline-flex items-center gap-2 pp-card px-3 py-1.5 text-sm font-semibold mb-5">
-              <MapPin size={15} /> Lansdale, PA · pilot accounts now opening
+              <MapPin size={15} /> Lansdale, PA · East Coast fulfillment & FBA prep
             </div>
             <h1 className="pp-display text-6xl md:text-8xl font-bold uppercase leading-[.85] tracking-tight">
-              East Coast FBA prep for wholesale sellers.
+              East Coast 3PL & FBA prep for online sellers.
             </h1>
             <p className="text-lg md:text-xl pp-sub mt-6 max-w-2xl">
-              Pilot onboarding for wholesale and private-label sellers who want photo check-ins, separated storage, and a live portal before inventory moves to Amazon.
+              Receiving, inspection, FNSKU labeling, prep, storage, and order fulfillment for Amazon FBA, Shopify, and TikTok Shop sellers — with photo check-ins and a live client portal. Backed by an established apparel-manufacturing warehouse with years of international receiving and labeling experience.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 mt-8">
               <a href={pilotMailto} className="pp-btn pp-btn-accent px-5 py-3 flex items-center justify-center gap-2">
-                Apply for first 100 units free <ArrowRight size={18} />
+                Start with 100 units free <ArrowRight size={18} />
               </a>
               <a href="/portal" className="pp-btn-ghost px-5 py-3 flex items-center justify-center gap-2">
                 View portal demo
               </a>
             </div>
             <p className="text-xs pp-sub mt-4 max-w-xl">
-              We’re onboarding a small number of test shipments after account approval. Inventory acceptance requires completed account setup and warehouse onboarding approval.
+              Now onboarding new accounts. Inventory acceptance requires completed account setup and warehouse onboarding approval.
             </p>
           </div>
 
@@ -107,6 +108,28 @@ export default function Landing() {
           </div>
         </section>
 
+        <section className="max-w-6xl mx-auto px-4 mb-14">
+          <div className="pp-card p-5 md:p-6 flex flex-col md:flex-row items-start md:items-center gap-4">
+            <Warehouse size={28} className="pp-accent shrink-0" />
+            <p className="text-sm md:text-base pp-sub">
+              <span className="font-semibold" style={{ color: 'var(--ink)' }}>Backed by an established warehouse operation.</span> Keystone runs out of the US facility of KT Trims, an apparel-trim manufacturer that supplies major global fashion brands — bringing years of hands-on international receiving, inspection, and labeling experience to your inventory.
+            </p>
+          </div>
+        </section>
+
+        <section id="services" className="border-y" style={{ borderColor: 'var(--line)', background: '#fff' }}>
+          <div className="max-w-6xl mx-auto px-4 py-14">
+            <SectionHeading eyebrow="Services" title="One warehouse. Every channel." />
+            <p className="pp-sub mt-3 max-w-2xl">Whether you sell on Amazon, your own store, or TikTok, we receive, prep, store, and ship your inventory — and you watch all of it in real time in the portal.</p>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-3 mt-8">
+              <Feature icon={Boxes} title="Amazon FBA prep" text="Receiving, inspection, FNSKU labeling, polybag, bundle, and box prep to Amazon's spec — so nothing gets rejected or hit with defect fees." />
+              <Feature icon={Store} title="DTC fulfillment" text="Store your inventory with us and we pick, pack, and ship individual orders straight to your customers from your Shopify or website store." />
+              <Feature icon={ShoppingBag} title="TikTok Shop" text="Fulfillment for TikTok Shop sellers — we handle the orders so you can focus on the content that drives them." />
+              <Feature icon={Package} title="Storage & returns" text="Separated client storage by SKU, plus inbound receiving and returns processing as you scale." />
+            </div>
+          </div>
+        </section>
+
         <section id="process" className="border-y" style={{ borderColor: 'var(--line)', background: '#fff' }}>
           <div className="max-w-6xl mx-auto px-4 py-14">
             <SectionHeading eyebrow="Process" title="The boring workflow sellers actually want." />
@@ -127,6 +150,9 @@ export default function Landing() {
             </p>
             <p className="text-sm pp-sub mt-3">
               Shipping, Amazon fees, and special packaging materials are billed separately or paid directly by the client. Final rates depend on SKU complexity and monthly volume.
+            </p>
+            <p className="text-sm pp-sub mt-3">
+              Pricing above is for FBA prep. DTC and TikTok Shop order fulfillment (pick, pack &amp; ship) is quoted per account based on order volume — ask for a quote.
             </p>
           </div>
 
@@ -168,7 +194,7 @@ export default function Landing() {
             <div>
               <SectionHeading eyebrow="Good fit" title="Who we want first." />
               <ul className="mt-4 space-y-3 text-sm">
-                {['Wholesale FBA sellers', 'Private-label brands', '500–3,000 units/month', 'Small-to-medium boxed products', 'Brands that value East Coast speed and photo check-ins'].map(x => <li key={x} className="flex gap-2"><CheckCircle2 size={17} style={{ color: 'var(--ok)' }} /> {x}</li>)}
+                {['Wholesale & private-label FBA sellers', 'Shopify / DTC brands', 'TikTok Shop sellers', '500+ units or orders / month', 'Small-to-medium boxed products', 'Brands that value East Coast speed and real-time visibility'].map(x => <li key={x} className="flex gap-2"><CheckCircle2 size={17} style={{ color: 'var(--ok)' }} /> {x}</li>)}
               </ul>
             </div>
             <div>
