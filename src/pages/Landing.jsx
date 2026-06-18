@@ -43,7 +43,7 @@ export default function Landing() {
             <a href="#fit" className="hover:underline">Fit</a>
             <a href="/portal" className="hover:underline">Portal demo</a>
           </nav>
-          <a href={pilotMailto} className="pp-btn pp-btn-accent px-4 py-2 text-sm">Apply for pilot</a>
+          <a href={pilotMailto} className="pp-btn pp-btn-accent px-4 py-2 text-sm"> Get a quote </a>
         </div>
       </header>
 
@@ -224,7 +224,7 @@ export default function Landing() {
         <section id="contact" className="border-t" style={{ borderColor: 'var(--line)', background: '#fff' }}>
           <div className="max-w-6xl mx-auto px-4 py-14 grid lg:grid-cols-[1fr_auto] gap-6 items-center">
             <div>
-              <SectionHeading eyebrow="Pilot accounts" title="Start with 100 units free." />
+              <SectionHeading eyebrow="New accounts." title="Start with 100 units free." />
               <p className="pp-sub mt-3 max-w-2xl">Send your monthly volume, product type, and current prep workflow. If it’s a good fit, we’ll schedule a quick call and walk through the portal demo.</p>
             </div>
             <a href={pilotMailto} className="pp-btn pp-btn-accent px-6 py-4 flex items-center justify-center gap-2">
