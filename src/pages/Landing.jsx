@@ -98,6 +98,30 @@ export default function Landing() {
           </div>
         </section>
 
+        <section className="max-w-6xl mx-auto px-4 mb-14">
+          <div className="pp-card overflow-hidden">
+            <div className="grid md:grid-cols-[1.4fr_1fr]">
+              <img
+                src="warehouse.jpg"
+                alt="Keystone Prep warehouse in Lansdale, PA — racked inventory and box prep area"
+                className="w-full h-full object-cover"
+                style={{ minHeight: '420px' }}
+              />
+              <div className="p-6 md:p-8 flex flex-col justify-center">
+                <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest pp-sub">
+                  <MapPin size={15} /> A real facility, not a middleman
+                </div>
+                <h2 className="pp-display text-4xl md:text-5xl font-bold uppercase leading-none mt-2">
+                  Your inventory, in our warehouse.
+                </h2>
+                <p className="pp-sub mt-3">
+                  Keystone runs out of an established, staffed warehouse in Lansdale, PA — racked storage, dedicated prep area, and hands-on receiving. When you send inventory, real people handle it in a real facility you can come see.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <section className="max-w-6xl mx-auto px-4 -mt-8 md:-mt-14 mb-14">
           <div className="pp-card p-4 md:p-5 grid md:grid-cols-3 gap-3">
             {TRUST_LINES.map((line) => (
@@ -133,7 +157,15 @@ export default function Landing() {
         <section id="process" className="border-y" style={{ borderColor: 'var(--line)', background: '#fff' }}>
           <div className="max-w-6xl mx-auto px-4 py-14">
             <SectionHeading eyebrow="Process" title="The boring workflow sellers actually want." />
-            <div className="grid md:grid-cols-4 gap-3 mt-8">
+            <div className="pp-card overflow-hidden mt-8">
+              <img
+                src="/warehouse2.jpg"
+                alt="Keystone Prep warehouse floor in Lansdale, PA — loading dock and staging area where inbound inventory is received"
+                className="w-full object-cover"
+                style={{ height: '320px' }}
+              />
+            </div>
+            <div className="grid md:grid-cols-4 gap-3 mt-3">
               <Feature icon={Truck} title="Receive" text="Supplier boxes arrive in Lansdale and get logged against the client account." />
               <Feature icon={Camera} title="Photograph" text="Cartons and exceptions are photographed at check-in so clients know exactly what arrived." />
               <Feature icon={Boxes} title="Prep" text="Inspect, label, polybag, bundle, and stage wholesale or private-label inventory for FBA." />
