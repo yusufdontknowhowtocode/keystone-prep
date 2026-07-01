@@ -102,7 +102,7 @@ export default function Landing() {
           <div className="pp-card overflow-hidden">
             <div className="grid md:grid-cols-[1.4fr_1fr]">
               <img
-                src="warehouse.jpg"
+                src="/warehouse.jpg"
                 alt="Keystone Prep warehouse in Lansdale, PA — racked inventory and box prep area"
                 className="w-full h-full object-cover"
                 style={{ minHeight: '420px' }}
