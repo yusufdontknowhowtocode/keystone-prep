@@ -5,7 +5,11 @@ import { SITE } from '../lib/config.js'
 const PILOT_EMAIL_SUBJECT = 'Keystone Prep Pilot Account'
 const PILOT_EMAIL_BODY = `Hi Keystone Prep,\n\nI'm interested in the first 100 units free pilot.\n\nMonthly unit volume:\nProduct type:\nAmazon / Shopify / both:\nWhat city/state do you ship from:\n\nThanks.`
 const pilotMailto = `mailto:${SITE.contactEmail}?subject=${encodeURIComponent(PILOT_EMAIL_SUBJECT)}&body=${encodeURIComponent(PILOT_EMAIL_BODY)}`
-
+function trackQuoteClick() {
+  if (typeof window.gtag === 'function') {
+    window.gtag('event', 'conversion', { send_to: 'AW-18227583658/GBCbCLurnckcEKq1y_ND' })
+  }
+}
 // Standard prep is one all-in per-unit rate that covers receiving, inspection,
 // FNSKU labeling, and outbound box prep. Discounts are earned at volume.
 const STANDARD_PREP = [
@@ -43,7 +47,7 @@ export default function Landing() {
             <a href="#fit" className="hover:underline">Fit</a>
             <a href="/portal" className="hover:underline">Portal demo</a>
           </nav>
-          <a href={pilotMailto} className="pp-btn pp-btn-accent px-4 py-2 text-sm"> Get a quote </a>
+          <a href={pilotMailto} onClick={trackQuoteClick} className="pp-btn pp-btn-accent px-4 py-2 text-sm"> Get a quote </a>
         </div>
       </header>
 
@@ -60,7 +64,7 @@ export default function Landing() {
               Receiving, inspection, FNSKU labeling, prep, storage, and order fulfillment for Amazon FBA, Shopify, and TikTok Shop sellers — with photo check-ins and a live client portal. Backed by an established apparel-manufacturing warehouse with years of international receiving and labeling experience.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 mt-8">
-              <a href={pilotMailto} className="pp-btn pp-btn-accent px-5 py-3 flex items-center justify-center gap-2">
+              <a href={pilotMailto} onClick={trackQuoteClick} className="pp-btn pp-btn-accent px-5 py-3 flex items-center justify-center gap-2">
                 Start with 100 units free <ArrowRight size={18} />
               </a>
               <a href="/portal" className="pp-btn-ghost px-5 py-3 flex items-center justify-center gap-2">
@@ -259,7 +263,7 @@ export default function Landing() {
               <SectionHeading eyebrow="New accounts." title="Start with 100 units free." />
               <p className="pp-sub mt-3 max-w-2xl">Send your monthly volume, product type, and current prep workflow. If it’s a good fit, we’ll schedule a quick call and walk through the portal demo.</p>
             </div>
-            <a href={pilotMailto} className="pp-btn pp-btn-accent px-6 py-4 flex items-center justify-center gap-2">
+            <a href={pilotMailto} onClick={trackQuoteClick} className="pp-btn pp-btn-accent px-6 py-4 flex items-center justify-center gap-2">
               Email {SITE.name} <ArrowRight size={18} />
             </a>
           </div>
