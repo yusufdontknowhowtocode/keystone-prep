@@ -200,7 +200,7 @@ export default function Portal() {
         {page === 'outbound' && <Outbound outbound={data.outbound} approve={approve} />}
         {page === 'issues' && <Issues issues={data.issues} resolve={resolveIssue} />}
         {page === 'billing' && <Billing invoices={data.invoices} ping={ping} />}
-        {page === 'settings' && <Prefs client={client} updatePrefs={updatePrefs} />}
+        {page === 'settings' && <Prefs client={client} updatePrefs={updatePrefs} mode={mode} />}
       </main>
 
       {toast && <Toast message={toast} onDismiss={() => setToast(null)} />}
@@ -458,7 +458,7 @@ function Billing({ invoices, ping }) {
   )
 }
 
-function Prefs({ client, updatePrefs }) {
+function Prefs({ client, updatePrefs, mode }) {
   const prefs = client.prefs || {}
   const setPref = (key) => updatePrefs({ ...prefs, [key]: !prefs[key] })
   const Toggle = ({ k, label, desc }) => (
@@ -480,6 +480,42 @@ function Prefs({ client, updatePrefs }) {
         <Toggle k="emailDigest" label="Daily email digest" desc="One summary email instead of per-event alerts" />
       </div>
       <div className="pp-card p-4 mt-4"><div className="text-xs font-semibold uppercase tracking-wider pp-sub">Account</div><div className="pp-mono text-sm mt-2">{client.name} · {client.account_code}</div><div className="text-sm pp-sub mt-1">Pilot account</div></div>
+      {mode !== 'demo' && <ChangePassword />}
+    </div>
+  )
+}
+
+function ChangePassword() {
+  const [pw, setPw] = useState('')
+  const [pw2, setPw2] = useState('')
+  const [msg, setMsg] = useState(null)
+  const [busy, setBusy] = useState(false)
+
+  async function submit(e) {
+    e.preventDefault()
+    setMsg(null)
+    if (pw.length < 8) return setMsg({ ok: false, text: 'Must be at least 8 characters.' })
+    if (pw !== pw2) return setMsg({ ok: false, text: "Passwords don't match." })
+
+    setBusy(true)
+    const { error } = await supabase.auth.updateUser({ password: pw })
+    setBusy(false)
+
+    if (error) return setMsg({ ok: false, text: error.message })
+    setPw(''); setPw2('')
+    setMsg({ ok: true, text: 'Password updated.' })
+  }
+
+  return (
+    <div className="pp-card p-4 mt-4">
+      <div className="text-xs font-semibold uppercase tracking-wider pp-sub">Change password</div>
+      <p className="text-sm pp-sub mt-2">Update the password you use to sign in to this portal.</p>
+      <form onSubmit={submit} className="space-y-3 mt-4 max-w-sm">
+        <input className="pp-input" type="password" placeholder="New password" autoComplete="new-password" value={pw} onChange={e => setPw(e.target.value)} />
+        <input className="pp-input" type="password" placeholder="Confirm new password" autoComplete="new-password" value={pw2} onChange={e => setPw2(e.target.value)} />
+        <button className="pp-btn pp-btn-accent px-4 py-2 text-sm" disabled={busy}>{busy ? 'Updating…' : 'Update password'}</button>
+      </form>
+      {msg && <div className="text-sm mt-3" style={{ color: msg.ok ? 'var(--ok)' : 'var(--bad)' }}>{msg.text}</div>}
     </div>
   )
 }
