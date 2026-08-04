@@ -9,6 +9,8 @@ const blankDamage = { client_id: '', ref_code: '', sku: '', units: '', note: '',
 const blankSku = { client_id: '', sku: '', fnsku: '', name: '', prep_spec: 'FNSKU only', on_hand: 0, prepped: 0, shipped_lifetime: 0, damaged: 0 }
 const blankActivity = { client_id: '', kind: 'note', message: '' }
 
+const emptyRecords = { skus: [], inbound: [], outbound: [] }
+
 export default function Admin() {
   const [session, setSession] = useState(null)
   const [profile, setProfile] = useState(null)
@@ -20,6 +22,11 @@ export default function Admin() {
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
   const [forms, setForms] = useState({ inbound: blankInbound, outbound: blankOutbound, damage: blankDamage, sku: blankSku, activity: blankActivity })
+
+  // --- read-view state ---
+  const [viewClientId, setViewClientId] = useState('')
+  const [records, setRecords] = useState(emptyRecords)
+  const [recordsLoading, setRecordsLoading] = useState(false)
 
   useEffect(() => {
     if (!hasSupabaseConfig) { setLoading(false); return }
@@ -35,6 +42,13 @@ export default function Admin() {
     if (session?.user?.id) loadAdmin()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.user?.id])
+
+  // reload records whenever the viewed client changes
+  useEffect(() => {
+    if (viewClientId) loadRecords(viewClientId)
+    else setRecords(emptyRecords)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [viewClientId])
 
   async function login(e) {
     e.preventDefault()
@@ -56,10 +70,29 @@ export default function Admin() {
       setClients(rows || [])
       const defaultId = rows?.find(c => c.id !== me.id)?.id || rows?.[0]?.id || ''
       setForms(prev => Object.fromEntries(Object.entries(prev).map(([k, v]) => [k, { ...v, client_id: v.client_id || defaultId }])))
+      setViewClientId(prev => prev || defaultId)
     } catch (err) {
       setError(err.message || String(err))
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function loadRecords(clientId) {
+    setRecordsLoading(true)
+    try {
+      const [skus, inbound, outbound] = await Promise.all([
+        supabase.from('skus').select('*').eq('client_id', clientId).order('created_at', { ascending: false }),
+        supabase.from('inbound_shipments').select('*').eq('client_id', clientId).order('created_at', { ascending: false }),
+        supabase.from('outbound_shipments').select('*').eq('client_id', clientId).order('created_at', { ascending: false }),
+      ])
+      for (const r of [skus, inbound, outbound]) { if (r.error) throw r.error }
+      setRecords({ skus: skus.data || [], inbound: inbound.data || [], outbound: outbound.data || [] })
+    } catch (err) {
+      setError(err.message || String(err))
+      setRecords(emptyRecords)
+    } finally {
+      setRecordsLoading(false)
     }
   }
 
@@ -71,6 +104,8 @@ export default function Admin() {
       if (insertError) throw insertError
       setNotice(`Saved to ${table}.`)
       setForms(prev => ({ ...prev, [resetKey]: { ...resetValue, client_id: payload.client_id } }))
+      // if we just wrote a record for the client we're viewing, refresh the read-view
+      if (payload.client_id && payload.client_id === viewClientId) loadRecords(viewClientId)
     } catch (err) {
       setError(err.message || String(err))
     } finally {
@@ -83,8 +118,10 @@ export default function Admin() {
   if (!session) return <AdminLogin email={email} setEmail={setEmail} password={password} setPassword={setPassword} login={login} busy={busy} error={error} />
   if (profile && !profile.is_admin) return <AdminShell><ErrorCard message="This login is not marked as an admin in the clients table." /></AdminShell>
 
+  const viewedClient = clients.find(c => c.id === viewClientId)
+
   return (
-    <AdminShell onRefresh={loadAdmin}>
+    <AdminShell onRefresh={() => { loadAdmin(); if (viewClientId) loadRecords(viewClientId) }}>
       {error && <ErrorCard message={error} />}
       {notice && <div className="pp-card p-4 text-sm" style={{ borderColor: 'var(--ok)' }}>{notice}</div>}
 
@@ -98,6 +135,53 @@ export default function Admin() {
         </div>
       </section>
 
+      {/* ---------- READ VIEW: client records ---------- */}
+      <section className="pp-card p-4 space-y-4">
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <SectionTitle>Client records</SectionTitle>
+          <div className="flex items-center gap-2">
+            <select className="pp-input" value={viewClientId} onChange={e => setViewClientId(e.target.value)}>
+              <option value="">Select client</option>
+              {clients.map(c => <option key={c.id} value={c.id}>{c.name} · {c.account_code}</option>)}
+            </select>
+            <button onClick={() => viewClientId && loadRecords(viewClientId)} className="pp-btn-ghost px-3 py-2 text-sm flex items-center gap-1" disabled={!viewClientId || recordsLoading}>
+              {recordsLoading ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />} Refresh
+            </button>
+          </div>
+        </div>
+
+        {!viewClientId && <div className="text-sm pp-sub">Pick a client to see their inbound, inventory, and outbound.</div>}
+
+        {viewClientId && (
+          <div className="space-y-5">
+            <RecordBlock title={`Inventory${viewedClient ? ` · ${viewedClient.account_code}` : ''}`} count={records.skus.length} loading={recordsLoading} empty="No SKUs logged yet.">
+              <RecordTable
+                head={['Product', 'SKU', 'FNSKU', 'On hand', 'Prepped', 'Damaged']}
+                rows={records.skus.map(s => [s.name, s.sku, s.fnsku || '—', s.on_hand ?? 0, s.prepped ?? 0, s.damaged ?? 0])}
+                mono={[1, 2]}
+              />
+              <div className="text-xs pp-sub mt-2">Total on hand: <span className="pp-mono">{records.skus.reduce((n, s) => n + Number(s.on_hand || 0), 0)}</span> across {records.skus.length} SKUs</div>
+            </RecordBlock>
+
+            <RecordBlock title="Inbound" count={records.inbound.length} loading={recordsLoading} empty="No inbound shipments logged yet.">
+              <RecordTable
+                head={['Ref', 'Carrier', 'Tracking', 'Units', 'Status']}
+                rows={records.inbound.map(s => [s.ref_code, s.carrier || '—', s.tracking || '—', s.received_units ?? s.expected_units ?? 0, s.status])}
+                mono={[0, 2]}
+              />
+            </RecordBlock>
+
+            <RecordBlock title="Outbound" count={records.outbound.length} loading={recordsLoading} empty="No outbound shipments staged yet.">
+              <RecordTable
+                head={['Ref', 'Destination', 'Units', 'Boxes', 'Status']}
+                rows={records.outbound.map(s => [s.ref_code, s.destination || '—', s.units ?? 0, s.boxes ?? 0, s.status])}
+                mono={[0]}
+              />
+            </RecordBlock>
+          </div>
+        )}
+      </section>
+
       <div className="grid lg:grid-cols-2 gap-4">
         <FormCard title="Add SKU" onSubmit={() => insert('skus', normalizeSku(forms.sku), 'sku', blankSku)} busy={busy}>
           <ClientSelect value={forms.sku.client_id} clients={clients} onChange={v => update('sku', 'client_id', v)} />
@@ -105,6 +189,7 @@ export default function Admin() {
           <Input label="FNSKU" value={forms.sku.fnsku} onChange={v => update('sku', 'fnsku', v)} />
           <Input label="Product name" value={forms.sku.name} onChange={v => update('sku', 'name', v)} />
           <Input label="Prep spec" value={forms.sku.prep_spec} onChange={v => update('sku', 'prep_spec', v)} />
+          <Input label="On hand" type="number" value={forms.sku.on_hand} onChange={v => update('sku', 'on_hand', v)} />
         </FormCard>
 
         <FormCard title="Log inbound" onSubmit={() => insert('inbound_shipments', normalizeInbound(forms.inbound), 'inbound', blankInbound)} busy={busy}>
@@ -150,6 +235,35 @@ export default function Admin() {
   function update(section, key, value) {
     setForms(prev => ({ ...prev, [section]: { ...prev[section], [key]: value } }))
   }
+}
+
+function RecordBlock({ title, count, loading, empty, children }) {
+  return (
+    <div>
+      <div className="flex items-center gap-2 mb-2">
+        <h3 className="pp-display text-xl font-bold uppercase">{title}</h3>
+        <span className="pp-mono text-xs px-1.5 rounded-full text-white" style={{ background: 'var(--accent)' }}>{count}</span>
+      </div>
+      {loading ? <div className="text-sm pp-sub">Loading…</div> : count === 0 ? <div className="text-sm pp-sub">{empty}</div> : children}
+    </div>
+  )
+}
+
+function RecordTable({ head, rows, mono = [] }) {
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full text-sm">
+        <thead><tr className="text-left pp-sub">{head.map((h, i) => <th key={i} className="py-2 pr-4 whitespace-nowrap">{h}</th>)}</tr></thead>
+        <tbody>
+          {rows.map((r, ri) => (
+            <tr key={ri} className="border-t" style={{ borderColor: 'var(--line)' }}>
+              {r.map((cell, ci) => <td key={ci} className={`py-2 pr-4 whitespace-nowrap ${mono.includes(ci) ? 'pp-mono' : ''}`}>{cell}</td>)}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
 }
 
 function AdminShell({ children, onRefresh }) {
