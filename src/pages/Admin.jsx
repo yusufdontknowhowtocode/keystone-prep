@@ -1,7 +1,23 @@
-import React, { useEffect, useState } from 'react'
-import { ArrowLeft, Loader2, Plus, RefreshCw, Pencil, Check, X } from 'lucide-react'
+import React, { useEffect, useMemo, useState } from 'react'
+import { ArrowLeft, Loader2, Plus, RefreshCw, Pencil, Check, X, Trash2, CreditCard, Link as LinkIcon } from 'lucide-react'
 import { hasSupabaseConfig, supabase } from '../lib/supabase.js'
 import { SectionTitle, LoadingCard, ErrorCard } from '../components/PortalUI.jsx'
+
+/* ============================================================
+   RATE SHEET — edit these numbers when pricing changes.
+   Rates are only defaults; every line stays editable on the invoice.
+   ============================================================ */
+const RATE_PRESETS = [
+  { label: 'Base prep — under 1,000/mo', description: 'Base prep (receive, inspect, FNSKU, box prep)', rate: 0.65 },
+  { label: 'Base prep — 1,000–5,000/mo', description: 'Base prep (receive, inspect, FNSKU, box prep)', rate: 0.60 },
+  { label: 'Base prep — 5,000+/mo', description: 'Base prep (receive, inspect, FNSKU, box prep)', rate: 0.55 },
+  { label: 'Bundling (per unit bundled)', description: 'Bundling — multipack assembly', rate: 0.50 },
+  { label: 'Polybagging', description: 'Polybagging', rate: 0.25 },
+  { label: 'Bubble wrap', description: 'Bubble wrap', rate: 0.40 },
+  { label: 'Storage (per pallet / month)', description: 'Storage — per pallet per month', rate: 25.00 },
+  { label: 'Free trial credit', description: 'First 100 units free — new client promo', rate: -0.65 },
+  { label: 'Custom line…', description: '', rate: 0 },
+]
 
 const blankInbound = { client_id: '', ref_code: '', carrier: '', tracking: '', source: '', expected_units: '', received_units: '', eta: '', status: 'in_transit' }
 const blankOutbound = { client_id: '', ref_code: '', destination: '', units: '', boxes: '', weight_lb: '', est_cost: '', sku_list: '', status: 'awaiting_approval' }
@@ -9,12 +25,11 @@ const blankDamage = { client_id: '', ref_code: '', sku: '', units: '', note: '',
 const blankSku = { client_id: '', sku: '', fnsku: '', name: '', prep_spec: 'FNSKU only', on_hand: 0, prepped: 0, shipped_lifetime: 0, damaged: 0 }
 const blankActivity = { client_id: '', kind: 'note', message: '' }
 
-const emptyRecords = { skus: [], inbound: [], outbound: [] }
+const emptyRecords = { skus: [], inbound: [], outbound: [], invoices: [] }
 
 const INBOUND_STATUSES = ['in_transit', 'receiving', 'received']
 const OUTBOUND_STATUSES = ['staging', 'awaiting_approval', 'approved', 'shipped']
 
-// Column configs for the editable record tables.
 const SKU_COLUMNS = [
   { key: 'name', label: 'Product', type: 'text' },
   { key: 'sku', label: 'SKU', type: 'text', mono: true },
@@ -58,7 +73,6 @@ export default function Admin() {
   const [notice, setNotice] = useState('')
   const [forms, setForms] = useState({ inbound: blankInbound, outbound: blankOutbound, damage: blankDamage, sku: blankSku, activity: blankActivity })
 
-  // --- read/edit-view state ---
   const [viewClientId, setViewClientId] = useState('')
   const [records, setRecords] = useState(emptyRecords)
   const [recordsLoading, setRecordsLoading] = useState(false)
@@ -115,13 +129,14 @@ export default function Admin() {
   async function loadRecords(clientId) {
     setRecordsLoading(true)
     try {
-      const [skus, inbound, outbound] = await Promise.all([
+      const [skus, inbound, outbound, invoices] = await Promise.all([
         supabase.from('skus').select('*').eq('client_id', clientId).order('created_at', { ascending: false }),
         supabase.from('inbound_shipments').select('*').eq('client_id', clientId).order('created_at', { ascending: false }),
         supabase.from('outbound_shipments').select('*').eq('client_id', clientId).order('created_at', { ascending: false }),
+        supabase.from('invoices').select('*, invoice_lines(*)').eq('client_id', clientId).order('created_at', { ascending: false }),
       ])
-      for (const r of [skus, inbound, outbound]) { if (r.error) throw r.error }
-      setRecords({ skus: skus.data || [], inbound: inbound.data || [], outbound: outbound.data || [] })
+      for (const r of [skus, inbound, outbound, invoices]) { if (r.error) throw r.error }
+      setRecords({ skus: skus.data || [], inbound: inbound.data || [], outbound: outbound.data || [], invoices: invoices.data || [] })
     } catch (err) {
       setError(err.message || String(err))
       setRecords(emptyRecords)
@@ -146,15 +161,11 @@ export default function Admin() {
     }
   }
 
-  // ---- inline row update ----
   async function saveRow(table, row, patch) {
     setError(''); setNotice('')
-
-    // Nothing actually changed — skip the write.
     const changed = Object.keys(patch).filter(k => String(patch[k] ?? '') !== String(row[k] ?? ''))
     if (changed.length === 0) return true
 
-    // Auto-stamp received_at when an inbound flips to received.
     if (table === 'inbound_shipments' && patch.status === 'received' && !row.received_at) {
       patch.received_at = new Date().toISOString()
     }
@@ -162,7 +173,6 @@ export default function Admin() {
     const { error: updateError } = await supabase.from(table).update(patch).eq('id', row.id)
     if (updateError) { setError(updateError.message); return false }
 
-    // Paper trail for any quantity change on a SKU — this is the count-error guard.
     const qtyKeys = ['on_hand', 'prepped', 'damaged', 'shipped_lifetime']
     const qtyChanges = changed.filter(k => qtyKeys.includes(k))
     if (table === 'skus' && qtyChanges.length > 0) {
@@ -177,6 +187,64 @@ export default function Admin() {
     setNotice('Row updated.')
     await loadRecords(viewClientId)
     return true
+  }
+
+  /* ---------- INVOICES ---------- */
+
+  async function createInvoice({ ref_code, period, stripe_payment_link, lines }) {
+    setError(''); setNotice('')
+    const clean = lines
+      .filter(l => l.description.trim() !== '' && l.qty !== '' && l.rate !== '')
+      .map(l => ({ description: l.description.trim(), qty: Number(l.qty), rate: Number(l.rate) }))
+
+    if (clean.length === 0) { setError('Add at least one line item with a description, quantity, and rate.'); return false }
+
+    const { data: invoice, error: invError } = await supabase
+      .from('invoices')
+      .insert(cleanPayload({ client_id: viewClientId, ref_code, period, stripe_payment_link, status: 'open' }))
+      .select()
+      .single()
+    if (invError) { setError(invError.message); return false }
+
+    const { error: lineError } = await supabase
+      .from('invoice_lines')
+      .insert(clean.map(l => ({ ...l, invoice_id: invoice.id })))
+    if (lineError) { setError(`Invoice created but lines failed: ${lineError.message}`); await loadRecords(viewClientId); return false }
+
+    const total = clean.reduce((s, l) => s + l.qty * l.rate, 0)
+    await supabase.from('activity_log').insert({
+      client_id: viewClientId,
+      kind: 'pay',
+      message: `Invoice ${ref_code} issued — ${formatMoney(total)}`,
+    })
+
+    setNotice(`Invoice ${ref_code} created — ${formatMoney(total)}.`)
+    await loadRecords(viewClientId)
+    return true
+  }
+
+  async function markPaid(invoice, total) {
+    setError(''); setNotice('')
+    const { error: payError } = await supabase
+      .from('invoices')
+      .update({ status: 'paid', paid_at: new Date().toISOString() })
+      .eq('id', invoice.id)
+    if (payError) { setError(payError.message); return }
+    await supabase.from('activity_log').insert({
+      client_id: invoice.client_id,
+      kind: 'pay',
+      message: `Payment received for invoice ${invoice.ref_code} — ${formatMoney(total)}`,
+    })
+    setNotice('Marked paid.')
+    await loadRecords(viewClientId)
+  }
+
+  async function attachLink(invoice, url) {
+    setError(''); setNotice('')
+    const { error: linkError } = await supabase.from('invoices').update({ stripe_payment_link: url || null }).eq('id', invoice.id)
+    if (linkError) { setError(linkError.message); return }
+    setNotice('Payment link saved.')
+    await loadRecords(viewClientId)
   }
 
   if (!hasSupabaseConfig) return <AdminShell><ErrorCard message="Supabase env vars are not configured. Copy .env.example to .env.local first." /></AdminShell>
@@ -201,7 +269,7 @@ export default function Admin() {
         </div>
       </section>
 
-      {/* ---------- EDITABLE CLIENT RECORDS ---------- */}
+      {/* ---------- CLIENT RECORDS ---------- */}
       <section className="pp-card p-4 space-y-4">
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <SectionTitle>Client records</SectionTitle>
@@ -241,6 +309,27 @@ export default function Admin() {
           </div>
         )}
       </section>
+
+      {/* ---------- INVOICES ---------- */}
+      {viewClientId && (
+        <section className="pp-card p-4 space-y-5">
+          <SectionTitle>Invoices{viewedClient ? ` · ${viewedClient.account_code}` : ''}</SectionTitle>
+
+          <InvoiceList
+            invoices={records.invoices}
+            loading={recordsLoading}
+            onMarkPaid={markPaid}
+            onAttachLink={attachLink}
+          />
+
+          <InvoiceBuilder
+            key={viewClientId + ':' + records.invoices.length}
+            existingCount={records.invoices.length}
+            clientCode={viewedClient?.account_code}
+            onCreate={createInvoice}
+          />
+        </section>
+      )}
 
       <div className="grid lg:grid-cols-2 gap-4">
         <FormCard title="Add SKU" onSubmit={() => insert('skus', normalizeSku(forms.sku), 'sku', blankSku)} busy={busy}>
@@ -306,9 +395,159 @@ export default function Admin() {
 }
 
 /* ============================================================
+   INVOICE BUILDER
+   ============================================================ */
+function InvoiceBuilder({ existingCount, clientCode, onCreate }) {
+  const suggestedRef = `INV-${String(existingCount + 1).padStart(4, '0')}`
+  const thisMonth = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+
+  const [refCode, setRefCode] = useState(suggestedRef)
+  const [period, setPeriod] = useState(thisMonth)
+  const [link, setLink] = useState('')
+  const [lines, setLines] = useState([newLine()])
+  const [saving, setSaving] = useState(false)
+
+  function newLine() { return { key: Math.random().toString(36).slice(2), preset: '', description: '', qty: '', rate: '' } }
+
+  const total = useMemo(
+    () => lines.reduce((s, l) => s + (Number(l.qty) || 0) * (Number(l.rate) || 0), 0),
+    [lines]
+  )
+
+  function setLine(key, patch) {
+    setLines(prev => prev.map(l => l.key === key ? { ...l, ...patch } : l))
+  }
+
+  function applyPreset(key, label) {
+    const preset = RATE_PRESETS.find(p => p.label === label)
+    if (!preset) return setLine(key, { preset: label })
+    setLine(key, { preset: label, description: preset.description, rate: preset.rate === 0 ? '' : preset.rate })
+  }
+
+  async function submit(e) {
+    e.preventDefault()
+    setSaving(true)
+    const ok = await onCreate({ ref_code: refCode, period, stripe_payment_link: link, lines })
+    setSaving(false)
+    if (ok) { setLines([newLine()]); setLink('') }
+  }
+
+  return (
+    <form onSubmit={submit} className="pp-card p-4 space-y-3" style={{ borderColor: 'var(--accent)' }}>
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <h3 className="pp-display text-2xl font-bold uppercase">New invoice</h3>
+        <div className="text-right">
+          <div className="pp-display text-3xl font-bold">{formatMoney(total)}</div>
+          <div className="text-xs pp-sub uppercase tracking-wide">running total</div>
+        </div>
+      </div>
+
+      <div className="grid sm:grid-cols-2 gap-3">
+        <Input label="Ref code" value={refCode} onChange={setRefCode} placeholder="INV-0001" />
+        <Input label="Period" value={period} onChange={setPeriod} placeholder="August 2026" />
+      </div>
+
+      <div className="space-y-2">
+        <div className="text-sm font-semibold">Line items</div>
+        {lines.map(l => (
+          <div key={l.key} className="grid gap-2 items-end" style={{ gridTemplateColumns: 'minmax(0,1.4fr) minmax(0,1.6fr) 90px 100px 110px 36px' }}>
+            <select className="pp-input py-1.5 text-sm" value={l.preset} onChange={e => applyPreset(l.key, e.target.value)}>
+              <option value="">Preset…</option>
+              {RATE_PRESETS.map(p => <option key={p.label} value={p.label}>{p.label}</option>)}
+            </select>
+            <input className="pp-input py-1.5 text-sm" placeholder="Description" value={l.description} onChange={e => setLine(l.key, { description: e.target.value })} />
+            <input className="pp-input py-1.5 text-sm" type="number" step="any" placeholder="Qty" value={l.qty} onChange={e => setLine(l.key, { qty: e.target.value })} />
+            <input className="pp-input py-1.5 text-sm" type="number" step="0.01" placeholder="Rate" value={l.rate} onChange={e => setLine(l.key, { rate: e.target.value })} />
+            <div className="pp-mono text-sm text-right pr-1">{formatMoney((Number(l.qty) || 0) * (Number(l.rate) || 0))}</div>
+            <button type="button" onClick={() => setLines(prev => prev.length > 1 ? prev.filter(x => x.key !== l.key) : prev)} className="pp-btn-ghost px-2 py-1.5" title="Remove line"><Trash2 size={14} /></button>
+          </div>
+        ))}
+        <button type="button" onClick={() => setLines(prev => [...prev, newLine()])} className="pp-btn-ghost px-3 py-1.5 text-sm flex items-center gap-1"><Plus size={14} /> Add line</button>
+      </div>
+
+      <Input label="Stripe Payment Link (optional — can add later)" value={link} onChange={setLink} placeholder="https://buy.stripe.com/…" />
+
+      <button className="pp-btn pp-btn-accent px-4 py-2 text-sm flex items-center gap-1.5" disabled={saving}>
+        {saving ? <Loader2 size={15} className="animate-spin" /> : <CreditCard size={15} />} Create invoice — {formatMoney(total)}
+      </button>
+      <p className="text-xs pp-sub">
+        Create the Payment Link in the Stripe dashboard for this exact amount, then paste it here or attach it below. The client sees a live Pay button in their portal.
+      </p>
+    </form>
+  )
+}
+
+function InvoiceList({ invoices, loading, onMarkPaid, onAttachLink }) {
+  if (loading) return <div className="text-sm pp-sub">Loading…</div>
+  if (invoices.length === 0) return <div className="text-sm pp-sub">No invoices for this client yet.</div>
+
+  return (
+    <div className="space-y-3">
+      {invoices.map(inv => <InvoiceCard key={inv.id} invoice={inv} onMarkPaid={onMarkPaid} onAttachLink={onAttachLink} />)}
+    </div>
+  )
+}
+
+function InvoiceCard({ invoice, onMarkPaid, onAttachLink }) {
+  const [editingLink, setEditingLink] = useState(false)
+  const [draftLink, setDraftLink] = useState(invoice.stripe_payment_link || '')
+  const lines = invoice.invoice_lines || []
+  const total = lines.reduce((s, l) => s + Number(l.qty || 0) * Number(l.rate || 0), 0)
+
+  return (
+    <div className="pp-card p-4">
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        <div className="flex items-center gap-3">
+          <span className="pp-mono font-semibold">{invoice.ref_code}</span>
+          <span className="pp-mono text-xs px-2 py-0.5 rounded-full border" style={{ borderColor: invoice.status === 'paid' ? 'var(--ok)' : 'var(--accent)', color: invoice.status === 'paid' ? 'var(--ok)' : 'var(--accent)' }}>
+            {invoice.status === 'paid' ? 'Paid' : 'Open'}
+          </span>
+          <span className="text-sm pp-sub">{invoice.period}</span>
+        </div>
+        <div className="pp-display text-2xl font-bold">{formatMoney(total)}</div>
+      </div>
+
+      <table className="w-full mt-3 text-sm">
+        <tbody>
+          {lines.map(l => (
+            <tr key={l.id} className="border-t" style={{ borderColor: 'var(--line)' }}>
+              <td className="py-1.5">{l.description}</td>
+              <td className="py-1.5 pp-mono text-right pp-sub">{Number(l.qty).toLocaleString()} × {formatMoney(l.rate)}</td>
+              <td className="py-1.5 pp-mono text-right w-24">{formatMoney(Number(l.qty) * Number(l.rate))}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <div className="flex items-center gap-2 mt-3 flex-wrap">
+        {editingLink ? (
+          <>
+            <input className="pp-input py-1.5 text-sm flex-1 min-w-48" placeholder="https://buy.stripe.com/…" value={draftLink} onChange={e => setDraftLink(e.target.value)} />
+            <button onClick={async () => { await onAttachLink(invoice, draftLink); setEditingLink(false) }} className="pp-btn pp-btn-accent px-3 py-1.5 text-sm flex items-center gap-1"><Check size={14} /> Save</button>
+            <button onClick={() => { setDraftLink(invoice.stripe_payment_link || ''); setEditingLink(false) }} className="pp-btn-ghost px-3 py-1.5 text-sm"><X size={14} /></button>
+          </>
+        ) : (
+          <>
+            <button onClick={() => setEditingLink(true)} className="pp-btn-ghost px-3 py-1.5 text-sm flex items-center gap-1">
+              <LinkIcon size={14} /> {invoice.stripe_payment_link ? 'Edit payment link' : 'Attach payment link'}
+            </button>
+            {invoice.stripe_payment_link && <a href={invoice.stripe_payment_link} target="_blank" rel="noreferrer" className="text-xs pp-sub underline truncate max-w-64">{invoice.stripe_payment_link}</a>}
+            {invoice.status !== 'paid' && (
+              <button onClick={() => onMarkPaid(invoice, total)} className="pp-btn px-3 py-1.5 text-sm flex items-center gap-1 ml-auto"><Check size={14} /> Mark paid</button>
+            )}
+          </>
+        )}
+      </div>
+
+      {!invoice.stripe_payment_link && invoice.status !== 'paid' && (
+        <p className="text-xs mt-2" style={{ color: 'var(--warn)' }}>No payment link attached — the client's Pay button won't work yet.</p>
+      )}
+    </div>
+  )
+}
+
+/* ============================================================
    EDITABLE TABLE
-   Click the pencil on a row to turn it into inputs. Save writes
-   only the changed columns back to Supabase.
    ============================================================ */
 function EditableTable({ columns, rows, onSave, flagRow, flagLabel }) {
   const [editingId, setEditingId] = useState(null)
@@ -429,7 +668,6 @@ function StatusPill({ value }) {
   return <span className="pp-mono text-xs px-2 py-0.5 rounded-full border" style={{ borderColor: tone, color: tone }}>{labelize(value)}</span>
 }
 
-// Live expected-vs-received check on the Log Inbound form.
 function CountCheck({ expected, received }) {
   if (expected === '' || received === '' || expected == null || received == null) return null
   const e = Number(expected), r = Number(received)
@@ -445,6 +683,11 @@ function CountCheck({ expected, received }) {
 
 function labelize(v) {
   return String(v || '').replace(/_/g, ' ').replace(/^\w/, c => c.toUpperCase())
+}
+
+function formatMoney(n) {
+  const value = Number(n || 0)
+  return value.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
 }
 
 function RecordBlock({ title, count, loading, empty, children }) {
