@@ -1,15 +1,50 @@
 import React, { useEffect, useState } from 'react'
-import { ArrowLeft, Loader2, Plus, RefreshCw, Save } from 'lucide-react'
+import { ArrowLeft, Loader2, Plus, RefreshCw, Pencil, Check, X } from 'lucide-react'
 import { hasSupabaseConfig, supabase } from '../lib/supabase.js'
 import { SectionTitle, LoadingCard, ErrorCard } from '../components/PortalUI.jsx'
 
-const blankInbound = { client_id: '', ref_code: '', carrier: '', tracking: '', source: '', expected_units: '', eta: '', status: 'in_transit' }
+const blankInbound = { client_id: '', ref_code: '', carrier: '', tracking: '', source: '', expected_units: '', received_units: '', eta: '', status: 'in_transit' }
 const blankOutbound = { client_id: '', ref_code: '', destination: '', units: '', boxes: '', weight_lb: '', est_cost: '', sku_list: '', status: 'awaiting_approval' }
 const blankDamage = { client_id: '', ref_code: '', sku: '', units: '', note: '', status: 'open' }
 const blankSku = { client_id: '', sku: '', fnsku: '', name: '', prep_spec: 'FNSKU only', on_hand: 0, prepped: 0, shipped_lifetime: 0, damaged: 0 }
 const blankActivity = { client_id: '', kind: 'note', message: '' }
 
 const emptyRecords = { skus: [], inbound: [], outbound: [] }
+
+const INBOUND_STATUSES = ['in_transit', 'receiving', 'received']
+const OUTBOUND_STATUSES = ['staging', 'awaiting_approval', 'approved', 'shipped']
+
+// Column configs for the editable record tables.
+const SKU_COLUMNS = [
+  { key: 'name', label: 'Product', type: 'text' },
+  { key: 'sku', label: 'SKU', type: 'text', mono: true },
+  { key: 'fnsku', label: 'FNSKU', type: 'text', mono: true },
+  { key: 'prep_spec', label: 'Prep', type: 'text' },
+  { key: 'on_hand', label: 'On hand', type: 'number' },
+  { key: 'prepped', label: 'Prepped', type: 'number' },
+  { key: 'damaged', label: 'Damaged', type: 'number' },
+]
+
+const INBOUND_COLUMNS = [
+  { key: 'ref_code', label: 'Ref', type: 'text', mono: true },
+  { key: 'carrier', label: 'Carrier', type: 'text' },
+  { key: 'tracking', label: 'Tracking', type: 'text', mono: true },
+  { key: 'expected_units', label: 'Expected', type: 'number' },
+  { key: 'received_units', label: 'Received', type: 'number' },
+  { key: 'status', label: 'Status', type: 'select', options: INBOUND_STATUSES },
+  { key: 'eta', label: 'ETA', type: 'date' },
+]
+
+const OUTBOUND_COLUMNS = [
+  { key: 'ref_code', label: 'Ref', type: 'text', mono: true },
+  { key: 'destination', label: 'Destination', type: 'text' },
+  { key: 'units', label: 'Units', type: 'number' },
+  { key: 'boxes', label: 'Boxes', type: 'number' },
+  { key: 'weight_lb', label: 'Weight lb', type: 'number' },
+  { key: 'est_cost', label: 'Est cost', type: 'number' },
+  { key: 'status', label: 'Status', type: 'select', options: OUTBOUND_STATUSES },
+  { key: 'tracking', label: 'Tracking', type: 'text', mono: true },
+]
 
 export default function Admin() {
   const [session, setSession] = useState(null)
@@ -23,7 +58,7 @@ export default function Admin() {
   const [notice, setNotice] = useState('')
   const [forms, setForms] = useState({ inbound: blankInbound, outbound: blankOutbound, damage: blankDamage, sku: blankSku, activity: blankActivity })
 
-  // --- read-view state ---
+  // --- read/edit-view state ---
   const [viewClientId, setViewClientId] = useState('')
   const [records, setRecords] = useState(emptyRecords)
   const [recordsLoading, setRecordsLoading] = useState(false)
@@ -43,7 +78,6 @@ export default function Admin() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.user?.id])
 
-  // reload records whenever the viewed client changes
   useEffect(() => {
     if (viewClientId) loadRecords(viewClientId)
     else setRecords(emptyRecords)
@@ -104,13 +138,45 @@ export default function Admin() {
       if (insertError) throw insertError
       setNotice(`Saved to ${table}.`)
       setForms(prev => ({ ...prev, [resetKey]: { ...resetValue, client_id: payload.client_id } }))
-      // if we just wrote a record for the client we're viewing, refresh the read-view
       if (payload.client_id && payload.client_id === viewClientId) loadRecords(viewClientId)
     } catch (err) {
       setError(err.message || String(err))
     } finally {
       setBusy(false)
     }
+  }
+
+  // ---- inline row update ----
+  async function saveRow(table, row, patch) {
+    setError(''); setNotice('')
+
+    // Nothing actually changed — skip the write.
+    const changed = Object.keys(patch).filter(k => String(patch[k] ?? '') !== String(row[k] ?? ''))
+    if (changed.length === 0) return true
+
+    // Auto-stamp received_at when an inbound flips to received.
+    if (table === 'inbound_shipments' && patch.status === 'received' && !row.received_at) {
+      patch.received_at = new Date().toISOString()
+    }
+
+    const { error: updateError } = await supabase.from(table).update(patch).eq('id', row.id)
+    if (updateError) { setError(updateError.message); return false }
+
+    // Paper trail for any quantity change on a SKU — this is the count-error guard.
+    const qtyKeys = ['on_hand', 'prepped', 'damaged', 'shipped_lifetime']
+    const qtyChanges = changed.filter(k => qtyKeys.includes(k))
+    if (table === 'skus' && qtyChanges.length > 0) {
+      const detail = qtyChanges.map(k => `${k} ${row[k] ?? 0} → ${patch[k]}`).join(', ')
+      await supabase.from('activity_log').insert({
+        client_id: row.client_id,
+        kind: 'note',
+        message: `Inventory corrected on ${row.sku}: ${detail}`,
+      })
+    }
+
+    setNotice('Row updated.')
+    await loadRecords(viewClientId)
+    return true
   }
 
   if (!hasSupabaseConfig) return <AdminShell><ErrorCard message="Supabase env vars are not configured. Copy .env.example to .env.local first." /></AdminShell>
@@ -135,7 +201,7 @@ export default function Admin() {
         </div>
       </section>
 
-      {/* ---------- READ VIEW: client records ---------- */}
+      {/* ---------- EDITABLE CLIENT RECORDS ---------- */}
       <section className="pp-card p-4 space-y-4">
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <SectionTitle>Client records</SectionTitle>
@@ -155,28 +221,22 @@ export default function Admin() {
         {viewClientId && (
           <div className="space-y-5">
             <RecordBlock title={`Inventory${viewedClient ? ` · ${viewedClient.account_code}` : ''}`} count={records.skus.length} loading={recordsLoading} empty="No SKUs logged yet.">
-              <RecordTable
-                head={['Product', 'SKU', 'FNSKU', 'On hand', 'Prepped', 'Damaged']}
-                rows={records.skus.map(s => [s.name, s.sku, s.fnsku || '—', s.on_hand ?? 0, s.prepped ?? 0, s.damaged ?? 0])}
-                mono={[1, 2]}
-              />
+              <EditableTable columns={SKU_COLUMNS} rows={records.skus} onSave={(row, patch) => saveRow('skus', row, patch)} />
               <div className="text-xs pp-sub mt-2">Total on hand: <span className="pp-mono">{records.skus.reduce((n, s) => n + Number(s.on_hand || 0), 0)}</span> across {records.skus.length} SKUs</div>
             </RecordBlock>
 
             <RecordBlock title="Inbound" count={records.inbound.length} loading={recordsLoading} empty="No inbound shipments logged yet.">
-              <RecordTable
-                head={['Ref', 'Carrier', 'Tracking', 'Units', 'Status']}
-                rows={records.inbound.map(s => [s.ref_code, s.carrier || '—', s.tracking || '—', s.received_units ?? s.expected_units ?? 0, s.status])}
-                mono={[0, 2]}
+              <EditableTable
+                columns={INBOUND_COLUMNS}
+                rows={records.inbound}
+                onSave={(row, patch) => saveRow('inbound_shipments', row, patch)}
+                flagRow={r => r.received_units != null && r.expected_units != null && Number(r.received_units) !== Number(r.expected_units)}
+                flagLabel="count mismatch"
               />
             </RecordBlock>
 
             <RecordBlock title="Outbound" count={records.outbound.length} loading={recordsLoading} empty="No outbound shipments staged yet.">
-              <RecordTable
-                head={['Ref', 'Destination', 'Units', 'Boxes', 'Status']}
-                rows={records.outbound.map(s => [s.ref_code, s.destination || '—', s.units ?? 0, s.boxes ?? 0, s.status])}
-                mono={[0]}
-              />
+              <EditableTable columns={OUTBOUND_COLUMNS} rows={records.outbound} onSave={(row, patch) => saveRow('outbound_shipments', row, patch)} />
             </RecordBlock>
           </div>
         )}
@@ -199,6 +259,14 @@ export default function Admin() {
           <Input label="Tracking" value={forms.inbound.tracking} onChange={v => update('inbound', 'tracking', v)} />
           <Input label="Source" value={forms.inbound.source} onChange={v => update('inbound', 'source', v)} />
           <Input label="Expected units" type="number" value={forms.inbound.expected_units} onChange={v => update('inbound', 'expected_units', v)} />
+          <Input label="Received units (count twice)" type="number" value={forms.inbound.received_units} onChange={v => update('inbound', 'received_units', v)} />
+          <CountCheck expected={forms.inbound.expected_units} received={forms.inbound.received_units} />
+          <label className="block text-sm">
+            <span className="font-semibold">Status</span>
+            <select className="pp-input mt-1" value={forms.inbound.status} onChange={e => update('inbound', 'status', e.target.value)}>
+              {INBOUND_STATUSES.map(s => <option key={s} value={s}>{labelize(s)}</option>)}
+            </select>
+          </label>
           <Input label="ETA" type="date" value={forms.inbound.eta} onChange={v => update('inbound', 'eta', v)} />
         </FormCard>
 
@@ -237,6 +305,148 @@ export default function Admin() {
   }
 }
 
+/* ============================================================
+   EDITABLE TABLE
+   Click the pencil on a row to turn it into inputs. Save writes
+   only the changed columns back to Supabase.
+   ============================================================ */
+function EditableTable({ columns, rows, onSave, flagRow, flagLabel }) {
+  const [editingId, setEditingId] = useState(null)
+  const [draft, setDraft] = useState({})
+  const [saving, setSaving] = useState(false)
+
+  function startEdit(row) {
+    const next = {}
+    for (const col of columns) next[col.key] = row[col.key] ?? ''
+    setDraft(next)
+    setEditingId(row.id)
+  }
+
+  function cancel() {
+    setEditingId(null)
+    setDraft({})
+  }
+
+  async function commit(row) {
+    setSaving(true)
+    const patch = {}
+    for (const col of columns) {
+      const raw = draft[col.key]
+      patch[col.key] = col.type === 'number'
+        ? (raw === '' || raw == null ? null : Number(raw))
+        : (raw === '' ? null : raw)
+    }
+    const ok = await onSave(row, patch)
+    setSaving(false)
+    if (ok) cancel()
+  }
+
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="text-left pp-sub">
+            {columns.map(c => <th key={c.key} className="py-2 pr-4 whitespace-nowrap">{c.label}</th>)}
+            <th className="py-2 w-20"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map(row => {
+            const editing = editingId === row.id
+            const flagged = flagRow ? flagRow(row) : false
+            return (
+              <tr key={row.id} className="border-t align-middle" style={{ borderColor: 'var(--line)' }}>
+                {columns.map(col => (
+                  <td key={col.key} className={`py-2 pr-4 whitespace-nowrap ${col.mono && !editing ? 'pp-mono' : ''}`}>
+                    {editing
+                      ? <CellInput col={col} value={draft[col.key]} onChange={v => setDraft(d => ({ ...d, [col.key]: v }))} />
+                      : <CellValue col={col} row={row} flagged={flagged} flagLabel={flagLabel} />}
+                  </td>
+                ))}
+                <td className="py-2">
+                  {editing ? (
+                    <div className="flex items-center gap-1">
+                      <button onClick={() => commit(row)} disabled={saving} className="pp-btn pp-btn-accent px-2 py-1 text-xs flex items-center gap-1" title="Save">
+                        {saving ? <Loader2 size={13} className="animate-spin" /> : <Check size={13} />}
+                      </button>
+                      <button onClick={cancel} disabled={saving} className="pp-btn-ghost px-2 py-1 text-xs" title="Cancel"><X size={13} /></button>
+                    </div>
+                  ) : (
+                    <button onClick={() => startEdit(row)} className="pp-btn-ghost px-2 py-1 text-xs flex items-center gap-1" title="Edit row"><Pencil size={13} /></button>
+                  )}
+                </td>
+              </tr>
+            )
+          })}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
+function CellValue({ col, row, flagged, flagLabel }) {
+  const raw = row[col.key]
+  if (col.type === 'select') return <StatusPill value={raw} />
+
+  const isMismatchCell = flagged && (col.key === 'received_units' || col.key === 'expected_units')
+  const display = raw === null || raw === undefined || raw === '' ? '—' : String(raw)
+
+  return (
+    <span style={isMismatchCell ? { color: 'var(--bad)', fontWeight: 600 } : undefined}>
+      {display}
+      {flagged && col.key === 'received_units' && flagLabel && (
+        <span className="text-xs ml-1.5 pp-sub">({flagLabel})</span>
+      )}
+    </span>
+  )
+}
+
+function CellInput({ col, value, onChange }) {
+  if (col.type === 'select') {
+    return (
+      <select className="pp-input py-1 text-sm" value={value || ''} onChange={e => onChange(e.target.value)}>
+        {col.options.map(o => <option key={o} value={o}>{labelize(o)}</option>)}
+      </select>
+    )
+  }
+  return (
+    <input
+      className="pp-input py-1 text-sm"
+      style={{ minWidth: col.type === 'number' ? 80 : 130 }}
+      type={col.type === 'number' ? 'number' : col.type === 'date' ? 'date' : 'text'}
+      value={value ?? ''}
+      onChange={e => onChange(e.target.value)}
+    />
+  )
+}
+
+function StatusPill({ value }) {
+  const tone = {
+    received: 'var(--ok)', shipped: 'var(--ok)', approved: 'var(--ok)',
+    receiving: 'var(--accent)', awaiting_approval: 'var(--accent)',
+    in_transit: 'var(--warn)', staging: 'var(--sub)',
+  }[value] || 'var(--sub)'
+  return <span className="pp-mono text-xs px-2 py-0.5 rounded-full border" style={{ borderColor: tone, color: tone }}>{labelize(value)}</span>
+}
+
+// Live expected-vs-received check on the Log Inbound form.
+function CountCheck({ expected, received }) {
+  if (expected === '' || received === '' || expected == null || received == null) return null
+  const e = Number(expected), r = Number(received)
+  if (Number.isNaN(e) || Number.isNaN(r)) return null
+  if (e === r) return <div className="text-xs" style={{ color: 'var(--ok)' }}>✓ Counts match.</div>
+  const diff = r - e
+  return (
+    <div className="text-xs" style={{ color: 'var(--bad)' }}>
+      Discrepancy: {diff > 0 ? `+${diff} over` : `${Math.abs(diff)} short`}. Recount before saving, then note it in the activity log.
+    </div>
+  )
+}
+
+function labelize(v) {
+  return String(v || '').replace(/_/g, ' ').replace(/^\w/, c => c.toUpperCase())
+}
+
 function RecordBlock({ title, count, loading, empty, children }) {
   return (
     <div>
@@ -245,23 +455,6 @@ function RecordBlock({ title, count, loading, empty, children }) {
         <span className="pp-mono text-xs px-1.5 rounded-full text-white" style={{ background: 'var(--accent)' }}>{count}</span>
       </div>
       {loading ? <div className="text-sm pp-sub">Loading…</div> : count === 0 ? <div className="text-sm pp-sub">{empty}</div> : children}
-    </div>
-  )
-}
-
-function RecordTable({ head, rows, mono = [] }) {
-  return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead><tr className="text-left pp-sub">{head.map((h, i) => <th key={i} className="py-2 pr-4 whitespace-nowrap">{h}</th>)}</tr></thead>
-        <tbody>
-          {rows.map((r, ri) => (
-            <tr key={ri} className="border-t" style={{ borderColor: 'var(--line)' }}>
-              {r.map((cell, ci) => <td key={ci} className={`py-2 pr-4 whitespace-nowrap ${mono.includes(ci) ? 'pp-mono' : ''}`}>{cell}</td>)}
-            </tr>
-          ))}
-        </tbody>
-      </table>
     </div>
   )
 }
@@ -322,7 +515,11 @@ function cleanPayload(payload) {
   return out
 }
 function normalizeSku(v) { return { ...v, on_hand: Number(v.on_hand || 0), prepped: Number(v.prepped || 0), shipped_lifetime: Number(v.shipped_lifetime || 0), damaged: Number(v.damaged || 0) } }
-function normalizeInbound(v) { return { ...v, expected_units: numOrNull(v.expected_units) } }
+function normalizeInbound(v) {
+  const out = { ...v, expected_units: numOrNull(v.expected_units), received_units: numOrNull(v.received_units) }
+  if (out.status === 'received' && out.received_units != null) out.received_at = new Date().toISOString()
+  return out
+}
 function normalizeOutbound(v) { return { ...v, units: numOrNull(v.units), boxes: numOrNull(v.boxes), weight_lb: numOrNull(v.weight_lb), est_cost: numOrNull(v.est_cost), sku_list: String(v.sku_list || '').split(',').map(s => s.trim()).filter(Boolean) } }
 function normalizeDamage(v) { return { ...v, units: numOrNull(v.units), photo_urls: [] } }
 function numOrNull(v) { return v === '' || v == null ? null : Number(v) }
