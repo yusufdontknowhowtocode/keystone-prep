@@ -273,9 +273,10 @@ export default function Landing() {
 
             <QuoteEstimator />
 
-            <div className="text-center">
-              <a href={pilotMailto} onClick={trackQuoteClick} className="text-sm pp-sub hover:underline">
-                Prefer email? Reach us at {SITE.contactEmail}
+            <div className="text-center pt-2">
+              <div className="text-sm pp-sub mb-3">Prefer to just email us?</div>
+              <a href={pilotMailto} onClick={trackQuoteClick} className="pp-btn-ghost px-5 py-3 inline-flex items-center gap-2">
+                Email {SITE.contactEmail} <ArrowRight size={16} />
               </a>
             </div>
           </div>

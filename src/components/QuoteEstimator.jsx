@@ -132,6 +132,12 @@ export default function QuoteEstimator() {
           Your estimate came out around <span className="pp-mono">${perUnit.toFixed(2)}/unit</span>. We'll confirm your exact rate by email, usually within a couple of hours.
         </p>
         <p className="text-xs pp-sub mt-4">Your first {FREE_TRIAL_UNITS} units are free either way — no card, no commitment.</p>
+                <button
+          onClick={() => { setSent(false); setError('') }}
+          className="pp-btn-ghost px-4 py-2 text-sm mt-4"
+        >
+          Send another request
+        </button>
       </section>
     )
   }
