@@ -1,6 +1,7 @@
 import React from 'react'
 import { ArrowRight, Barcode, Boxes, Camera, CheckCircle2, Clock, MapPin, Package, ShieldCheck, ShoppingBag, Store, Truck, Warehouse } from 'lucide-react'
 import { SITE } from '../lib/config.js'
+import QuoteEstimator from '../components/QuoteEstimator.jsx'
 
 const PILOT_EMAIL_SUBJECT = 'Keystone Prep Pilot Account'
 const PILOT_EMAIL_BODY = `Hi Keystone Prep,\n\nI'm interested in the first 100 units free pilot.\n\nMonthly unit volume:\nProduct type:\nAmazon / Shopify / both:\nWhat city/state do you ship from:\n\nThanks.`
@@ -22,7 +23,7 @@ const STANDARD_PREP = [
 const ADD_ONS = [
   ['Polybagging', '$0.25/unit'],
   ['Bubble wrap', '$0.40/unit'],
-  ['Bundling / kitting / custom prep', 'from $0.50/unit'],
+  ['Bundling / kitting', '$0.50 per unit bundled'],
   ['Pallet storage', '$25/pallet/mo'],
 ]
 
@@ -47,7 +48,7 @@ export default function Landing() {
             <a href="#fit" className="hover:underline">Fit</a>
             <a href="/portal" className="hover:underline">Portal demo</a>
           </nav>
-          <a href={pilotMailto} onClick={trackQuoteClick} className="pp-btn pp-btn-accent px-4 py-2 text-sm"> Get a quote </a>
+          <a href="#contact" onClick={trackQuoteClick} className="pp-btn pp-btn-accent px-4 py-2 text-sm"> Get a quote </a>
         </div>
       </header>
 
@@ -64,7 +65,7 @@ export default function Landing() {
               Receiving, inspection, FNSKU labeling, prep, storage, and order fulfillment for Amazon FBA, Shopify, and TikTok Shop sellers — with photo check-ins and a live client portal. Backed by an established apparel-manufacturing warehouse with years of international receiving and labeling experience.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 mt-8">
-              <a href={pilotMailto} onClick={trackQuoteClick} className="pp-btn pp-btn-accent px-5 py-3 flex items-center justify-center gap-2">
+              <a href="#contact" onClick={trackQuoteClick} className="pp-btn pp-btn-accent px-5 py-3 flex items-center justify-center gap-2">
                 Start with 100 units free <ArrowRight size={18} />
               </a>
               <a href="/portal" className="pp-btn-ghost px-5 py-3 flex items-center justify-center gap-2">
@@ -86,10 +87,10 @@ export default function Landing() {
                 <Barcode size={34} className="pp-accent" />
               </div>
               <div className="grid grid-cols-2 gap-3 mt-5">
-                <MiniStat label="Units stored" value="1,573" />
-                <MiniStat label="Awaiting approval" value="2" accent />
-                <MiniStat label="Open issues" value="2" />
-                <MiniStat label="Current invoice" value="$748" />
+                <MiniStat label="Units on hand" value="99" />
+                <MiniStat label="Prepped & staged" value="59" accent />
+                <MiniStat label="Open issues" value="0" />
+                <MiniStat label="Discrepancies caught" value="1" />
               </div>
               <div className="mt-5 space-y-2">
                 {TRUST_LINES.map((x) => (
@@ -190,6 +191,9 @@ export default function Landing() {
             <p className="text-sm pp-sub mt-3">
               Pricing above is for FBA prep. DTC and TikTok Shop order fulfillment (pick, pack &amp; ship) is quoted per account based on order volume — ask for a quote.
             </p>
+            <a href="#contact" onClick={trackQuoteClick} className="pp-btn pp-btn-accent px-5 py-3 mt-5 inline-flex items-center gap-2">
+              Estimate your cost <ArrowRight size={17} />
+            </a>
           </div>
 
           <div className="space-y-4">
@@ -257,15 +261,23 @@ export default function Landing() {
           </div>
         </section>
 
+        {/* ---------- QUOTE ESTIMATOR + CONTACT ---------- */}
         <section id="contact" className="border-t" style={{ borderColor: 'var(--line)', background: '#fff' }}>
-          <div className="max-w-6xl mx-auto px-4 py-14 grid lg:grid-cols-[1fr_auto] gap-6 items-center">
+          <div className="max-w-6xl mx-auto px-4 py-14 space-y-8">
             <div>
               <SectionHeading eyebrow="New accounts." title="Start with 100 units free." />
-              <p className="pp-sub mt-3 max-w-2xl">Send your monthly volume, product type, and current prep workflow. If it’s a good fit, we’ll schedule a quick call and walk through the portal demo.</p>
+              <p className="pp-sub mt-3 max-w-2xl">
+                Get a rough number in seconds, then send it over and we'll confirm your exact rate. If it's a good fit we'll schedule a quick call and walk through the portal.
+              </p>
             </div>
-            <a href={pilotMailto} onClick={trackQuoteClick} className="pp-btn pp-btn-accent px-6 py-4 flex items-center justify-center gap-2">
-              Email {SITE.name} <ArrowRight size={18} />
-            </a>
+
+            <QuoteEstimator />
+
+            <div className="text-center">
+              <a href={pilotMailto} onClick={trackQuoteClick} className="text-sm pp-sub hover:underline">
+                Prefer email? Reach us at {SITE.contactEmail}
+              </a>
+            </div>
           </div>
         </section>
       </main>
