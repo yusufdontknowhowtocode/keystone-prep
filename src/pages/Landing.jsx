@@ -6,6 +6,10 @@ import QuoteEstimator from '../components/QuoteEstimator.jsx'
 const PILOT_EMAIL_SUBJECT = 'Keystone Prep Pilot Account'
 const PILOT_EMAIL_BODY = `Hi Keystone Prep,\n\nI'm interested in the first 100 units free pilot.\n\nMonthly unit volume:\nProduct type:\nAmazon / Shopify / both:\nWhat city/state do you ship from:\n\nThanks.`
 const pilotMailto = `mailto:${SITE.contactEmail}?subject=${encodeURIComponent(PILOT_EMAIL_SUBJECT)}&body=${encodeURIComponent(PILOT_EMAIL_BODY)}`
+
+// Only fires on real intent: opening an email to us. Form submissions fire their
+// own conversion from QuoteEstimator.jsx. Buttons that merely scroll to the form
+// do NOT count — otherwise Google optimises for scrolling, not leads.
 function trackQuoteClick() {
   if (typeof window.gtag === 'function') {
     window.gtag('event', 'conversion', { send_to: 'AW-18227583658/GBCbCLurnckcEKq1y_ND' })
@@ -48,7 +52,7 @@ export default function Landing() {
             <a href="#fit" className="hover:underline">Fit</a>
             <a href="/portal" className="hover:underline">Portal demo</a>
           </nav>
-          <a href="#contact" onClick={trackQuoteClick} className="pp-btn pp-btn-accent px-4 py-2 text-sm"> Get a quote </a>
+          <a href="#contact" className="pp-btn pp-btn-accent px-4 py-2 text-sm"> Get a quote </a>
         </div>
       </header>
 
@@ -65,7 +69,7 @@ export default function Landing() {
               Receiving, inspection, FNSKU labeling, prep, storage, and order fulfillment for Amazon FBA, Shopify, and TikTok Shop sellers — with photo check-ins and a live client portal. Backed by an established apparel-manufacturing warehouse with years of international receiving and labeling experience.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 mt-8">
-              <a href="#contact" onClick={trackQuoteClick} className="pp-btn pp-btn-accent px-5 py-3 flex items-center justify-center gap-2">
+              <a href="#contact" className="pp-btn pp-btn-accent px-5 py-3 flex items-center justify-center gap-2">
                 Start with 100 units free <ArrowRight size={18} />
               </a>
               <a href="/portal" className="pp-btn-ghost px-5 py-3 flex items-center justify-center gap-2">
@@ -191,7 +195,7 @@ export default function Landing() {
             <p className="text-sm pp-sub mt-3">
               Pricing above is for FBA prep. DTC and TikTok Shop order fulfillment (pick, pack &amp; ship) is quoted per account based on order volume — ask for a quote.
             </p>
-            <a href="#contact" onClick={trackQuoteClick} className="pp-btn pp-btn-accent px-5 py-3 mt-5 inline-flex items-center gap-2">
+            <a href="#contact" className="pp-btn pp-btn-accent px-5 py-3 mt-5 inline-flex items-center gap-2">
               Estimate your cost <ArrowRight size={17} />
             </a>
           </div>

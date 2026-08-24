@@ -118,6 +118,9 @@ export default function QuoteEstimator() {
       setError("Something went wrong sending that. Email us directly and we'll get straight back to you.")
       return
     }
+        if (typeof window.gtag === 'function') {
+      window.gtag('event', 'conversion', { send_to: 'AW-18227583658/GBCbCLurnckcEKq1y_ND' })
+    }
     setSent(true)
   }
 
