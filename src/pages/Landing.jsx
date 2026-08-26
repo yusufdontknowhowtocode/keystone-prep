@@ -3,8 +3,8 @@ import { ArrowRight, Barcode, Boxes, Camera, CheckCircle2, Clock, MapPin, Packag
 import { SITE } from '../lib/config.js'
 import QuoteEstimator from '../components/QuoteEstimator.jsx'
 
-const PILOT_EMAIL_SUBJECT = 'Keystone Prep Pilot Account'
-const PILOT_EMAIL_BODY = `Hi Keystone Prep,\n\nI'm interested in the first 100 units free pilot.\n\nMonthly unit volume:\nProduct type:\nAmazon / Shopify / both:\nWhat city/state do you ship from:\n\nThanks.`
+const PILOT_EMAIL_SUBJECT = 'Keystone Prep Account'
+const PILOT_EMAIL_BODY = `Hi Keystone Prep,\n\nI'd like a rate for my volume.\n\nMonthly unit volume:\nProduct type:\nAmazon / Shopify / both:\nWhat city/state do you ship from:\n\nThanks.`
 const pilotMailto = `mailto:${SITE.contactEmail}?subject=${encodeURIComponent(PILOT_EMAIL_SUBJECT)}&body=${encodeURIComponent(PILOT_EMAIL_BODY)}`
 
 // Only fires on real intent: opening an email to us. Form submissions fire their
@@ -37,6 +37,13 @@ const TRUST_LINES = [
   'Outbound shipments require approval before pickup',
 ]
 
+const FACILITY_SPECS = [
+  ['Dock-high', 'Receiving'],
+  ['48 ft', 'Trailer access'],
+  ['6,000', 'Sq ft facility'],
+  ['9–5 M–F', 'Receiving hours'],
+]
+
 export default function Landing() {
   return (
     <div className="min-h-screen bg-[var(--paper)] text-[var(--ink)]">
@@ -52,7 +59,7 @@ export default function Landing() {
             <a href="#fit" className="hover:underline">Fit</a>
             <a href="/portal" className="hover:underline">Portal demo</a>
           </nav>
-          <a href="#contact" className="pp-btn pp-btn-accent px-4 py-2 text-sm"> Get a quote </a>
+          <a href="#contact" className="pp-btn pp-btn-accent px-4 py-2 text-sm"> Get your rate </a>
         </div>
       </header>
 
@@ -63,14 +70,14 @@ export default function Landing() {
               <MapPin size={15} /> Lansdale, PA · East Coast fulfillment & FBA prep
             </div>
             <h1 className="pp-display text-6xl md:text-8xl font-bold uppercase leading-[.85] tracking-tight">
-              East Coast 3PL & FBA prep for online sellers.
+              East Coast FBA prep with a real loading dock.
             </h1>
             <p className="text-lg md:text-xl pp-sub mt-6 max-w-2xl">
-              Receiving, inspection, FNSKU labeling, prep, storage, and order fulfillment for Amazon FBA, Shopify, and TikTok Shop sellers — with photo check-ins and a live client portal. Backed by an established apparel-manufacturing warehouse with years of international receiving and labeling experience.
+              Keystone runs FBA prep and 3PL out of a 6,000 sq ft staffed warehouse in Lansdale, PA — elevated dock at trailer height, a lot that takes full 48-foot containers, racked client storage, and receiving crews with years of international freight experience. Send a container or send a case; either way you watch every unit live in the portal.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 mt-8">
               <a href="#contact" className="pp-btn pp-btn-accent px-5 py-3 flex items-center justify-center gap-2">
-                Start with 100 units free <ArrowRight size={18} />
+                Get your rate <ArrowRight size={18} />
               </a>
               <a href="/portal" className="pp-btn-ghost px-5 py-3 flex items-center justify-center gap-2">
                 View portal demo
@@ -85,16 +92,15 @@ export default function Landing() {
             <div className="border-2 border-dashed rounded-lg p-5" style={{ borderColor: 'var(--line)' }}>
               <div className="flex justify-between items-start gap-4">
                 <div>
-                  <div className="text-xs font-semibold uppercase tracking-widest pp-sub">Client Portal Preview</div>
-                  <h2 className="pp-display text-4xl font-bold uppercase mt-1">Every unit visible</h2>
+                  <div className="text-xs font-semibold uppercase tracking-widest pp-sub">The facility</div>
+                  <h2 className="pp-display text-4xl font-bold uppercase mt-1">Built for freight</h2>
                 </div>
                 <Barcode size={34} className="pp-accent" />
               </div>
               <div className="grid grid-cols-2 gap-3 mt-5">
-                <MiniStat label="Units on hand" value="99" />
-                <MiniStat label="Prepped & staged" value="59" accent />
-                <MiniStat label="Open issues" value="0" />
-                <MiniStat label="Discrepancies caught" value="1" />
+                {FACILITY_SPECS.map(([value, label]) => (
+                  <MiniStat key={label} label={label} value={value} />
+                ))}
               </div>
               <div className="mt-5 space-y-2">
                 {TRUST_LINES.map((x) => (
@@ -175,7 +181,7 @@ export default function Landing() {
               />
             </div>
             <div className="grid md:grid-cols-4 gap-3 mt-3">
-              <Feature icon={Truck} title="Receive" text="Supplier boxes arrive in Lansdale and get logged against the client account." />
+              <Feature icon={Truck} title="Receive" text="Containers and parcel freight arrive at the Lansdale dock and get logged against the client account." />
               <Feature icon={Camera} title="Photograph" text="Cartons and exceptions are photographed at check-in so clients know exactly what arrived." />
               <Feature icon={Boxes} title="Prep" text="Inspect, label, polybag, bundle, and stage wholesale or private-label inventory for FBA." />
               <Feature icon={Clock} title="Approve" text="Clients review outbound shipments in the portal before anything leaves the warehouse." />
@@ -196,7 +202,7 @@ export default function Landing() {
               Pricing above is for FBA prep. DTC and TikTok Shop order fulfillment (pick, pack &amp; ship) is quoted per account based on order volume — ask for a quote.
             </p>
             <a href="#contact" className="pp-btn pp-btn-accent px-5 py-3 mt-5 inline-flex items-center gap-2">
-              Estimate your cost <ArrowRight size={17} />
+              Get your rate <ArrowRight size={17} />
             </a>
           </div>
 
@@ -238,7 +244,7 @@ export default function Landing() {
             <div>
               <SectionHeading eyebrow="Good fit" title="Who we want first." />
               <ul className="mt-4 space-y-3 text-sm">
-                {['Wholesale & private-label FBA sellers', 'Shopify / DTC brands', 'TikTok Shop sellers', '500+ units or orders / month', 'Small-to-medium boxed products', 'Brands that value East Coast speed and real-time visibility'].map(x => <li key={x} className="flex gap-2"><CheckCircle2 size={17} style={{ color: 'var(--ok)' }} /> {x}</li>)}
+                {['Wholesale & private-label FBA sellers', 'Sellers receiving containers or pallet freight', 'Shopify / DTC brands', 'TikTok Shop sellers', '1,000+ units or orders / month preferred', 'Brands that value East Coast speed and real-time visibility'].map(x => <li key={x} className="flex gap-2"><CheckCircle2 size={17} style={{ color: 'var(--ok)' }} /> {x}</li>)}
               </ul>
             </div>
             <div>
@@ -258,7 +264,7 @@ export default function Landing() {
               <p className="pp-sub mt-3">Philly-metro sellers can schedule a quick warehouse walkthrough before sending inventory. For non-local sellers, the portal demo shows the receiving, photo, approval, and issue-resolution workflow.</p>
             </div>
             <div className="space-y-3">
-              {['Separated client rack zones', 'Photo check-ins for cartons and damage reports', 'Pilot test shipments before monthly volume'].map(x => (
+              {['Separated client rack zones', 'Photo check-ins for cartons and damage reports', 'Test shipments before monthly volume'].map(x => (
                 <div key={x} className="pp-card px-4 py-3 flex items-center gap-2 text-sm"><CheckCircle2 size={17} style={{ color: 'var(--ok)' }} /> {x}</div>
               ))}
             </div>
@@ -269,9 +275,12 @@ export default function Landing() {
         <section id="contact" className="border-t" style={{ borderColor: 'var(--line)', background: '#fff' }}>
           <div className="max-w-6xl mx-auto px-4 py-14 space-y-8">
             <div>
-              <SectionHeading eyebrow="New accounts." title="Start with 100 units free." />
+              <SectionHeading eyebrow="New accounts." title="Get your rate." />
               <p className="pp-sub mt-3 max-w-2xl">
                 Get a rough number in seconds, then send it over and we'll confirm your exact rate. If it's a good fit we'll schedule a quick call and walk through the portal.
+              </p>
+              <p className="text-sm font-medium mt-2">
+                Your first test shipment — up to 100 units — is on us, so you can see the work before you commit volume.
               </p>
             </div>
 

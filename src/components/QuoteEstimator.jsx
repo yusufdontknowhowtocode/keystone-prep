@@ -134,7 +134,7 @@ export default function QuoteEstimator() {
         <p className="text-sm pp-sub mt-2 max-w-md mx-auto">
           Your estimate came out around <span className="pp-mono">${perUnit.toFixed(2)}/unit</span>. We'll confirm your exact rate by email, usually within a couple of hours.
         </p>
-        <p className="text-xs pp-sub mt-4">Your first {FREE_TRIAL_UNITS} units are free either way — no card, no commitment.</p>
+        <p className="text-xs pp-sub mt-4">Your first test shipment (up to {FREE_TRIAL_UNITS} units) is on us either way — no card, no commitment.</p>
                 <button
           onClick={() => { setSent(false); setError('') }}
           className="pp-btn-ghost px-4 py-2 text-sm mt-4"
@@ -152,7 +152,7 @@ export default function QuoteEstimator() {
         <h2 className="pp-display text-3xl sm:text-4xl font-bold uppercase">Estimate your cost</h2>
       </div>
       <p className="text-sm pp-sub mt-1">
-        Move the numbers around to see where you'd land. Your first {FREE_TRIAL_UNITS} units are free, so the first shipment costs you nothing to try.
+        Move the numbers around to see where you'd land. Your first test shipment — up to {FREE_TRIAL_UNITS} units — is on us.
       </p>
 
       <form onSubmit={submit} className="mt-6 grid lg:grid-cols-2 gap-6">
