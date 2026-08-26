@@ -1,29 +1,30 @@
 import React from 'react'
-import { ArrowRight, Barcode, Boxes, Camera, CheckCircle2, Clock, MapPin, Package, ShieldCheck, ShoppingBag, Store, Truck, Warehouse } from 'lucide-react'
+import { ArrowRight, Barcode, Boxes, Camera, CheckCircle2, Clock, MapPin, MessageCircle, Package, Phone, ShieldCheck, ShoppingBag, Store, Truck, Warehouse } from 'lucide-react'
 import { SITE } from '../lib/config.js'
 import QuoteEstimator from '../components/QuoteEstimator.jsx'
+
+const PHONE_DISPLAY = '267-517-1112'
+const PHONE_TEL = '+12675171112'
+const WHATSAPP_URL = 'https://wa.me/12675171112'
 
 const PILOT_EMAIL_SUBJECT = 'Keystone Prep Account'
 const PILOT_EMAIL_BODY = `Hi Keystone Prep,\n\nI'd like a rate for my volume.\n\nMonthly unit volume:\nProduct type:\nAmazon / Shopify / both:\nWhat city/state do you ship from:\n\nThanks.`
 const pilotMailto = `mailto:${SITE.contactEmail}?subject=${encodeURIComponent(PILOT_EMAIL_SUBJECT)}&body=${encodeURIComponent(PILOT_EMAIL_BODY)}`
 
-// Only fires on real intent: opening an email to us. Form submissions fire their
-// own conversion from QuoteEstimator.jsx. Buttons that merely scroll to the form
-// do NOT count — otherwise Google optimises for scrolling, not leads.
+// Only fires on real intent: opening an email or WhatsApp to us. Form submissions
+// fire their own conversion from QuoteEstimator.jsx.
 function trackQuoteClick() {
   if (typeof window.gtag === 'function') {
     window.gtag('event', 'conversion', { send_to: 'AW-18227583658/GBCbCLurnckcEKq1y_ND' })
   }
 }
-// Standard prep is one all-in per-unit rate that covers receiving, inspection,
-// FNSKU labeling, and outbound box prep. Discounts are earned at volume.
+
 const STANDARD_PREP = [
   ['Up to 1,000 units / mo', '$0.65/unit'],
   ['1,001–5,000 units / mo', '$0.60/unit'],
   ['5,001+ units / mo', '$0.55/unit'],
 ]
 
-// Opt-in extras, only billed when a SKU actually needs them.
 const ADD_ONS = [
   ['Polybagging', '$0.25/unit'],
   ['Bubble wrap', '$0.40/unit'],
@@ -44,6 +45,41 @@ const FACILITY_SPECS = [
   ['9–5 M–F', 'Receiving hours'],
 ]
 
+const FAQS = [
+  {
+    q: 'What does the per-unit rate include?',
+    a: 'Everything in the standard flow: receiving your inbound shipment, physical inspection and count verification, FNSKU labeling with the manufacturer barcode covered, and outbound box prep to Amazon spec. Add-ons like polybagging or bundling are only billed on SKUs that actually need them.',
+  },
+  {
+    q: 'How fast is turnaround?',
+    a: 'Most standard prep ships within 1–2 business days once we have your inventory and label files in hand. Receiving is logged the day freight arrives, and you can watch every step in the portal.',
+  },
+  {
+    q: 'Can you receive containers and pallet freight?',
+    a: 'Yes. The dock is elevated to trailer height, the lot takes full 48-foot trailers, and our receiving crew has years of international container experience through the parent warehouse operation. LTL, FTL, and parcel all work.',
+  },
+  {
+    q: 'How do I send you inventory?',
+    a: 'Get a rate below, and once your account is set up we send the ship-to address and your portal login. You (or your supplier) ship to us, we photograph and log everything at check-in, and you track it live.',
+  },
+  {
+    q: 'What products do you not accept?',
+    a: 'Hazmat, meltables, regulated goods, oversize or heavy freight, very fragile items, and porous goods unless sealed before storage. If you are unsure whether your product qualifies, ask — a two-minute email saves everyone a headache.',
+  },
+  {
+    q: 'Do you handle expiration-dated products?',
+    a: 'Yes. Consumables need the expiration date visible on the sellable unit for FBA, and we verify that during prep — including on multipacks and case packs, where the date has to show on the outside of the finished unit.',
+  },
+  {
+    q: 'How does billing work?',
+    a: 'You get an itemized invoice after your shipment goes out, payable by card link or bank transfer. No setup fees, no monthly minimums, no long-term contracts.',
+  },
+  {
+    q: 'Can I visit the warehouse?',
+    a: 'Please do. Philly-metro sellers are welcome to schedule a walkthrough before sending anything — we would rather you see the racks, the dock, and the prep bench in person than take our word for it.',
+  },
+]
+
 export default function Landing() {
   return (
     <div className="min-h-screen bg-[var(--paper)] text-[var(--ink)]">
@@ -56,10 +92,22 @@ export default function Landing() {
             <a href="#services" className="hover:underline">Services</a>
             <a href="#process" className="hover:underline">Process</a>
             <a href="#pricing" className="hover:underline">Pricing</a>
-            <a href="#fit" className="hover:underline">Fit</a>
+            <a href="#faq" className="hover:underline">FAQ</a>
             <a href="/portal" className="hover:underline">Portal demo</a>
           </nav>
-          <a href="#contact" className="pp-btn pp-btn-accent px-4 py-2 text-sm"> Get your rate </a>
+          <div className="flex items-center gap-2">
+            <a
+              href={WHATSAPP_URL}
+              target="_blank"
+              rel="noreferrer"
+              onClick={trackQuoteClick}
+              className="pp-btn-ghost px-3 py-2 text-sm hidden sm:flex items-center gap-1.5"
+              title={`Text or WhatsApp ${PHONE_DISPLAY}`}
+            >
+              <MessageCircle size={16} /> {PHONE_DISPLAY}
+            </a>
+            <a href="#contact" className="pp-btn pp-btn-accent px-4 py-2 text-sm"> Get your rate </a>
+          </div>
         </div>
       </header>
 
@@ -79,8 +127,14 @@ export default function Landing() {
               <a href="#contact" className="pp-btn pp-btn-accent px-5 py-3 flex items-center justify-center gap-2">
                 Get your rate <ArrowRight size={18} />
               </a>
-              <a href="/portal" className="pp-btn-ghost px-5 py-3 flex items-center justify-center gap-2">
-                View portal demo
+              <a
+                href={WHATSAPP_URL}
+                target="_blank"
+                rel="noreferrer"
+                onClick={trackQuoteClick}
+                className="pp-btn-ghost px-5 py-3 flex items-center justify-center gap-2"
+              >
+                <MessageCircle size={18} /> Text / WhatsApp us
               </a>
             </div>
             <p className="text-xs pp-sub mt-4 max-w-xl">
@@ -271,6 +325,32 @@ export default function Landing() {
           </div>
         </section>
 
+        {/* ---------- FAQ ---------- */}
+        <section id="faq" className="border-t" style={{ borderColor: 'var(--line)', background: '#fff' }}>
+          <div className="max-w-4xl mx-auto px-4 py-14">
+            <SectionHeading eyebrow="FAQ" title="Questions sellers actually ask." />
+            <div className="mt-8 space-y-3">
+              {FAQS.map(({ q, a }) => (
+                <details key={q} className="pp-card px-5 py-4 group">
+                  <summary className="font-semibold cursor-pointer list-none flex items-center justify-between gap-4">
+                    {q}
+                    <span className="pp-sub text-xl leading-none select-none group-open:hidden">+</span>
+                    <span className="pp-sub text-xl leading-none select-none hidden group-open:inline">−</span>
+                  </summary>
+                  <p className="text-sm pp-sub mt-3">{a}</p>
+                </details>
+              ))}
+            </div>
+            <p className="text-sm pp-sub mt-6 text-center">
+              Something else?{' '}
+              <a href={WHATSAPP_URL} target="_blank" rel="noreferrer" onClick={trackQuoteClick} className="underline font-medium" style={{ color: 'var(--ink)' }}>
+                Text or WhatsApp {PHONE_DISPLAY}
+              </a>{' '}
+              — we reply fast.
+            </p>
+          </div>
+        </section>
+
         {/* ---------- QUOTE ESTIMATOR + CONTACT ---------- */}
         <section id="contact" className="border-t" style={{ borderColor: 'var(--line)', background: '#fff' }}>
           <div className="max-w-6xl mx-auto px-4 py-14 space-y-8">
@@ -286,11 +366,22 @@ export default function Landing() {
 
             <QuoteEstimator />
 
-            <div className="text-center pt-2">
-              <div className="text-sm pp-sub mb-3">Prefer to just email us?</div>
-              <a href={pilotMailto} onClick={trackQuoteClick} className="pp-btn-ghost px-5 py-3 inline-flex items-center gap-2">
-                Email {SITE.contactEmail} <ArrowRight size={16} />
-              </a>
+            <div className="text-center pt-2 space-y-3">
+              <div className="text-sm pp-sub">Prefer to talk to a person?</div>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                <a
+                  href={WHATSAPP_URL}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={trackQuoteClick}
+                  className="pp-btn-ghost px-5 py-3 inline-flex items-center gap-2"
+                >
+                  <MessageCircle size={16} /> Text / WhatsApp {PHONE_DISPLAY}
+                </a>
+                <a href={pilotMailto} onClick={trackQuoteClick} className="pp-btn-ghost px-5 py-3 inline-flex items-center gap-2">
+                  Email {SITE.contactEmail} <ArrowRight size={16} />
+                </a>
+              </div>
             </div>
           </div>
         </section>
@@ -298,10 +389,27 @@ export default function Landing() {
 
       <footer className="border-t" style={{ borderColor: 'var(--line)' }}>
         <div className="max-w-6xl mx-auto px-4 py-8 flex flex-col md:flex-row gap-3 justify-between text-sm pp-sub">
-          <div>© {new Date().getFullYear()} {SITE.name}. Lansdale, PA.</div>
-          <div className="flex gap-4"><a href="/portal" className="hover:underline">Portal demo</a><a href={`mailto:${SITE.contactEmail}`} className="hover:underline">{SITE.contactEmail}</a></div>
+          <div>© {new Date().getFullYear()} {SITE.name}. 805 West Fifth Street, Suite 10, Lansdale, PA 19446.</div>
+          <div className="flex flex-wrap gap-4">
+            <a href={`tel:${PHONE_TEL}`} className="hover:underline flex items-center gap-1"><Phone size={14} /> {PHONE_DISPLAY}</a>
+            <a href="/portal" className="hover:underline">Portal demo</a>
+            <a href={`mailto:${SITE.contactEmail}`} className="hover:underline">{SITE.contactEmail}</a>
+          </div>
         </div>
       </footer>
+
+      {/* ---------- FLOATING WHATSAPP ---------- */}
+      <a
+        href={WHATSAPP_URL}
+        target="_blank"
+        rel="noreferrer"
+        onClick={trackQuoteClick}
+        aria-label={`Text or WhatsApp Keystone Prep at ${PHONE_DISPLAY}`}
+        className="fixed bottom-5 right-5 z-50 flex items-center justify-center rounded-full shadow-lg"
+        style={{ width: 56, height: 56, background: '#25D366', color: '#fff' }}
+      >
+        <MessageCircle size={28} />
+      </a>
     </div>
   )
 }
