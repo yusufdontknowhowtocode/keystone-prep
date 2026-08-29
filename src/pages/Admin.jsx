@@ -92,8 +92,13 @@ export default function Admin() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.user?.id])
 
-  useEffect(() => {
-    if (viewClientId) loadRecords(viewClientId)
+    useEffect(() => {
+    if (viewClientId) {
+      loadRecords(viewClientId)
+      setForms(prev => Object.fromEntries(
+        Object.entries(prev).map(([k, v]) => [k, { ...v, client_id: viewClientId }])
+      ))
+    }
     else setRecords(emptyRecords)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [viewClientId])
