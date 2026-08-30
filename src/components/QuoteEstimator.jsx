@@ -64,17 +64,18 @@ export default function QuoteEstimator() {
 
 
     const payload = {
-      name: form.name.trim() || null,
-      email: form.email.trim(),
-      brand: form.brand.trim() || null,
-      phone: form.phone.trim() || null,
-      product_type: form.product_type || null,
-      monthly_units: Number(units) || null,
-      prep_needs: selectedPrep,
-      ship_window: form.ship_window || null,
-      notes: form.notes.trim() || null,
-      est_rate: Number(perUnit.toFixed(4)),
-      est_monthly: Number(monthly.toFixed(2)),
+        source,
+        name: form.name.trim() || null,
+        email: form.email.trim(),
+        brand: form.brand.trim() || null,
+        phone: form.phone.trim() || null,
+        product_type: form.product_type || null,
+        monthly_units: Number(units) || null,
+        prep_needs: selectedPrep,
+        ship_window: form.ship_window || null,
+        notes: form.notes.trim() || null,
+        est_rate: Number(perUnit.toFixed(4)),
+        est_monthly: Number(monthly.toFixed(2)),
     }
 
     // 1. Durable record in Supabase. Failure here shouldn't block the email.
