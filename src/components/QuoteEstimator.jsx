@@ -60,6 +60,9 @@ export default function QuoteEstimator() {
 
     setSending(true)
 
+    const source = new URLSearchParams(window.location.search).get('src') || 'organic'
+
+
     const payload = {
       name: form.name.trim() || null,
       email: form.email.trim(),
