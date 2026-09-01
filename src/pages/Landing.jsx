@@ -5,7 +5,14 @@ import QuoteEstimator from '../components/QuoteEstimator.jsx'
 
 const PHONE_DISPLAY = '267-517-1112'
 const PHONE_TEL = '+12675171112'
-const WHATSAPP_URL = 'https://wa.me/12675171112'
+const WHATSAPP_MSG = `Hi Keystone Prep — I'm looking into FBA prep.
+
+Monthly unit volume:
+Product type:
+Where the inventory is right now (PO / tracking / ship date):
+
+Thanks!`
+const WHATSAPP_URL = `https://wa.me/12675171112?text=${encodeURIComponent(WHATSAPP_MSG)}`
 
 const PILOT_EMAIL_SUBJECT = 'Keystone Prep Account'
 const PILOT_EMAIL_BODY = `Hi Keystone Prep,\n\nI'd like a rate for my volume.\n\nMonthly unit volume:\nProduct type:\nAmazon / Shopify / both:\nWhat city/state do you ship from:\n\nThanks.`
