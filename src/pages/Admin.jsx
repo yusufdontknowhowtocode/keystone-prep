@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { ArrowLeft, Loader2, Plus, RefreshCw, Pencil, Check, X, Trash2, CreditCard, Link as LinkIcon } from 'lucide-react'
 import { hasSupabaseConfig, supabase } from '../lib/supabase.js'
 import { SectionTitle, LoadingCard, ErrorCard } from '../components/PortalUI.jsx'
+import PhotoUploader from '../components/PhotoUploader.jsx'
 
 /* ============================================================
    RATE SHEET — edit these numbers when pricing changes.
@@ -20,7 +21,7 @@ const RATE_PRESETS = [
 ]
 
 const blankInbound = { client_id: '', ref_code: '', carrier: '', tracking: '', source: '', expected_units: '', received_units: '', eta: '', status: 'in_transit' }
-const blankOutbound = { client_id: '', ref_code: '', destination: '', units: '', boxes: '', weight_lb: '', est_cost: '', sku_list: '', status: 'awaiting_approval' }
+const blankOutbound = { client_id: '', ref_code: '', destination: '', units: '', boxes: '', weight_lb: '', est_cost: '', sku_list: '', tracking: '', ship_date: '', status: 'awaiting_approval' }
 const blankDamage = { client_id: '', ref_code: '', sku: '', units: '', note: '', status: 'open' }
 const blankSku = { client_id: '', sku: '', fnsku: '', name: '', prep_spec: 'FNSKU only', on_hand: 0, prepped: 0, shipped_lifetime: 0, damaged: 0 }
 const blankActivity = { client_id: '', kind: 'note', message: '' }
@@ -59,6 +60,7 @@ const OUTBOUND_COLUMNS = [
   { key: 'est_cost', label: 'Est cost', type: 'number' },
   { key: 'status', label: 'Status', type: 'select', options: OUTBOUND_STATUSES },
   { key: 'tracking', label: 'Tracking', type: 'text', mono: true },
+  { key: 'ship_date', label: 'Shipped', type: 'date' },
 ]
 
 export default function Admin() {
@@ -92,7 +94,7 @@ export default function Admin() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.user?.id])
 
-    useEffect(() => {
+  useEffect(() => {
     if (viewClientId) {
       loadRecords(viewClientId)
       setForms(prev => Object.fromEntries(
@@ -306,6 +308,14 @@ export default function Admin() {
                 flagRow={r => r.received_units != null && r.expected_units != null && Number(r.received_units) !== Number(r.expected_units)}
                 flagLabel="count mismatch"
               />
+              <div className="mt-3 space-y-2">
+                {records.inbound.map(row => (
+                  <div key={row.id} className="flex items-center gap-3 text-sm">
+                    <span className="pp-mono pp-sub" style={{ minWidth: 90 }}>{row.ref_code || '—'}</span>
+                    <PhotoUploader table="inbound_shipments" row={row} onSaved={() => loadRecords(viewClientId)} />
+                  </div>
+                ))}
+              </div>
             </RecordBlock>
 
             <RecordBlock title="Outbound" count={records.outbound.length} loading={recordsLoading} empty="No outbound shipments staged yet.">
@@ -372,6 +382,8 @@ export default function Admin() {
           <Input label="Boxes" type="number" value={forms.outbound.boxes} onChange={v => update('outbound', 'boxes', v)} />
           <Input label="Weight lb" type="number" value={forms.outbound.weight_lb} onChange={v => update('outbound', 'weight_lb', v)} />
           <Input label="Estimated cost" type="number" value={forms.outbound.est_cost} onChange={v => update('outbound', 'est_cost', v)} />
+          <Input label="Tracking" value={forms.outbound.tracking} onChange={v => update('outbound', 'tracking', v)} />
+          <Input label="Ship date" type="date" value={forms.outbound.ship_date} onChange={v => update('outbound', 'ship_date', v)} />
           <Input label="SKU list comma-separated" value={forms.outbound.sku_list} onChange={v => update('outbound', 'sku_list', v)} />
         </FormCard>
 
