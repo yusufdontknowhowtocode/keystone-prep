@@ -294,9 +294,9 @@ export default function Landing() {
               ))}
             </div>
 
-            <p className="text-sm pp-sub">
-              Shipping large wholesale lots? Ask about flat per-carton receiving — cheaper for cases of many low-cost units.
-            </p>
+              <p className="text-sm pp-sub">
+                Shipping large wholesale lots? Ask about flat per-carton receiving — cheaper for cases of many low-cost units. More on our <a href="/fba-prep-pennsylvania" className="underline" style={{ color: 'var(--ink)' }}>Pennsylvania FBA prep</a> setup here.
+              </p>
           </div>
         </section>
 
