@@ -36,7 +36,7 @@ const ADD_ONS = [
   ['Polybagging', '$0.25/unit'],
   ['Bubble wrap', '$0.40/unit'],
   ['Bundling / kitting', '$0.50 per unit bundled'],
-  ['Pallet storage', '$25/pallet/mo'],
+  ['Pallet storage', 'First 30 days included · then from $35/pallet/mo'],
 ]
 
 const TRUST_LINES = [

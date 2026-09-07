@@ -217,8 +217,7 @@ export default function FbaPrepPennsylvania() {
 
           <p className="text-sm pp-sub mt-3">
             Add-ons only when a SKU needs them: polybagging $0.25/unit, bubble
-            wrap $0.40/unit, bundling $0.50 per unit bundled, pallet storage
-            $25/pallet/mo. Your first test shipment — up to 100 units — is on
+            wrap $0.40/unit, bundling $0.50 per unit bundled, first 30 days included, then from $35/pallet/month based on dwell time. Your first test shipment — up to 100 units — is on
             us, valid 30 days from account setup.
           </p>
         </section>
