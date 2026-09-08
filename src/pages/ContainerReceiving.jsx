@@ -45,7 +45,7 @@ const FAQS = [
   },
   {
     q: 'What happens to inventory that is not shipping to Amazon right away?',
-    a: 'It goes into racked storage in your own client zone at 30 days included, then from $35/pallet/month based on dwell time, tracked in your portal, and ships out in replenishment batches whenever you create the Amazon shipment.',
+    a: 'It goes into racked storage in your own client zone — first 30 days included, then from $35/pallet/month based on dwell time, tracked in your portal, and ships out in replenishment batches whenever you create the Amazon shipment.',
   },
   {
     q: 'Who clears customs?',

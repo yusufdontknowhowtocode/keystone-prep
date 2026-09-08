@@ -320,7 +320,7 @@ export default function Landing() {
         <section className="max-w-6xl mx-auto px-4 pb-16">
           <div className="pp-card p-6 md:p-8 grid lg:grid-cols-[.9fr_1.1fr] gap-8 items-center">
             <div>
-              <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest pp-sub"><Warehouse size={15} /> Local trust angle</div>
+              <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest pp-sub"><Warehouse size={15} /> Lansdale, PA — visit us</div>
               <h2 className="pp-display text-4xl md:text-5xl font-bold uppercase leading-none mt-2">Tours welcome for local sellers.</h2>
               <p className="pp-sub mt-3">Philly-metro sellers can schedule a quick warehouse walkthrough before sending inventory. For non-local sellers, the portal demo shows the receiving, photo, approval, and issue-resolution workflow.</p>
             </div>

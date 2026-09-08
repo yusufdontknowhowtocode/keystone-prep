@@ -6,8 +6,8 @@ import { hasSupabaseConfig, supabase } from '../lib/supabase.js'
    RATE SHEET — keep in sync with src/pages/Admin.jsx
    ============================================================ */
 const TIERS = [
-  { max: 999, rate: 0.65, label: 'Under 1,000 units/mo' },
-  { max: 4999, rate: 0.60, label: '1,000–5,000 units/mo' },
+  { max: 1000, rate: 0.65, label: 'Up to 1,000 units/mo' },
+  { max: 5000, rate: 0.60, label: '1,001–5,000 units/mo' },
   { max: Infinity, rate: 0.55, label: '5,000+ units/mo' },
 ]
 
@@ -24,6 +24,8 @@ const PRODUCT_TYPES = [
   'Pet supplies', 'Apparel', 'Home & kitchen', 'Toys & games', 'Other',
 ]
 
+const INVENTORY_STATUS = ['Available now', 'Ordered - in transit', 'Still researching products']
+
 const SHIP_WINDOWS = ['Within 2 weeks', '2–4 weeks', '1–2 months', 'Just exploring']
 
 const WEB3FORMS_KEY = import.meta.env.VITE_WEB3FORMS_KEY
@@ -31,7 +33,7 @@ const WEB3FORMS_KEY = import.meta.env.VITE_WEB3FORMS_KEY
 export default function QuoteEstimator() {
   const [units, setUnits] = useState(500)
   const [addons, setAddons] = useState({})
-  const [form, setForm] = useState({ name: '', email: '', brand: '', phone: '', product_type: '', ship_window: '', notes: '' })
+  const [form, setForm] = useState({ name: '', email: '', brand: '', phone: '', product_type: '', ship_window: '', inventory_status: '', notes: '' })
   const [sending, setSending] = useState(false)
   const [sent, setSent] = useState(false)
   const [error, setError] = useState('')
@@ -57,6 +59,9 @@ export default function QuoteEstimator() {
     setError('')
 
     if (!form.email.trim()) return setError('Email is required so we can send your quote.')
+    if (!form.product_type) return setError('Please select your product type.')
+    if (!form.inventory_status) return setError('Please tell us where your inventory is right now.')
+    if (!form.ship_window) return setError('Please select when your first shipment would go out.')
 
     setSending(true)
 
@@ -73,6 +78,7 @@ export default function QuoteEstimator() {
         monthly_units: Number(units) || null,
         prep_needs: selectedPrep,
         ship_window: form.ship_window || null,
+      inventory_status: form.inventory_status || null,
         notes: form.notes.trim() || null,
         est_rate: Number(perUnit.toFixed(4)),
         est_monthly: Number(monthly.toFixed(2)),
@@ -104,6 +110,7 @@ export default function QuoteEstimator() {
             monthly_units: payload.monthly_units || '—',
             prep_needs: selectedPrep.length ? selectedPrep.join(', ') : 'FNSKU only',
             ship_window: payload.ship_window || '—',
+            inventory_status: payload.inventory_status || '—',
             estimated_rate: `$${perUnit.toFixed(2)}/unit`,
             estimated_monthly: money(monthly),
             notes: payload.notes || '—',
@@ -185,7 +192,7 @@ export default function QuoteEstimator() {
 
           <div>
             <div className="text-sm font-semibold">Extra prep needed?</div>
-            <div className="text-xs pp-sub">Only billed on SKUs that actually need it.</div>
+            <div className="text-xs pp-sub">Only billed on SKUs that actually need it. Estimate assumes all units need the selected add-ons — your invoice only bills the SKUs that actually do.</div>
             <div className="mt-2 space-y-2">
               {ADDONS.map(a => (
                 <label key={a.key} className="flex items-start gap-2.5 p-2.5 rounded cursor-pointer border" style={{ borderColor: addons[a.key] ? 'var(--accent)' : 'var(--line)' }}>
@@ -243,14 +250,20 @@ export default function QuoteEstimator() {
               <input className="pp-input" value={form.phone} onChange={e => set('phone', e.target.value)} placeholder="215-555-0100" />
             </Field>
           </div>
-          <Field label="Product type">
-            <select className="pp-input" value={form.product_type} onChange={e => set('product_type', e.target.value)}>
+          <Field label="Product type" required>
+            <select className="pp-input" required value={form.product_type} onChange={e => set('product_type', e.target.value)}>
               <option value="">Select…</option>
               {PRODUCT_TYPES.map(p => <option key={p} value={p}>{p}</option>)}
             </select>
           </Field>
-          <Field label="When would you send a first shipment?">
-            <select className="pp-input" value={form.ship_window} onChange={e => set('ship_window', e.target.value)}>
+          <Field label="Where is the inventory right now?" required>
+            <select className="pp-input" required value={form.inventory_status} onChange={e => set('inventory_status', e.target.value)}>
+              <option value="">Select…</option>
+              {INVENTORY_STATUS.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+          </Field>
+          <Field label="When would you send a first shipment?" required>
+            <select className="pp-input" required value={form.ship_window} onChange={e => set('ship_window', e.target.value)}>
               <option value="">Select…</option>
               {SHIP_WINDOWS.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
