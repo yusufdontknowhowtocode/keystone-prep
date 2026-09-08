@@ -229,7 +229,7 @@ export default function QuoteEstimator() {
               <span className="pp-mono font-bold" style={{ color: 'var(--ok)' }}>{money(firstMonth)}</span>
             </div>
             <p className="text-xs pp-sub mt-2">
-              Estimate only — we confirm your exact rate by email once we know your SKUs. Storage: first 30 days included, then from $35/pallet/month based on dwell time.
+                Estimate only — we confirm your exact rate by email once we know your SKUs. $25 minimum per inbound shipment ($50 for container/trailer freight). Storage: first 30 days included, then from $35/pallet/month based on dwell time.
             </p>
           </div>
         </div>

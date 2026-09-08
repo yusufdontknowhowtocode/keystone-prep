@@ -37,6 +37,7 @@ const ADD_ONS = [
   ['Bubble wrap', '$0.40/unit'],
   ['Bundling / kitting', '$0.50 per unit bundled'],
   ['Pallet storage', 'First 30 days included · then from $35/pallet/mo'],
+  ['Inbound minimum', '$25/shipment · $50 freight'],
 ]
 
 const TRUST_LINES = [

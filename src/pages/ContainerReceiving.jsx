@@ -41,7 +41,7 @@ const FAQS = [
   },
   {
     q: 'What does container receiving cost?',
-    a: 'Receiving is included in our per-unit prep rate ($0.55–$0.65/unit depending on monthly volume) when we prep the goods. For large wholesale lots of many low-cost units, ask about flat per-carton receiving — it is often the cheaper structure.',
+    a: 'Receiving is included in our per-unit prep rate ($0.55–$0.65/unit depending on monthly volume) when we prep the goods. For large wholesale lots of many low-cost units, ask about flat per-carton receiving — it is often the cheaper structure. Freight receiving carries a $50 minimum per inbound shipment.',
   },
   {
     q: 'What happens to inventory that is not shipping to Amazon right away?',
