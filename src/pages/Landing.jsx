@@ -312,7 +312,7 @@ export default function Landing() {
             <div>
               <SectionHeading eyebrow="Not a fit yet" title="What we decline at first." />
               <ul className="mt-4 space-y-3 text-sm pp-sub">
-                {['Hazmat, meltables, or regulated goods', 'Oversize/heavy freight', 'Clothing with tons of size/color variants', 'Very fragile items', 'Porous goods unless sealed before storage'].map(x => <li key={x} className="flex gap-2"><ShieldCheck size={17} /> {x}</li>)}
+                {['Hazmat, meltables, or regulated goods', 'Oversize/heavy freight', 'Clothing with tons of size/color variants', 'Very fragile items', 'unsealed or unpackaged absorbent goods (e.g. open food products)'].map(x => <li key={x} className="flex gap-2"><ShieldCheck size={17} /> {x}</li>)}
               </ul>
             </div>
           </div>
