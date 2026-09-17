@@ -72,7 +72,7 @@ const FAQS = [
   },
   {
     q: 'What products do you not accept?',
-    a: 'Hazmat, meltables, regulated goods, oversize or heavy freight, very fragile items, and porous goods unless sealed before storage. If you are unsure whether your product qualifies, ask — a two-minute email saves everyone a headache.',
+    a: 'Hazmat, meltables, regulated goods, oversize or heavy freight, very fragile items, and unsealed or unpackaged absorbent goods (e.g. open food products). If you are unsure whether your product qualifies, ask — a two-minute email saves everyone a headache.',
   },
   {
     q: 'Do you handle expiration-dated products?',
