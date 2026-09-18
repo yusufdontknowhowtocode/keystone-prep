@@ -1,5 +1,5 @@
 import React from 'react'
-import { ArrowRight, Barcode, Boxes, Camera, CheckCircle2, Clock, MapPin, MessageCircle, Package, Phone, ShieldCheck, ShoppingBag, Store, Truck, Warehouse } from 'lucide-react'
+import { ArrowRight, Barcode, Boxes, Camera, CheckCircle2, Clock, MapPin, MessageCircle, Package, Phone, ShieldCheck, ShoppingBag, Star, Store, Truck, Warehouse } from 'lucide-react'
 import { SITE } from '../lib/config.js'
 import QuoteEstimator from '../components/QuoteEstimator.jsx'
 
@@ -44,6 +44,22 @@ const TRUST_LINES = [
   'Inbound cartons photographed at receiving',
   'Each client gets separated SKU storage',
   'Outbound shipments require approval before pickup',
+]
+
+const TESTIMONIALS = [
+  {
+    name: 'Ryan D.',
+    company: 'Dooley Core Enterprise LLC',
+    source: '★★★★★ Google review',
+    quote: 'Excellent communication with my company. They kept on top of everything and were able to provide additional information when I needed it for my suppliers and for Amazon as well. Due to his quick response, even after hours, they responded to several inquiries. I look forward to continuing my partnership with Keystone.',
+  },
+  // Liubomyr / NordPeak — add next week once his Google review surfaces (or he OKs quoting his email):
+  // {
+  //   name: 'Liubomyr',
+  //   company: 'NordPeak Distribution',
+  //   source: '★★★★★ Google review',
+  //   quote: 'Thanks a lot for the great work and smooth process. I really appreciate your help with relabeling and handling everything so cleanly.',
+  // },
 ]
 
 const FACILITY_SPECS = [
@@ -298,6 +314,26 @@ export default function Landing() {
               <p className="text-sm pp-sub">
                 Shipping large wholesale lots? Ask about flat per-carton receiving — cheaper for cases of many low-cost units. More on our <a href="/fba-prep-pennsylvania" className="underline" style={{ color: 'var(--ink)' }}>Pennsylvania FBA prep</a> setup here.
               </p>
+          </div>
+        </section>
+
+        <section id="reviews" className="max-w-6xl mx-auto px-4 pb-14">
+          <div className="pp-card p-6 md:p-8">
+            <SectionHeading eyebrow="Client reviews" title="What sellers say." />
+            <div className="mt-6 grid md:grid-cols-2 gap-6">
+              {TESTIMONIALS.map(t => (
+                <figure key={t.name} className="pp-card p-5 flex flex-col gap-3">
+                  <div className="flex gap-1" aria-label="5 out of 5 stars">
+                    {[...Array(5)].map((_, i) => <Star key={i} size={16} fill="currentColor" style={{ color: 'var(--ok)' }} />)}
+                  </div>
+                  <blockquote className="text-sm leading-relaxed">“{t.quote}”</blockquote>
+                  <figcaption className="mt-auto text-xs pp-sub">
+                    <span className="font-semibold" style={{ color: 'var(--ink)' }}>{t.name}</span> · {t.company}
+                    <span className="block mt-0.5">{t.source}</span>
+                  </figcaption>
+                </figure>
+              ))}
+            </div>
           </div>
         </section>
 
