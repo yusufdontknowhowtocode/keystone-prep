@@ -325,7 +325,7 @@ export default function Landing() {
                   <div className="flex gap-1" aria-label="5 out of 5 stars">
                     {[...Array(5)].map((_, i) => <Star key={i} size={16} fill="currentColor" style={{ color: 'var(--ok)' }} />)}
                   </div>
-                  <blockquote className="text-sm leading-relaxed">“{t.quote}\u201d</blockquote>
+                  <blockquote className="text-sm leading-relaxed">“{t.quote}”</blockquote>
                   <figcaption className="mt-auto text-xs pp-sub">
                     <span className="font-semibold" style={{ color: 'var(--ink)' }}>{t.name}</span> · {t.company}
                     <span className="block mt-0.5">{t.source}</span>
