@@ -53,13 +53,12 @@ const TESTIMONIALS = [
     source: '★★★★★ Google review',
     quote: 'Excellent communication with my company. They kept on top of everything and were able to provide additional information when I needed it for my suppliers and for Amazon as well. Due to his quick response, even after hours, they responded to several inquiries. I look forward to continuing my partnership with Keystone.',
   },
-  // Liubomyr / NordPeak — add next week once his Google review surfaces (or he OKs quoting his email):
-  // {
-  //   name: 'Liubomyr',
-  //   company: 'NordPeak Distribution',
-  //   source: '★★★★★ Google review',
-  //   quote: 'Thanks a lot for the great work and smooth process. I really appreciate your help with relabeling and handling everything so cleanly.',
-  // },
+  {
+    name: 'Liubomyr',
+    company: 'NordPeak Distribution',
+    source: '★★★★★ Client review',
+    quote: 'Thanks a lot for the great work and smooth process. I really appreciate your help with relabeling and handling everything so cleanly. Thanks again for the top-notch service!',
+  },
 ]
 
 const FACILITY_SPECS = [
@@ -326,7 +325,7 @@ export default function Landing() {
                   <div className="flex gap-1" aria-label="5 out of 5 stars">
                     {[...Array(5)].map((_, i) => <Star key={i} size={16} fill="currentColor" style={{ color: 'var(--ok)' }} />)}
                   </div>
-                  <blockquote className="text-sm leading-relaxed">“{t.quote}”</blockquote>
+                  <blockquote className="text-sm leading-relaxed">“{t.quote}\u201d</blockquote>
                   <figcaption className="mt-auto text-xs pp-sub">
                     <span className="font-semibold" style={{ color: 'var(--ink)' }}>{t.name}</span> · {t.company}
                     <span className="block mt-0.5">{t.source}</span>
