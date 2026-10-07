@@ -369,7 +369,6 @@ function Inbound({ inbound }) {
               <div className="pp-mono text-xs pp-sub mt-1">{s.carrier || 'Carrier TBD'} · {s.tracking || 'Tracking TBD'}</div>
               {s.received_at && <div className="text-xs mt-1" style={{ color: 'var(--ok)' }}>✓ Checked in {formatDateTime(s.received_at)}</div>}
             </div>
-                          {s.received_at && <div className="text-xs mt-1" style={{ color: 'var(--ok)' }}>✓ Checked in {formatDateTime(s.received_at)}</div>}
               {s.photo_urls?.length > 0 && (
                 <div className="flex gap-2 mt-2">
                   {s.photo_urls.map(url => (
