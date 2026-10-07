@@ -369,6 +369,16 @@ function Inbound({ inbound }) {
               <div className="pp-mono text-xs pp-sub mt-1">{s.carrier || 'Carrier TBD'} · {s.tracking || 'Tracking TBD'}</div>
               {s.received_at && <div className="text-xs mt-1" style={{ color: 'var(--ok)' }}>✓ Checked in {formatDateTime(s.received_at)}</div>}
             </div>
+                          {s.received_at && <div className="text-xs mt-1" style={{ color: 'var(--ok)' }}>✓ Checked in {formatDateTime(s.received_at)}</div>}
+              {s.photo_urls?.length > 0 && (
+                <div className="flex gap-2 mt-2">
+                  {s.photo_urls.map(url => (
+                    <a key={url} href={url} target="_blank" rel="noreferrer">
+                      <img src={url} alt="Check-in photo" className="w-16 h-16 rounded border pp-line object-cover" />
+                    </a>
+                  ))}
+                </div>
+              )}
             <div className="text-right"><div className="pp-display text-3xl font-bold">{s.received_units || s.expected_units || 0}</div><div className="text-xs pp-sub uppercase tracking-wide">units · ETA {formatShortDate(s.eta)}</div></div>
           </div>
         ))}
