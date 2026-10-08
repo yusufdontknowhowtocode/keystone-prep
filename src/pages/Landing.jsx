@@ -138,10 +138,10 @@ export default function Landing() {
         <section className="max-w-6xl mx-auto px-4 py-16 md:py-24 grid lg:grid-cols-[1.1fr_.9fr] gap-10 items-center">
           <div>
             <div className="inline-flex items-center gap-2 pp-card px-3 py-1.5 text-sm font-semibold mb-5">
-              <MapPin size={15} /> Lansdale, PA · East Coast fulfillment & FBA prep
+              <MapPin size={15} /> Lansdale, PA · FBA prep & Shopify fulfillment
             </div>
             <h1 className="pp-display text-6xl md:text-8xl font-bold uppercase leading-[.85] tracking-tight">
-              East Coast FBA prep with a real loading dock.
+              FBA prep & Shopify fulfillment with a real loading dock.
             </h1>
             <p className="text-lg md:text-xl pp-sub mt-6 max-w-2xl">
               Keystone runs FBA prep and 3PL out of a 6,000 sq ft staffed warehouse in Lansdale, PA — elevated dock at trailer height, a lot that takes full 48-foot containers, racked client storage, and receiving crews with years of international freight experience. Send a container or send a case; either way you watch every unit live in the portal.
@@ -275,14 +275,17 @@ export default function Landing() {
             <p className="text-sm pp-sub mt-3">
               Shipping, Amazon fees, and special packaging materials are billed separately or paid directly by the client. Final rates depend on SKU complexity and monthly volume.
             </p>
+          
+              <p className="text-sm pp-sub mt-3">
+              <strong>DTC / Shopify fulfillment:</strong> $4.50 per order + $1.00 per additional item. Volume pricing for 300+ orders/month. No setup, API, or bin fees, no peak surcharge, and a 3 PM ET same-day cutoff.
+            </p>
             <p className="text-sm pp-sub mt-3">
-              Pricing above is for FBA prep. DTC and TikTok Shop order fulfillment (pick, pack &amp; ship) is quoted per account based on order volume — ask for a quote.
+              Shipping from Pennsylvania reaches NY, NJ, Boston, and DC customers in 1–2 days by ground, for faster delivery and lower postage than shipping from the West or South.
             </p>
             <a href="#contact" className="pp-btn pp-btn-accent px-5 py-3 mt-5 inline-flex items-center gap-2">
               Get your rate <ArrowRight size={17} />
             </a>
           </div>
-
           <div className="space-y-4">
             <div className="pp-card overflow-hidden">
               <div className="px-4 py-3 border-b flex items-center justify-between gap-4" style={{ borderColor: 'var(--line)' }}>
