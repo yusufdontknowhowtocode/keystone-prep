@@ -438,6 +438,7 @@ export default function Landing() {
           <div>© {new Date().getFullYear()} {SITE.name}. 805 West Fifth Street, Suite 10, Lansdale, PA 19446.</div>
           <div className="flex flex-wrap gap-4">
             <a href="/fba-prep-pennsylvania" className="hover:underline">PA FBA Prep</a>
+            <a href="/shopify-fulfillment-pennsylvania" className="hover:underline">Shopify Fulfillment</a>
             <a href={`tel:${PHONE_TEL}`} className="hover:underline flex items-center gap-1"><Phone size={14} /> {PHONE_DISPLAY}</a>
             <a href="/portal" className="hover:underline">Portal demo</a>
             <a href={`mailto:${SITE.contactEmail}`} className="hover:underline">{SITE.contactEmail}</a>

@@ -353,7 +353,9 @@ export default function FbaPrepPennsylvania() {
             <a href="/container-receiving" className="hover:underline">
               Container Receiving
             </a>
-
+              <a href="/shopify-fulfillment-pennsylvania" className="hover:underline">
+              Shopify Fulfillment
+            </a>
             <a href="/portal" className="hover:underline">
               Portal demo
             </a>
