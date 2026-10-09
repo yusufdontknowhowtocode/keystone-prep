@@ -25,7 +25,7 @@ const RATES = [
 
 const SERVICES = [
   'Shopify orders picked, packed, and shipped same day',
-  'Orders by 3 PM ET ship same day, Mon–Fri',
+  'Orders by 2 PM ET ship same day, Mon–Fri',
   'Your branded boxes, inserts, and thank-you cards',
   'Multi-SKU kits, bundles, and gift sets',
   'Wholesale / B2B carton orders to retailers',
@@ -41,7 +41,7 @@ const FAQS = [
   },
   {
     q: 'What is your order cutoff?',
-    a: 'Orders placed by 3:00 PM Eastern on a business day ship the same day. Many fulfillment centers cut off before noon, so the later cutoff gives your afternoon customers same-day shipping too.',
+    a: 'Orders placed by 2:00 PM Eastern on a business day ship the same day. Many fulfillment centers cut off before noon, so the later cutoff gives your afternoon customers same-day shipping too.',
   },
   {
     q: 'How fast do packages reach customers?',
@@ -71,7 +71,7 @@ export default function ShopifyFulfillmentPennsylvania() {
     if (desc) {
       desc.setAttribute(
         'content',
-        'Shopify fulfillment center in Lansdale, PA. $4.50/order pick & pack, 3 PM ET same-day cutoff, 1–2 day ground to the Northeast, branded packaging, no setup fees or minimums.'
+        'Shopify fulfillment center in Lansdale, PA. $4.50/order pick & pack, 2 PM ET same-day cutoff, 1–2 day ground to the Northeast, branded packaging, no setup fees or minimums.'
       )
     }
 
@@ -138,7 +138,7 @@ export default function ShopifyFulfillmentPennsylvania() {
 
           <p className="text-lg pp-sub mt-6">
             Keystone Prep picks, packs, and ships Shopify orders from a staffed
-            warehouse in Lansdale, Pennsylvania. Orders placed by 3 PM Eastern
+            warehouse in Lansdale, Pennsylvania. Orders placed by 2 PM Eastern
             ship the same day, and ground packages reach New York, New Jersey,
             and most of the Northeast in 1–2 days.
           </p>
@@ -248,7 +248,7 @@ export default function ShopifyFulfillmentPennsylvania() {
               {[
                 [
                   Clock,
-                  '3 PM ET same-day cutoff',
+                  '2 PM ET same-day cutoff',
                   'Later than most fulfillment centers, so more orders go out the day they come in',
                 ],
                 [

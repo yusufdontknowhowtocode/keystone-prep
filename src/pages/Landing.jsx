@@ -277,7 +277,7 @@ export default function Landing() {
             </p>
           
               <p className="text-sm pp-sub mt-3">
-              <strong>DTC / Shopify fulfillment:</strong> $4.50 per order + $1.00 per additional item. Volume pricing for 300+ orders/month. No setup, API, or bin fees, no peak surcharge, and a 3 PM ET same-day cutoff.
+              <strong>DTC / Shopify fulfillment:</strong> $4.50 per order + $1.00 per additional item. Volume pricing for 300+ orders/month. No setup, API, or bin fees, no peak surcharge, and a 2 PM ET same-day cutoff.
             </p>
             <p className="text-sm pp-sub mt-3">
               Shipping from Pennsylvania reaches NY, NJ, Boston, and DC customers in 1–2 days by ground, for faster delivery and lower postage than shipping from the West or South.
