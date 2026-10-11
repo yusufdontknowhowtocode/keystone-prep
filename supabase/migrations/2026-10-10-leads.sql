@@ -1,20 +1,20 @@
--- Leads table for the admin Overview pipeline.
--- Run once in the Supabase SQL editor. Admin-only: clients can never see leads.
+-- Pipeline columns on the existing `leads` table (website quote form writes here).
+-- Safe to run more than once.
 
-create table if not exists leads (
-  id uuid primary key default gen_random_uuid(),
-  company text not null,
-  contact text,
-  source text,
-  stage text default 'new' check (stage in ('new','quoted','agreement_sent','signed','lost')),
-  est_monthly numeric,
-  next_action text,
-  next_date date,
-  notes text,
-  created_at timestamptz default now()
-);
+alter table leads add column if not exists stage text default 'new';
+alter table leads add column if not exists next_action text;
+alter table leads add column if not exists next_date date;
 
+alter table leads drop constraint if exists leads_stage_check;
+alter table leads add constraint leads_stage_check check (stage in ('new','quoted','agreement_sent','signed','lost'));
+
+update leads set stage = 'new' where stage is null;
+
+-- RLS: admin can read/update everything; the public quote form can still insert.
 alter table leads enable row level security;
 
 drop policy if exists "admin leads all" on leads;
 create policy "admin leads all" on leads for all using (public.is_admin()) with check (public.is_admin());
+
+drop policy if exists "public quote form insert" on leads;
+create policy "public quote form insert" on leads for insert to anon, authenticated with check (true);

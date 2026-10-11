@@ -13,7 +13,7 @@ import { SectionTitle } from './PortalUI.jsx'
 
 const PAYMENT_TERMS_DAYS = 7 // invoices are due within 7 days of the invoice date
 const LEAD_STAGES = ['new', 'quoted', 'agreement_sent', 'signed', 'lost']
-const blankLead = { company: '', contact: '', source: '', stage: 'new', est_monthly: '', next_action: '', next_date: '' }
+const blankLead = { brand: '', email: '', source: '', stage: 'new', est_monthly: '', next_action: '', next_date: '' }
 
 export default function AdminOverview({ clients }) {
   const [data, setData] = useState({ skus: [], inbound: [], invoices: [], leads: [] })
@@ -80,14 +80,14 @@ export default function AdminOverview({ clients }) {
     .filter(i => i.status !== 'received')
     .sort((a, b) => String(a.eta || '9999').localeCompare(String(b.eta || '9999')))
 
-  const activeLeads = data.leads.filter(l => !['signed', 'lost'].includes(l.stage))
+  const activeLeads = data.leads.filter(l => !['signed', 'lost'].includes(l.stage || 'new'))
   const pipelineMonthly = sum(activeLeads.map(l => Number(l.est_monthly || 0)))
 
   async function addLead(e) {
     e.preventDefault()
-    if (!leadForm.company.trim()) return
+    if (!leadForm.brand.trim()) return
     setSavingLead(true)
-    const payload = { ...leadForm, est_monthly: leadForm.est_monthly === '' ? null : Number(leadForm.est_monthly), next_date: leadForm.next_date || null }
+    const payload = { ...leadForm, email: leadForm.email.trim() || 'unknown@manual.entry', source: leadForm.source || 'manual', est_monthly: leadForm.est_monthly === '' ? null : Number(leadForm.est_monthly), next_date: leadForm.next_date || null }
     const { error: err } = await supabase.from('leads').insert(payload)
     setSavingLead(false)
     if (err) return setError(err.message)
@@ -182,27 +182,30 @@ export default function AdminOverview({ clients }) {
       {/* Pipeline */}
       <Block title="Pipeline">
         {leadsMissing ? (
-          <div className="text-sm pp-sub">The <span className="pp-mono">leads</span> table doesn't exist yet. Run <span className="pp-mono">supabase/migrations/2026-10-10-leads.sql</span> in the Supabase SQL editor, then refresh.</div>
+          <div className="text-sm pp-sub">The <span className="pp-mono">leads</span> table doesn't exist yet. Run the leads migration in the Supabase SQL editor, then refresh.</div>
         ) : (
           <>
             {data.leads.length > 0 && (
               <table className="w-full text-sm mb-4">
-                <thead><tr className="text-left pp-sub"><th className="py-2">Company</th><th>Contact</th><th>Stage</th><th className="text-right">Est/mo</th><th>Next action</th><th className="text-right">By</th></tr></thead>
+                <thead><tr className="text-left pp-sub"><th className="py-2">Lead</th><th>Contact</th><th>Source</th><th>Stage</th><th className="text-right pr-4">Est/mo</th><th>Next action</th><th className="text-right">By</th><th className="text-right">Added</th></tr></thead>
                 <tbody>
                   {data.leads.map(l => {
-                    const late = l.next_date && !['signed', 'lost'].includes(l.stage) && new Date(l.next_date) < startOfToday()
+                    const stage = l.stage || 'new'
+                    const late = l.next_date && !['signed', 'lost'].includes(stage) && new Date(l.next_date) < startOfToday()
                     return (
-                      <tr key={l.id} className="border-t" style={{ borderColor: 'var(--line)', opacity: l.stage === 'lost' ? 0.5 : 1 }}>
-                        <td className="py-2 font-medium">{l.company}</td>
-                        <td>{l.contact || '—'}</td>
+                      <tr key={l.id} className="border-t" style={{ borderColor: 'var(--line)', opacity: stage === 'lost' ? 0.5 : 1 }}>
+                        <td className="py-2 font-medium">{l.brand || l.name || '—'}{l.product_type && <div className="text-xs pp-sub">{l.product_type}{l.monthly_units ? ` · ${l.monthly_units}/mo` : ''}</div>}</td>
+                        <td className="text-xs">{l.email || '—'}{l.phone && <div className="pp-sub">{l.phone}</div>}</td>
+                        <td className="text-xs pp-sub">{l.source || '—'}</td>
                         <td>
-                          <select className="pp-input py-1 text-sm" value={l.stage} onChange={e => updateLead(l.id, { stage: e.target.value })}>
+                          <select className="pp-input py-1 text-sm" value={stage} onChange={e => updateLead(l.id, { stage: e.target.value })}>
                             {LEAD_STAGES.map(s => <option key={s} value={s}>{labelize(s)}</option>)}
                           </select>
                         </td>
-                        <td className="text-right pp-mono">{l.est_monthly ? money(l.est_monthly) : '—'}</td>
-                        <td>{l.next_action || '—'}</td>
-                        <td className="text-right pp-mono" style={late ? { color: 'var(--bad)', fontWeight: 700 } : undefined}>{l.next_date || '—'}</td>
+                        <td className="text-right pp-mono pr-4">{l.est_monthly ? money(l.est_monthly) : '—'}</td>
+                        <td><input className="pp-input py-1 text-sm" defaultValue={l.next_action || ''} placeholder="—" onBlur={e => e.target.value !== (l.next_action || '') && updateLead(l.id, { next_action: e.target.value || null })} /></td>
+                        <td className="text-right"><input type="date" className="pp-input py-1 text-sm" style={late ? { color: 'var(--bad)', fontWeight: 700 } : undefined} defaultValue={l.next_date || ''} onChange={e => updateLead(l.id, { next_date: e.target.value || null })} /></td>
+                        <td className="text-right pp-sub text-xs">{l.created_at ? `${daysSince(l.created_at)}d ago` : '—'}</td>
                       </tr>
                     )
                   })}
@@ -210,8 +213,8 @@ export default function AdminOverview({ clients }) {
               </table>
             )}
             <form onSubmit={addLead} className="grid grid-cols-2 md:grid-cols-7 gap-2 items-end">
-              <input className="pp-input" placeholder="Company" value={leadForm.company} onChange={e => setLeadForm({ ...leadForm, company: e.target.value })} />
-              <input className="pp-input" placeholder="Contact" value={leadForm.contact} onChange={e => setLeadForm({ ...leadForm, contact: e.target.value })} />
+              <input className="pp-input" placeholder="Brand / company" value={leadForm.brand} onChange={e => setLeadForm({ ...leadForm, brand: e.target.value })} />
+              <input className="pp-input" placeholder="Email" value={leadForm.email} onChange={e => setLeadForm({ ...leadForm, email: e.target.value })} />
               <input className="pp-input" placeholder="Source" value={leadForm.source} onChange={e => setLeadForm({ ...leadForm, source: e.target.value })} />
               <input className="pp-input" type="number" placeholder="Est $/mo" value={leadForm.est_monthly} onChange={e => setLeadForm({ ...leadForm, est_monthly: e.target.value })} />
               <input className="pp-input" placeholder="Next action" value={leadForm.next_action} onChange={e => setLeadForm({ ...leadForm, next_action: e.target.value })} />
