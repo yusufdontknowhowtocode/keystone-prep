@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { ArrowLeft, Loader2, Plus, RefreshCw, Pencil, Check, X, Trash2, CreditCard, Link as LinkIcon } from 'lucide-react'
 import { hasSupabaseConfig, supabase } from '../lib/supabase.js'
-import { SectionTitle, LoadingCard, ErrorCard } from '../components/PortalUI.jsx'
+import { LoadingCard, ErrorCard } from '../components/PortalUI.jsx'
 import PhotoUploader from '../components/PhotoUploader.jsx'
 import AdminOverview from '../components/AdminOverview.jsx'
 
@@ -85,6 +85,13 @@ export default function Admin() {
   const [viewClientId, setViewClientId] = useState('')
   const [records, setRecords] = useState(emptyRecords)
   const [recordsLoading, setRecordsLoading] = useState(false)
+
+  const [tab, setTab] = useState(() => {
+    try { const h = window.location.hash.slice(1); return ['home', 'clients', 'pipeline', 'log'].includes(h) ? h : 'home' } catch { return 'home' }
+  })
+  const [clientTab, setClientTab] = useState('inventory')
+  const [logForm, setLogForm] = useState('inbound')
+  const [refreshKey, setRefreshKey] = useState(0)
 
   useEffect(() => {
     if (!hasSupabaseConfig) { setLoading(false); return }
@@ -268,150 +275,224 @@ export default function Admin() {
 
   const viewedClient = clients.find(c => c.id === viewClientId)
 
+  const realClients = clients.filter(c => !c.is_admin)
+  const go = (t) => { setTab(t); try { window.location.hash = t } catch {} }
+  const openClient = (id, sub = 'inventory') => { setViewClientId(id); setClientTab(sub); go('clients') }
+
   return (
-    <AdminShell onRefresh={() => { loadAdmin(); if (viewClientId) loadRecords(viewClientId) }}>
+    <AdminShell onRefresh={() => { loadAdmin(); if (viewClientId) loadRecords(viewClientId); setRefreshKey(k => k + 1) }}>
+      <TabBar
+        tabs={[['home', 'Home'], ['clients', 'Clients'], ['pipeline', 'Pipeline'], ['log', '+ Log entry']]}
+        value={tab}
+        onChange={go}
+      />
+
       {error && <ErrorCard message={error} />}
-      {notice && <div className="pp-card p-4 text-sm" style={{ borderColor: 'var(--ok)' }}>{notice}</div>}
+      {notice && <div className="pp-card p-3 text-sm" style={{ borderColor: 'var(--ok)', color: 'var(--ok)' }}>{notice}</div>}
 
-      {clients.length > 0 && <AdminOverview clients={clients} />}
+      {tab === 'home' && clients.length > 0 && (
+        <AdminOverview key={'home' + refreshKey} view="home" clients={clients} onOpenClient={openClient} onGoPipeline={() => go('pipeline')} />
+      )}
 
-      <section className="pp-card p-4">
-        <SectionTitle>Clients</SectionTitle>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead><tr className="text-left pp-sub"><th className="py-2">Brand</th><th>Code</th><th>Email</th></tr></thead>
-            <tbody>{clients.map(c => <tr key={c.id} className="border-t" style={{ borderColor: 'var(--line)' }}><td className="py-2 font-medium">{c.name}</td><td className="pp-mono">{c.account_code}</td><td>{c.email}</td></tr>)}</tbody>
-          </table>
-        </div>
-      </section>
+      {tab === 'pipeline' && (
+        <AdminOverview key={'pipe' + refreshKey} view="pipeline" clients={clients} />
+      )}
 
-      {/* ---------- CLIENT RECORDS ---------- */}
-      <section className="pp-card p-4 space-y-4">
-        <div className="flex items-center justify-between gap-3 flex-wrap">
-          <SectionTitle>Client records</SectionTitle>
-          <div className="flex items-center gap-2">
-            <select className="pp-input" value={viewClientId} onChange={e => setViewClientId(e.target.value)}>
-              <option value="">Select client</option>
-              {clients.map(c => <option key={c.id} value={c.id}>{c.name} · {c.account_code}</option>)}
-            </select>
-            <button onClick={() => viewClientId && loadRecords(viewClientId)} className="pp-btn-ghost px-3 py-2 text-sm flex items-center gap-1" disabled={!viewClientId || recordsLoading}>
-              {recordsLoading ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />} Refresh
-            </button>
+      {/* ---------- CLIENTS ---------- */}
+      {tab === 'clients' && (
+        <section className="pp-card p-4 space-y-4">
+          <div className="flex flex-wrap gap-2">
+            {realClients.map(c => (
+              <button
+                key={c.id}
+                onClick={() => setViewClientId(c.id)}
+                className="px-3 py-1.5 text-sm rounded-full"
+                style={c.id === viewClientId
+                  ? { background: 'var(--accent)', color: '#fff', fontWeight: 600 }
+                  : { border: '1px solid var(--line)', color: 'var(--ink)' }}
+              >
+                {c.name}
+              </button>
+            ))}
           </div>
-        </div>
 
-        {!viewClientId && <div className="text-sm pp-sub">Pick a client to see their inbound, inventory, and outbound.</div>}
+          {!viewClientId && <div className="text-sm pp-sub">Pick a client.</div>}
 
-        {viewClientId && (
-          <div className="space-y-5">
-            <RecordBlock title={`Inventory${viewedClient ? ` · ${viewedClient.account_code}` : ''}`} count={records.skus.length} loading={recordsLoading} empty="No SKUs logged yet.">
-              <EditableTable columns={SKU_COLUMNS} rows={records.skus} onSave={(row, patch) => saveRow('skus', row, patch)} />
-              <div className="text-xs pp-sub mt-2">Total on hand: <span className="pp-mono">{records.skus.reduce((n, s) => n + Number(s.on_hand || 0), 0)}</span> across {records.skus.length} SKUs</div>
-            </RecordBlock>
-
-            <RecordBlock title="Inbound" count={records.inbound.length} loading={recordsLoading} empty="No inbound shipments logged yet.">
-              <EditableTable
-                columns={INBOUND_COLUMNS}
-                rows={records.inbound}
-                onSave={(row, patch) => saveRow('inbound_shipments', row, patch)}
-                flagRow={r => r.received_units != null && r.expected_units != null && Number(r.received_units) !== Number(r.expected_units)}
-                flagLabel="count mismatch"
-              />
-              <div className="mt-3 space-y-2">
-                {records.inbound.map(row => (
-                  <div key={row.id} className="flex items-center gap-3 text-sm">
-                    <span className="pp-mono pp-sub" style={{ minWidth: 90 }}>{row.ref_code || '—'}</span>
-                    <PhotoUploader table="inbound_shipments" row={row} onSaved={() => loadRecords(viewClientId)} />
-                  </div>
-                ))}
+          {viewClientId && (
+            <>
+              <div className="flex items-end justify-between gap-3 flex-wrap border-b" style={{ borderColor: 'var(--line)' }}>
+                <div className="flex gap-1">
+                  {[
+                    ['inventory', `Inventory (${records.skus.length})`],
+                    ['inbound', `Inbound (${records.inbound.length})`],
+                    ['outbound', `Outbound (${records.outbound.length})`],
+                    ['invoices', `Invoices (${records.invoices.length})`],
+                  ].map(([k, label]) => (
+                    <button
+                      key={k}
+                      onClick={() => setClientTab(k)}
+                      className="px-3 py-2 text-sm -mb-px"
+                      style={clientTab === k
+                        ? { borderBottom: '2px solid var(--accent)', color: 'var(--ink)', fontWeight: 600 }
+                        : { borderBottom: '2px solid transparent', color: 'var(--sub)' }}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+                <div className="text-xs pp-sub pb-2 pp-mono">{viewedClient?.account_code} · {viewedClient?.email}</div>
               </div>
-            </RecordBlock>
 
-            <RecordBlock title="Outbound" count={records.outbound.length} loading={recordsLoading} empty="No outbound shipments staged yet.">
-              <EditableTable columns={OUTBOUND_COLUMNS} rows={records.outbound} onSave={(row, patch) => saveRow('outbound_shipments', row, patch)} />
-            </RecordBlock>
-          </div>
-        )}
-      </section>
+              {recordsLoading && <div className="text-sm pp-sub flex items-center gap-2"><Loader2 size={14} className="animate-spin" /> Loading…</div>}
 
-      {/* ---------- INVOICES ---------- */}
-      {viewClientId && (
-        <section className="pp-card p-4 space-y-5">
-          <SectionTitle>Invoices{viewedClient ? ` · ${viewedClient.account_code}` : ''}</SectionTitle>
+              {!recordsLoading && clientTab === 'inventory' && (
+                records.skus.length === 0 ? <Empty text="No SKUs yet." action="Add SKU" onAction={() => { setLogForm('sku'); go('log') }} /> : (
+                  <>
+                    <EditableTable columns={SKU_COLUMNS} rows={records.skus} onSave={(row, patch) => saveRow('skus', row, patch)} />
+                    <div className="text-xs pp-sub">Total on hand: <span className="pp-mono">{records.skus.reduce((n, s) => n + Number(s.on_hand || 0), 0)}</span> across {records.skus.length} SKUs</div>
+                  </>
+                )
+              )}
 
-          <InvoiceList
-            invoices={records.invoices}
-            loading={recordsLoading}
-            onMarkPaid={markPaid}
-            onAttachLink={attachLink}
-          />
+              {!recordsLoading && clientTab === 'inbound' && (
+                records.inbound.length === 0 ? <Empty text="No inbound shipments yet." action="Log inbound" onAction={() => { setLogForm('inbound'); go('log') }} /> : (
+                  <>
+                    <EditableTable
+                      columns={INBOUND_COLUMNS}
+                      rows={records.inbound}
+                      onSave={(row, patch) => saveRow('inbound_shipments', row, patch)}
+                      flagRow={r => r.received_units != null && r.expected_units != null && Number(r.received_units) !== Number(r.expected_units)}
+                      flagLabel="count mismatch"
+                    />
+                    <details className="text-sm">
+                      <summary className="cursor-pointer pp-sub">Photos</summary>
+                      <div className="mt-3 space-y-2">
+                        {records.inbound.map(row => (
+                          <div key={row.id} className="flex items-center gap-3">
+                            <span className="pp-mono pp-sub" style={{ minWidth: 90 }}>{row.ref_code || '—'}</span>
+                            <PhotoUploader table="inbound_shipments" row={row} onSaved={() => loadRecords(viewClientId)} />
+                          </div>
+                        ))}
+                      </div>
+                    </details>
+                  </>
+                )
+              )}
 
-          <InvoiceBuilder
-            key={viewClientId + ':' + records.invoices.length}
-            existingCount={records.invoices.length}
-            clientCode={viewedClient?.account_code}
-            onCreate={createInvoice}
-          />
+              {!recordsLoading && clientTab === 'outbound' && (
+                records.outbound.length === 0 ? <Empty text="No outbound shipments yet." action="Stage outbound" onAction={() => { setLogForm('outbound'); go('log') }} /> : (
+                  <EditableTable columns={OUTBOUND_COLUMNS} rows={records.outbound} onSave={(row, patch) => saveRow('outbound_shipments', row, patch)} />
+                )
+              )}
+
+              {!recordsLoading && clientTab === 'invoices' && (
+                <div className="space-y-5">
+                  <InvoiceList invoices={records.invoices} loading={recordsLoading} onMarkPaid={markPaid} onAttachLink={attachLink} />
+                  <details>
+                    <summary className="cursor-pointer pp-btn pp-btn-accent px-3 py-2 text-sm inline-flex items-center gap-1"><Plus size={14} /> New invoice</summary>
+                    <div className="mt-4">
+                      <InvoiceBuilder
+                        key={viewClientId + ':' + records.invoices.length}
+                        existingCount={records.invoices.length}
+                        clientCode={viewedClient?.account_code}
+                        onCreate={createInvoice}
+                      />
+                    </div>
+                  </details>
+                </div>
+              )}
+            </>
+          )}
         </section>
       )}
 
-      <div className="grid lg:grid-cols-2 gap-4">
-        <FormCard title="Add SKU" onSubmit={() => insert('skus', normalizeSku(forms.sku), 'sku', blankSku)} busy={busy}>
-          <ClientSelect value={forms.sku.client_id} clients={clients} onChange={v => update('sku', 'client_id', v)} />
-          <Input label="SKU" value={forms.sku.sku} onChange={v => update('sku', 'sku', v)} />
-          <Input label="FNSKU" value={forms.sku.fnsku} onChange={v => update('sku', 'fnsku', v)} />
-          <Input label="Product name" value={forms.sku.name} onChange={v => update('sku', 'name', v)} />
-          <Input label="Prep spec" value={forms.sku.prep_spec} onChange={v => update('sku', 'prep_spec', v)} />
-          <Input label="On hand" type="number" value={forms.sku.on_hand} onChange={v => update('sku', 'on_hand', v)} />
-        </FormCard>
+      {/* ---------- LOG ENTRY ---------- */}
+      {tab === 'log' && (
+        <div className="space-y-4">
+          <div className="flex flex-wrap gap-2">
+            {[['inbound', 'Inbound'], ['outbound', 'Outbound'], ['sku', 'New SKU'], ['damage', 'Damage'], ['activity', 'Note']].map(([k, label]) => (
+              <button
+                key={k}
+                onClick={() => setLogForm(k)}
+                className="px-3 py-1.5 text-sm rounded-full"
+                style={logForm === k
+                  ? { background: 'var(--accent)', color: '#fff', fontWeight: 600 }
+                  : { border: '1px solid var(--line)', color: 'var(--ink)' }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
 
-        <FormCard title="Log inbound" onSubmit={() => insert('inbound_shipments', normalizeInbound(forms.inbound), 'inbound', blankInbound)} busy={busy}>
-          <ClientSelect value={forms.inbound.client_id} clients={clients} onChange={v => update('inbound', 'client_id', v)} />
-          <Input label="Ref code" value={forms.inbound.ref_code} placeholder="IN-0001" onChange={v => update('inbound', 'ref_code', v)} />
-          <Input label="Carrier" value={forms.inbound.carrier} onChange={v => update('inbound', 'carrier', v)} />
-          <Input label="Tracking" value={forms.inbound.tracking} onChange={v => update('inbound', 'tracking', v)} />
-          <Input label="Source" value={forms.inbound.source} onChange={v => update('inbound', 'source', v)} />
-          <Input label="Expected units" type="number" value={forms.inbound.expected_units} onChange={v => update('inbound', 'expected_units', v)} />
-          <Input label="Received units (count twice)" type="number" value={forms.inbound.received_units} onChange={v => update('inbound', 'received_units', v)} />
-          <CountCheck expected={forms.inbound.expected_units} received={forms.inbound.received_units} />
-          <label className="block text-sm">
-            <span className="font-semibold">Status</span>
-            <select className="pp-input mt-1" value={forms.inbound.status} onChange={e => update('inbound', 'status', e.target.value)}>
-              {INBOUND_STATUSES.map(s => <option key={s} value={s}>{labelize(s)}</option>)}
-            </select>
-          </label>
-          <Input label="ETA" type="date" value={forms.inbound.eta} onChange={v => update('inbound', 'eta', v)} />
-        </FormCard>
+          <div className="max-w-xl">
+            {logForm === 'sku' && (
+              <FormCard title="Add SKU" onSubmit={() => insert('skus', normalizeSku(forms.sku), 'sku', blankSku)} busy={busy}>
+                <ClientSelect value={forms.sku.client_id} clients={realClients} onChange={v => update('sku', 'client_id', v)} />
+                <Input label="SKU" value={forms.sku.sku} onChange={v => update('sku', 'sku', v)} />
+                <Input label="FNSKU" value={forms.sku.fnsku} onChange={v => update('sku', 'fnsku', v)} />
+                <Input label="Product name" value={forms.sku.name} onChange={v => update('sku', 'name', v)} />
+                <Input label="Prep spec" value={forms.sku.prep_spec} onChange={v => update('sku', 'prep_spec', v)} />
+                <Input label="On hand" type="number" value={forms.sku.on_hand} onChange={v => update('sku', 'on_hand', v)} />
+              </FormCard>
+            )}
 
-        <FormCard title="Stage outbound" onSubmit={() => insert('outbound_shipments', normalizeOutbound(forms.outbound), 'outbound', blankOutbound)} busy={busy}>
-          <ClientSelect value={forms.outbound.client_id} clients={clients} onChange={v => update('outbound', 'client_id', v)} />
-          <Input label="Ref code" value={forms.outbound.ref_code} placeholder="OUT-0001" onChange={v => update('outbound', 'ref_code', v)} />
-          <Input label="Destination" value={forms.outbound.destination} placeholder="Amazon FBA — ABE8" onChange={v => update('outbound', 'destination', v)} />
-          <Input label="Units" type="number" value={forms.outbound.units} onChange={v => update('outbound', 'units', v)} />
-          <Input label="Boxes" type="number" value={forms.outbound.boxes} onChange={v => update('outbound', 'boxes', v)} />
-          <Input label="Weight lb" type="number" value={forms.outbound.weight_lb} onChange={v => update('outbound', 'weight_lb', v)} />
-          <Input label="Estimated cost" type="number" value={forms.outbound.est_cost} onChange={v => update('outbound', 'est_cost', v)} />
-          <Input label="Tracking" value={forms.outbound.tracking} onChange={v => update('outbound', 'tracking', v)} />
-          <Input label="Ship date" type="date" value={forms.outbound.ship_date} onChange={v => update('outbound', 'ship_date', v)} />
-          <Input label="SKU list comma-separated" value={forms.outbound.sku_list} onChange={v => update('outbound', 'sku_list', v)} />
-        </FormCard>
+            {logForm === 'inbound' && (
+              <FormCard title="Log inbound" onSubmit={() => insert('inbound_shipments', normalizeInbound(forms.inbound), 'inbound', blankInbound)} busy={busy}>
+                <ClientSelect value={forms.inbound.client_id} clients={realClients} onChange={v => update('inbound', 'client_id', v)} />
+                <Input label="Ref code" value={forms.inbound.ref_code} placeholder="IN-0001" onChange={v => update('inbound', 'ref_code', v)} />
+                <Input label="Carrier" value={forms.inbound.carrier} onChange={v => update('inbound', 'carrier', v)} />
+                <Input label="Tracking" value={forms.inbound.tracking} onChange={v => update('inbound', 'tracking', v)} />
+                <Input label="Source" value={forms.inbound.source} onChange={v => update('inbound', 'source', v)} />
+                <Input label="Expected units" type="number" value={forms.inbound.expected_units} onChange={v => update('inbound', 'expected_units', v)} />
+                <Input label="Received units (count twice)" type="number" value={forms.inbound.received_units} onChange={v => update('inbound', 'received_units', v)} />
+                <CountCheck expected={forms.inbound.expected_units} received={forms.inbound.received_units} />
+                <label className="block text-sm">
+                  <span className="font-semibold">Status</span>
+                  <select className="pp-input mt-1" value={forms.inbound.status} onChange={e => update('inbound', 'status', e.target.value)}>
+                    {INBOUND_STATUSES.map(s => <option key={s} value={s}>{labelize(s)}</option>)}
+                  </select>
+                </label>
+                <Input label="ETA" type="date" value={forms.inbound.eta} onChange={v => update('inbound', 'eta', v)} />
+              </FormCard>
+            )}
 
-        <FormCard title="Open damage report" onSubmit={() => insert('damage_reports', normalizeDamage(forms.damage), 'damage', blankDamage)} busy={busy}>
-          <ClientSelect value={forms.damage.client_id} clients={clients} onChange={v => update('damage', 'client_id', v)} />
-          <Input label="Ref code" value={forms.damage.ref_code} placeholder="DMG-0001" onChange={v => update('damage', 'ref_code', v)} />
-          <Input label="SKU" value={forms.damage.sku} onChange={v => update('damage', 'sku', v)} />
-          <Input label="Units" type="number" value={forms.damage.units} onChange={v => update('damage', 'units', v)} />
-          <TextArea label="Note" value={forms.damage.note} onChange={v => update('damage', 'note', v)} />
-        </FormCard>
-      </div>
+            {logForm === 'outbound' && (
+              <FormCard title="Stage outbound" onSubmit={() => insert('outbound_shipments', normalizeOutbound(forms.outbound), 'outbound', blankOutbound)} busy={busy}>
+                <ClientSelect value={forms.outbound.client_id} clients={realClients} onChange={v => update('outbound', 'client_id', v)} />
+                <Input label="Ref code" value={forms.outbound.ref_code} placeholder="OUT-0001" onChange={v => update('outbound', 'ref_code', v)} />
+                <Input label="Destination" value={forms.outbound.destination} placeholder="Amazon FBA — ABE8" onChange={v => update('outbound', 'destination', v)} />
+                <Input label="Units" type="number" value={forms.outbound.units} onChange={v => update('outbound', 'units', v)} />
+                <Input label="Boxes" type="number" value={forms.outbound.boxes} onChange={v => update('outbound', 'boxes', v)} />
+                <Input label="Weight lb" type="number" value={forms.outbound.weight_lb} onChange={v => update('outbound', 'weight_lb', v)} />
+                <Input label="Estimated cost" type="number" value={forms.outbound.est_cost} onChange={v => update('outbound', 'est_cost', v)} />
+                <Input label="Tracking" value={forms.outbound.tracking} onChange={v => update('outbound', 'tracking', v)} />
+                <Input label="Ship date" type="date" value={forms.outbound.ship_date} onChange={v => update('outbound', 'ship_date', v)} />
+                <Input label="SKU list comma-separated" value={forms.outbound.sku_list} onChange={v => update('outbound', 'sku_list', v)} />
+              </FormCard>
+            )}
 
-      <FormCard title="Add activity note" onSubmit={() => insert('activity_log', forms.activity, 'activity', blankActivity)} busy={busy}>
-        <ClientSelect value={forms.activity.client_id} clients={clients} onChange={v => update('activity', 'client_id', v)} />
-        <select className="pp-input" value={forms.activity.kind} onChange={e => update('activity', 'kind', e.target.value)}>
-          <option value="note">Note</option><option value="in">Inbound</option><option value="out">Outbound</option><option value="issue">Issue</option><option value="pay">Payment</option>
-        </select>
-        <TextArea label="Message" value={forms.activity.message} onChange={v => update('activity', 'message', v)} />
-      </FormCard>
+            {logForm === 'damage' && (
+              <FormCard title="Open damage report" onSubmit={() => insert('damage_reports', normalizeDamage(forms.damage), 'damage', blankDamage)} busy={busy}>
+                <ClientSelect value={forms.damage.client_id} clients={realClients} onChange={v => update('damage', 'client_id', v)} />
+                <Input label="Ref code" value={forms.damage.ref_code} placeholder="DMG-0001" onChange={v => update('damage', 'ref_code', v)} />
+                <Input label="SKU" value={forms.damage.sku} onChange={v => update('damage', 'sku', v)} />
+                <Input label="Units" type="number" value={forms.damage.units} onChange={v => update('damage', 'units', v)} />
+                <TextArea label="Note" value={forms.damage.note} onChange={v => update('damage', 'note', v)} />
+              </FormCard>
+            )}
+
+            {logForm === 'activity' && (
+              <FormCard title="Add activity note" onSubmit={() => insert('activity_log', forms.activity, 'activity', blankActivity)} busy={busy}>
+                <ClientSelect value={forms.activity.client_id} clients={realClients} onChange={v => update('activity', 'client_id', v)} />
+                <select className="pp-input" value={forms.activity.kind} onChange={e => update('activity', 'kind', e.target.value)}>
+                  <option value="note">Note</option><option value="in">Inbound</option><option value="out">Outbound</option><option value="issue">Issue</option><option value="pay">Payment</option>
+                </select>
+                <TextArea label="Message" value={forms.activity.message} onChange={v => update('activity', 'message', v)} />
+              </FormCard>
+            )}
+          </div>
+        </div>
+      )}
     </AdminShell>
   )
 
@@ -716,14 +797,30 @@ function formatMoney(n) {
   return value.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
 }
 
-function RecordBlock({ title, count, loading, empty, children }) {
+function TabBar({ tabs, value, onChange }) {
   return (
-    <div>
-      <div className="flex items-center gap-2 mb-2">
-        <h3 className="pp-display text-xl font-bold uppercase">{title}</h3>
-        <span className="pp-mono text-xs px-1.5 rounded-full text-white" style={{ background: 'var(--accent)' }}>{count}</span>
-      </div>
-      {loading ? <div className="text-sm pp-sub">Loading…</div> : count === 0 ? <div className="text-sm pp-sub">{empty}</div> : children}
+    <nav className="flex gap-1 p-1 rounded-lg overflow-x-auto" style={{ background: 'var(--card)', border: '1px solid var(--line)' }}>
+      {tabs.map(([k, label]) => (
+        <button
+          key={k}
+          onClick={() => onChange(k)}
+          className="flex-1 px-4 py-2 text-sm rounded-md whitespace-nowrap"
+          style={value === k
+            ? { background: 'var(--accent)', color: '#fff', fontWeight: 600 }
+            : { color: 'var(--sub)' }}
+        >
+          {label}
+        </button>
+      ))}
+    </nav>
+  )
+}
+
+function Empty({ text, action, onAction }) {
+  return (
+    <div className="text-sm pp-sub flex items-center gap-3">
+      {text}
+      {action && <button onClick={onAction} className="pp-btn-ghost px-3 py-1.5 text-sm flex items-center gap-1"><Plus size={14} /> {action}</button>}
     </div>
   )
 }
@@ -733,7 +830,7 @@ function AdminShell({ children, onRefresh }) {
     <div className="pp-root admin-dark min-h-screen">
       <header className="border-b-2" style={{ borderColor: 'var(--ink)', background: 'var(--card)' }}>
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between gap-4">
-          <div><a href="/" className="text-xs pp-sub font-semibold uppercase tracking-widest hover:underline flex items-center gap-1"><ArrowLeft size={14}/> Back to site</a><h1 className="pp-display text-4xl font-bold uppercase">Admin Console</h1></div>
+          <div><a href="/" className="text-xs pp-sub font-semibold uppercase tracking-widest hover:underline flex items-center gap-1"><ArrowLeft size={14}/> Back to site</a><h1 className="pp-display text-3xl font-bold uppercase">Keystone Admin</h1></div>
           {onRefresh && <button onClick={onRefresh} className="pp-btn-ghost px-3 py-2 text-sm flex items-center gap-1"><RefreshCw size={14}/> Refresh</button>}
         </div>
       </header>
