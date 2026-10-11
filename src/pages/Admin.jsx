@@ -3,6 +3,7 @@ import { ArrowLeft, Loader2, Plus, RefreshCw, Pencil, Check, X, Trash2, CreditCa
 import { hasSupabaseConfig, supabase } from '../lib/supabase.js'
 import { SectionTitle, LoadingCard, ErrorCard } from '../components/PortalUI.jsx'
 import PhotoUploader from '../components/PhotoUploader.jsx'
+import AdminOverview from '../components/AdminOverview.jsx'
 
 /* ============================================================
    RATE SHEET — edit these numbers when pricing changes.
@@ -16,6 +17,12 @@ const RATE_PRESETS = [
   { label: 'Polybagging', description: 'Polybagging', rate: 0.25 },
   { label: 'Bubble wrap', description: 'Bubble wrap', rate: 0.40 },
   { label: 'Storage (per pallet / month)', description: 'Storage — per pallet per month', rate: 25.00 },
+  { label: 'DTC pick & pack (per order)', description: 'B2C pick & pack', rate: 2.90 },
+  { label: 'DTC single item <1 lb, poly mailer', description: 'B2C pick & pack — single item under 1 lb (poly mailer)', rate: 2.50 },
+  { label: 'DTC additional item', description: 'Additional item', rate: 0.50 },
+  { label: 'B2B carton', description: 'B2B — per carton shipped', rate: 3.00 },
+  { label: 'B2B broken case (per unit)', description: 'B2B — broken case, per unit', rate: 0.25 },
+  { label: 'Return processed', description: 'Returns processed', rate: 2.50 },
   { label: 'Free trial credit', description: 'First 100 units free — new client promo', rate: -0.65 },
   { label: 'Custom line…', description: '', rate: 0 },
 ]
@@ -120,7 +127,7 @@ export default function Admin() {
       if (meError) throw meError
       setProfile(me)
       if (!me.is_admin) return
-      const { data: rows, error: clientsError } = await supabase.from('clients').select('id,name,account_code,email,created_at').order('created_at', { ascending: false })
+      const { data: rows, error: clientsError } = await supabase.from('clients').select('id,name,account_code,email,is_admin,created_at').order('created_at', { ascending: false })
       if (clientsError) throw clientsError
       setClients(rows || [])
       const defaultId = rows?.find(c => c.id !== me.id)?.id || rows?.[0]?.id || ''
@@ -265,6 +272,8 @@ export default function Admin() {
     <AdminShell onRefresh={() => { loadAdmin(); if (viewClientId) loadRecords(viewClientId) }}>
       {error && <ErrorCard message={error} />}
       {notice && <div className="pp-card p-4 text-sm" style={{ borderColor: 'var(--ok)' }}>{notice}</div>}
+
+      {clients.length > 0 && <AdminOverview clients={clients} />}
 
       <section className="pp-card p-4">
         <SectionTitle>Clients</SectionTitle>
