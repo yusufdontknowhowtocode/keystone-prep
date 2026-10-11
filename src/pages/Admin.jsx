@@ -730,7 +730,7 @@ function RecordBlock({ title, count, loading, empty, children }) {
 
 function AdminShell({ children, onRefresh }) {
   return (
-    <div className="pp-root min-h-screen">
+    <div className="pp-root admin-dark min-h-screen">
       <header className="border-b-2" style={{ borderColor: 'var(--ink)', background: 'var(--card)' }}>
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between gap-4">
           <div><a href="/" className="text-xs pp-sub font-semibold uppercase tracking-widest hover:underline flex items-center gap-1"><ArrowLeft size={14}/> Back to site</a><h1 className="pp-display text-4xl font-bold uppercase">Admin Console</h1></div>

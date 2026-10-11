@@ -30,3 +30,18 @@ button, input, textarea, select { font: inherit; }
 .pp-input{ width:100%; border:1px solid var(--line); border-radius:8px; padding:10px 12px; background:#fff; outline:none; }
 .pp-input:focus{ border-color:var(--accent); box-shadow:0 0 0 3px rgba(255,79,0,.12); }
 @media (prefers-reduced-motion: reduce){ *{ transition:none !important; animation:none !important; scroll-behavior:auto !important; } }
+
+/* ---------- Admin night mode ---------- */
+.admin-dark{
+  --paper:#0B0D10; --card:#14171C; --ink:#E8E9EB; --sub:#9AA0A8;
+  --line:#2A2F37; --accent:#FF5A14; --ok:#34C46A; --warn:#E0A33A; --bad:#FF5C5C;
+  color-scheme: dark;
+}
+.admin-dark .pp-btn{ color:#0B0D10; }
+.admin-dark .pp-btn-accent{ color:#fff; }
+.admin-dark .pp-btn-ghost:hover{ background:#1C2027; }
+.admin-dark .pp-input{ background:#0F1216; color:var(--ink); }
+.admin-dark .pp-input::placeholder{ color:#6B717A; }
+.admin-dark .pp-row:hover{ background:#181C22; }
+.admin-dark .pp-navbtn.active{ color:#0B0D10; }
+.admin-dark .pp-navbtn:not(.active):hover{ background:#1C2027; }
