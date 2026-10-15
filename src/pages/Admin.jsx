@@ -4,6 +4,7 @@ import { hasSupabaseConfig, supabase } from '../lib/supabase.js'
 import { LoadingCard, ErrorCard } from '../components/PortalUI.jsx'
 import PhotoUploader from '../components/PhotoUploader.jsx'
 import AdminOverview from '../components/AdminOverview.jsx'
+import GoalTracker from '../components/GoalTracker.jsx'
 
 /* ============================================================
    RATE SHEET — edit these numbers when pricing changes.
@@ -87,7 +88,7 @@ export default function Admin() {
   const [recordsLoading, setRecordsLoading] = useState(false)
 
   const [tab, setTab] = useState(() => {
-    try { const h = window.location.hash.slice(1); return ['home', 'clients', 'pipeline', 'log'].includes(h) ? h : 'home' } catch { return 'home' }
+    try { const h = window.location.hash.slice(1); return ['home', 'clients', 'pipeline', 'goal', 'log'].includes(h) ? h : 'home' } catch { return 'home' }
   })
   const [clientTab, setClientTab] = useState('inventory')
   const [logForm, setLogForm] = useState('inbound')
@@ -282,7 +283,7 @@ export default function Admin() {
   return (
     <AdminShell onRefresh={() => { loadAdmin(); if (viewClientId) loadRecords(viewClientId); setRefreshKey(k => k + 1) }}>
       <TabBar
-        tabs={[['home', 'Home'], ['clients', 'Clients'], ['pipeline', 'Pipeline'], ['log', '+ Log entry']]}
+        tabs={[['home', 'Home'], ['clients', 'Clients'], ['pipeline', 'Pipeline'], ['goal', 'Goal'], ['log', '+ Log entry']]}
         value={tab}
         onChange={go}
       />
@@ -297,6 +298,8 @@ export default function Admin() {
       {tab === 'pipeline' && (
         <AdminOverview key={'pipe' + refreshKey} view="pipeline" clients={clients} />
       )}
+
+      {tab === 'goal' && <GoalTracker key={'goal' + refreshKey} />}
 
       {/* ---------- CLIENTS ---------- */}
       {tab === 'clients' && (
