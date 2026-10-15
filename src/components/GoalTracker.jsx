@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { Loader2, Save } from 'lucide-react'
 import { supabase } from '../lib/supabase.js'
+import RunRate from './RunRate.jsx'
 
 /* ============================================================
    $1M GOAL — cumulative after-tax profit vs the plan (projection v1, Oct 15 2026).
@@ -81,6 +82,8 @@ export default function GoalTracker() {
         <Stat label="Needed / month" value={money(neededPerMonth)} sub={`${monthsLeft} months left`} bad />
         <Stat label="vs plan" value={baseNow == null ? '—' : money(cumNow - baseNow)} sub={baseNow == null ? 'plan starts Nov 26' : `baseline ${money(baseNow)} · stretch ${money(stretchNow)}`} bad={baseNow != null && cumNow < baseNow} />
       </div>
+
+      <RunRate neededPerMonth={neededPerMonth} />
 
       <div className="pp-card p-4">
         <div className="flex items-baseline justify-between flex-wrap gap-2">
