@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { Loader2, Plus, ChevronRight, X } from 'lucide-react'
+import { Loader2, Plus, ChevronRight, X, PhoneCall } from 'lucide-react'
 import { supabase } from '../lib/supabase.js'
 
 /* ============================================================
@@ -194,7 +194,7 @@ function Pipeline({ leads, leadsMissing, setData, setError, reload }) {
     e.preventDefault()
     if (!form.brand.trim()) return
     setSaving(true)
-    const payload = { ...form, email: form.email.trim() || 'unknown@manual.entry', source: form.source || 'manual', est_monthly: form.est_monthly === '' ? null : Number(form.est_monthly), next_date: form.next_date || null }
+    const payload = { ...form, email: form.email.trim() || 'unknown@manual.entry', source: form.source || 'manual', est_monthly: form.est_monthly === '' ? null : Number(form.est_monthly), next_date: form.next_date || null, last_contact: localISO(new Date()) }
     const { error: err } = await supabase.from('leads').insert(payload)
     setSaving(false)
     if (err) return setError(err.message)
@@ -207,6 +207,18 @@ function Pipeline({ leads, leadsMissing, setData, setError, reload }) {
     const { error: err } = await supabase.from('leads').update(patch).eq('id', id)
     if (err) return setError(err.message)
     setData(d => ({ ...d, leads: d.leads.map(l => (l.id === id ? { ...l, ...patch } : l)) }))
+  }
+
+  // One click after any email/text/call: stamps today as last contact and,
+  // if there's no future follow-up date, sets one a week out.
+  function markContacted(l) {
+    const today = startOfToday()
+    const patch = { last_contact: localISO(today) }
+    if (!l.next_date || new Date(l.next_date + 'T00:00:00') <= today) {
+      const next = new Date(today); next.setDate(next.getDate() + 7)
+      patch.next_date = localISO(next)
+    }
+    updateLead(l.id, patch)
   }
 
   return (
@@ -243,7 +255,7 @@ function Pipeline({ leads, leadsMissing, setData, setError, reload }) {
       {shown.length === 0 ? <div className="text-sm pp-sub">No active leads.</div> : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead><tr className="text-left pp-sub text-xs uppercase"><th className="py-2 font-medium">Lead</th><th className="font-medium">Stage</th><th className="font-medium">Next action</th><th className="font-medium">Follow up</th><th className="text-right font-medium">Est/mo</th></tr></thead>
+            <thead><tr className="text-left pp-sub text-xs uppercase"><th className="py-2 font-medium">Lead</th><th className="font-medium">Stage</th><th className="font-medium">Next action</th><th className="font-medium">Last contact</th><th className="font-medium">Follow up</th><th className="text-right font-medium">Est/mo</th></tr></thead>
             <tbody>
               {shown.map(l => {
                 const stage = l.stage || 'new'
@@ -261,7 +273,15 @@ function Pipeline({ leads, leadsMissing, setData, setError, reload }) {
                       </select>
                     </td>
                     <td className="py-2 pr-2"><input className="pp-input py-1 text-sm" defaultValue={l.next_action || ''} placeholder="—" onBlur={e => e.target.value !== (l.next_action || '') && updateLead(l.id, { next_action: e.target.value || null })} /></td>
-                    <td className="py-2 pr-2"><input type="date" className="pp-input py-1 text-sm" style={late ? { color: 'var(--bad)', fontWeight: 700 } : undefined} defaultValue={l.next_date || ''} onChange={e => updateLead(l.id, { next_date: e.target.value || null })} /></td>
+                    <td className="py-2 pr-2 whitespace-nowrap">
+                      <div className="text-xs pp-mono">{l.last_contact ? `${shortDate(l.last_contact)} · ${daysAgoLabel(l.last_contact)}` : 'never'}</div>
+                      {!CLOSED.includes(stage) && (
+                        <button onClick={() => markContacted(l)} className="pp-btn-ghost mt-1 px-2 py-0.5 text-xs flex items-center gap-1" title="Mark contacted today (sets follow-up +7 days if none)">
+                          <PhoneCall size={12} /> Contacted today
+                        </button>
+                      )}
+                    </td>
+                    <td className="py-2 pr-2"><input key={l.next_date || 'none'} type="date" className="pp-input py-1 text-sm" style={late ? { color: 'var(--bad)', fontWeight: 700 } : undefined} defaultValue={l.next_date || ''} onChange={e => updateLead(l.id, { next_date: e.target.value || null })} /></td>
                     <td className="py-2.5 text-right pp-mono">{l.est_monthly ? money(l.est_monthly) : '—'}</td>
                   </tr>
                 )
@@ -289,6 +309,8 @@ function Tile({ label, value, sub, bad }) {
 function sum(arr) { return arr.reduce((n, v) => n + v, 0) }
 function money(n) { return '$' + Number(n || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }
 function daysSince(d) { return Math.max(0, Math.floor((Date.now() - new Date(d).getTime()) / 86400000)) }
+function localISO(d) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` }
+function daysAgoLabel(d) { const n = Math.round((startOfToday() - new Date(String(d).slice(0, 10) + 'T00:00:00')) / 86400000); return n <= 0 ? 'today' : n === 1 ? '1d ago' : `${n}d ago` }
 function startOfToday() { const d = new Date(); d.setHours(0, 0, 0, 0); return d }
 function shortDate(d) { return new Date(String(d).slice(0, 10) + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) }
 function labelize(v) { return String(v || '').replaceAll('_', ' ').replace(/\b\w/g, c => c.toUpperCase()) }
