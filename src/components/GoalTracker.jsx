@@ -38,6 +38,8 @@ export default function GoalTracker() {
     setRows(data || [])
   }
   useEffect(() => { load() }, [])
+  // Default the form to the month after the latest entry.
+  useEffect(() => { if (rows.length) setForm(f => ({ ...f, month: addMonths(rows[rows.length - 1].month, 1) })) }, [rows])
 
   const planMonths = useMemo(() => BASELINE.map((_, i) => addMonths(PLAN_START, i)), [])
 
@@ -139,7 +141,7 @@ function Key({ color, label, dashed }) {
 }
 
 function Chart({ planMonths, actual }) {
-  const W = 640, H = 220, P = { l: 56, r: 10, t: 10, b: 24 }
+  const W = 640, H = 220, P = { l: 56, r: 24, t: 10, b: 24 }
   const months = [addMonths(PLAN_START, -1), ...planMonths]
   const idx = m => monthsBetween(months[0], m)
   const all = [...BASELINE, ...STRETCH, ...actual.map(a => a.cum), 0]
@@ -147,7 +149,9 @@ function Chart({ planMonths, actual }) {
   const x = i => P.l + (i / (months.length - 1)) * (W - P.l - P.r)
   const y = v => P.t + (1 - (v - yMin) / (yMax - yMin)) * (H - P.t - P.b)
   const path = pts => pts.map(([i, v], k) => `${k ? 'L' : 'M'}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ')
-  const ticks = [yMin, 0, yMax / 2, yMax].map(v => Math.round(v / 1000) * 1000)
+  const span = yMax - yMin
+  // Skip the negative tick when it sits too close to $0 (labels would overlap).
+  const ticks = [yMin, 0, yMax / 2, yMax].filter(v => v === 0 || Math.abs(v) / span > 0.08).map(v => Math.round(v / 1000) * 1000)
   const actualPts = actual.filter(a => idx(a.month) >= 0 && idx(a.month) < months.length).map(a => [idx(a.month), a.cum])
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="w-full mt-3" role="img" aria-label="Cumulative profit vs baseline and stretch plans">
