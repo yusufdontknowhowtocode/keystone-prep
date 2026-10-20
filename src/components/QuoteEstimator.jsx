@@ -139,7 +139,7 @@ export default function QuoteEstimator() {
       return
     }
         if (typeof window.gtag === 'function') {
-      window.gtag('event', 'conversion', { send_to: 'AW-18227583658/GBCbCLurnckcEKq1y_ND' })
+      window.gtag('event', 'conversion', { send_to: 'AW-18227583658/0YvECJW98qMdEKq1y_ND' }) // 'Quote form submit' (primary)
     }
     setSent(true)
   }
