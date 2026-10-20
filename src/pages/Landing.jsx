@@ -18,8 +18,8 @@ const PILOT_EMAIL_SUBJECT = 'Keystone Prep Account'
 const PILOT_EMAIL_BODY = `Hi Keystone Prep,\n\nI'd like a rate for my volume.\n\nMonthly unit volume:\nProduct type:\nAmazon / Shopify / both:\nWhat city/state do you ship from:\n\nThanks.`
 const pilotMailto = `mailto:${SITE.contactEmail}?subject=${encodeURIComponent(PILOT_EMAIL_SUBJECT)}&body=${encodeURIComponent(PILOT_EMAIL_BODY)}`
 
-// Only fires on real intent: opening an email or WhatsApp to us. Form submissions
-// fire their own conversion from QuoteEstimator.jsx.
+// Email/WhatsApp button clicks -> the original 'Contact' conversion (keep as SECONDARY in Google Ads;
+// a click isn't a sent message). Quote form submits fire their own primary conversion from QuoteEstimator.jsx.
 function trackQuoteClick() {
   if (typeof window.gtag === 'function') {
     window.gtag('event', 'conversion', { send_to: 'AW-18227583658/GBCbCLurnckcEKq1y_ND' })
