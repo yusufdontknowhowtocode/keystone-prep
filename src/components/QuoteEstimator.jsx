@@ -28,12 +28,14 @@ const INVENTORY_STATUS = ['Available now', 'Ordered - in transit', 'Still resear
 
 const SHIP_WINDOWS = ['Within 2 weeks', '2–4 weeks', '1–2 months', 'Just exploring']
 
+const CURRENT_PROVIDERS = ['Another prep center / 3PL', 'We do it ourselves', 'Not selling yet']
+
 const WEB3FORMS_KEY = import.meta.env.VITE_WEB3FORMS_KEY
 
 export default function QuoteEstimator() {
   const [units, setUnits] = useState(500)
   const [addons, setAddons] = useState({})
-  const [form, setForm] = useState({ name: '', email: '', brand: '', phone: '', product_type: '', ship_window: '', inventory_status: '', notes: '' })
+  const [form, setForm] = useState({ name: '', email: '', brand: '', phone: '', product_type: '', ship_window: '', inventory_status: '', current_provider: '', notes: '' })
   const [sending, setSending] = useState(false)
   const [sent, setSent] = useState(false)
   const [error, setError] = useState('')
@@ -62,10 +64,16 @@ export default function QuoteEstimator() {
     if (!form.product_type) return setError('Please select your product type.')
     if (!form.inventory_status) return setError('Please tell us where your inventory is right now.')
     if (!form.ship_window) return setError('Please select when your first shipment would go out.')
+    if (!form.current_provider) return setError('Please tell us who handles your prep or fulfillment today.')
 
     setSending(true)
 
     const source = new URLSearchParams(window.location.search).get('src') || 'organic'
+
+    // Triage tag for the notification subject: READY = shipping within a month with inventory in hand or ordered.
+    const exploring = form.ship_window === 'Just exploring' || form.inventory_status === 'Still researching products'
+    const soon = form.ship_window === 'Within 2 weeks' || form.ship_window === '2–4 weeks'
+    const leadTag = exploring ? '[EXPLORING]' : soon ? '[READY]' : '[LATER]'
 
 
     const payload = {
@@ -79,7 +87,7 @@ export default function QuoteEstimator() {
         prep_needs: selectedPrep,
         ship_window: form.ship_window || null,
       inventory_status: form.inventory_status || null,
-        notes: form.notes.trim() || null,
+        notes: [`Current provider: ${form.current_provider}`, form.notes.trim()].filter(Boolean).join(' | '),
         est_rate: Number(perUnit.toFixed(4)),
         est_monthly: Number(monthly.toFixed(2)),
     }
@@ -100,7 +108,7 @@ export default function QuoteEstimator() {
           headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
           body: JSON.stringify({
             access_key: WEB3FORMS_KEY,
-            subject: `New prep quote request — ${form.brand || form.email}`,
+            subject: `${leadTag} New prep quote request — ${form.brand || form.email}`,
             from_name: 'Keystone Prep Center',
             name: payload.name || '—',
             email: payload.email,
@@ -111,6 +119,7 @@ export default function QuoteEstimator() {
             prep_needs: selectedPrep.length ? selectedPrep.join(', ') : 'FNSKU only',
             ship_window: payload.ship_window || '—',
             inventory_status: payload.inventory_status || '—',
+            current_provider: form.current_provider || '—',
             estimated_rate: `$${perUnit.toFixed(2)}/unit`,
             estimated_monthly: money(monthly),
             notes: payload.notes || '—',
@@ -266,6 +275,12 @@ export default function QuoteEstimator() {
             <select className="pp-input" required value={form.ship_window} onChange={e => set('ship_window', e.target.value)}>
               <option value="">Select…</option>
               {SHIP_WINDOWS.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+          </Field>
+          <Field label="Who handles your prep or fulfillment today?" required>
+            <select className="pp-input" required value={form.current_provider} onChange={e => set('current_provider', e.target.value)}>
+              <option value="">Select…</option>
+              {CURRENT_PROVIDERS.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
           </Field>
           <Field label="Anything else we should know?">
