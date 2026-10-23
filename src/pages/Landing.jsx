@@ -195,7 +195,7 @@ export default function Landing() {
             <div className="grid md:grid-cols-[1.4fr_1fr]">
               <img
                 src="/warehouse.jpg"
-                alt="Keystone Prep warehouse in Lansdale, PA — racked inventory and box prep area"
+                alt="Keystone Prep warehouse in Lansdale, PA — client inventory in labeled bins on steel racks, pack station and scale"
                 className="w-full h-full object-cover"
                 style={{ minHeight: '420px' }}
               />
