@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { ArrowRight, Barcode, Boxes, Camera, CheckCircle2, Clock, MapPin, MessageCircle, Package, Phone, ShieldCheck, ShoppingBag, Star, Store, Truck, Warehouse } from 'lucide-react'
 import { SITE } from '../lib/config.js'
 import ServicesMenu from '../components/ServicesMenu.jsx'
@@ -105,6 +105,17 @@ const FAQS = [
 ]
 
 export default function Landing() {
+  // Arriving from another page via /#contact etc: the browser tries to jump
+  // before React renders the section, so scroll once the page is mounted.
+  useEffect(() => {
+    const id = window.location.hash.slice(1)
+    if (!id) return
+    const go = () => document.getElementById(id)?.scrollIntoView({ behavior: 'auto', block: 'start' })
+    const t1 = setTimeout(go, 0)
+    const t2 = setTimeout(go, 400) // re-run after images/fonts shift layout
+    return () => { clearTimeout(t1); clearTimeout(t2) }
+  }, [])
+
   return (
     <div className="min-h-screen bg-[var(--paper)] text-[var(--ink)]">
       <header className="border-b-2" style={{ borderColor: 'var(--ink)', background: 'var(--card)' }}>
