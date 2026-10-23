@@ -237,11 +237,12 @@ export default function Landing() {
           <div className="max-w-6xl mx-auto px-4 py-14">
             <SectionHeading eyebrow="Services" title="One warehouse. Every channel." />
             <p className="pp-sub mt-3 max-w-2xl">Whether you sell on Amazon, your own store, or TikTok, we receive, prep, store, and ship your inventory — and you watch all of it in real time in the portal.</p>
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-3 mt-8">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3 mt-8">
               <Feature icon={Boxes} title="Amazon FBA prep" text="Receiving, inspection, FNSKU labeling, polybag, bundle, and box prep to Amazon's spec — so nothing gets rejected or hit with defect fees." />
               <Feature icon={Store} title="DTC fulfillment" text="Store your inventory with us and we pick, pack, and ship individual orders straight to your customers from your Shopify or website store." />
               <Feature icon={ShoppingBag} title="TikTok Shop" text="Fulfillment for TikTok Shop sellers — we handle the orders so you can focus on the content that drives them." />
               <Feature icon={Package} title="Storage & returns" text="Separated client storage by SKU, plus inbound receiving and returns processing as you scale." />
+              <Feature icon={Truck} title="FBA removals" text="Send Amazon removal orders to us. We match every box, sort sellable from damaged, photograph it all, and re-prep, store, or liquidate on your call." />
             </div>
           </div>
         </section>
@@ -439,6 +440,7 @@ export default function Landing() {
           <div className="flex flex-wrap gap-4">
             <a href="/fba-prep-pennsylvania" className="hover:underline">PA FBA Prep</a>
             <a href="/shopify-fulfillment-pennsylvania" className="hover:underline">Shopify Fulfillment</a>
+            <a href="/fba-removal-processing" className="hover:underline">FBA Removals</a>
             <a href={`tel:${PHONE_TEL}`} className="hover:underline flex items-center gap-1"><Phone size={14} /> {PHONE_DISPLAY}</a>
             <a href="/portal" className="hover:underline">Portal demo</a>
             <a href={`mailto:${SITE.contactEmail}`} className="hover:underline">{SITE.contactEmail}</a>
