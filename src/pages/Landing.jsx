@@ -1,6 +1,7 @@
 import React from 'react'
 import { ArrowRight, Barcode, Boxes, Camera, CheckCircle2, Clock, MapPin, MessageCircle, Package, Phone, ShieldCheck, ShoppingBag, Star, Store, Truck, Warehouse } from 'lucide-react'
 import { SITE } from '../lib/config.js'
+import ServicesMenu from '../components/ServicesMenu.jsx'
 import QuoteEstimator from '../components/QuoteEstimator.jsx'
 
 const PHONE_DISPLAY = '267-517-1112'
@@ -112,12 +113,13 @@ export default function Landing() {
             <Boxes size={24} /> {SITE.name}
           </a>
           <nav className="hidden md:flex items-center gap-6 text-sm font-semibold">
-            <a href="#services" className="hover:underline">Services</a>
+            <ServicesMenu />
             <a href="#process" className="hover:underline">Process</a>
             <a href="#pricing" className="hover:underline">Pricing</a>
             <a href="#faq" className="hover:underline">FAQ</a>
             <a href="/portal" className="hover:underline">Portal demo</a>
           </nav>
+          <ServicesMenu className="md:hidden" />
           <div className="flex items-center gap-2">
             <a
               href={WHATSAPP_URL}
