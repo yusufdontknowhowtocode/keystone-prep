@@ -19,7 +19,7 @@ const STEPS = [
   ],
   [
     'Unload at the dock',
-    'Dock-high door at standard trailer height, open paved lot that takes full 48-foot trailers and 53-foot dry vans, drive-in door for box trucks. Floor-loaded or palletized both work.',
+    'Dock-high door at standard trailer height, open paved lot that takes full 53-foot dry vans and 40-foot containers, drive-in door for box trucks. Floor-loaded or palletized both work.',
   ],
   [
     'Count, inspect, photograph',
@@ -34,7 +34,7 @@ const STEPS = [
 const FAQS = [
   {
     q: 'Can you receive a full 40-ft container?',
-    a: 'Yes. The lot takes full 48-foot trailers and 53-foot dry vans, and the receiving crew has years of international container experience through the parent manufacturing operation. Floor-loaded containers are unloaded by hand and counted carton by carton; palletized freight comes straight off at the dock.',
+    a: 'Yes. The lot takes full 53-foot dry vans and 40-foot containers, and the receiving crew has years of international container experience through the parent manufacturing operation. Floor-loaded containers are unloaded by hand and counted carton by carton; palletized freight comes straight off at the dock.',
   },
   {
     q: 'Do you work with freight forwarders?',
