@@ -148,18 +148,25 @@ export default function Landing() {
       </header>
 
       <main>
-        <section className="max-w-6xl mx-auto px-4 py-16 md:py-24 grid lg:grid-cols-[1.1fr_.9fr] gap-10 items-center">
+        <section className="max-w-6xl mx-auto px-4 pt-10 pb-8 md:pt-16 md:pb-10 grid lg:grid-cols-[1fr_1fr] gap-8 lg:gap-10 items-center">
           <div>
-            <div className="inline-flex items-center gap-2 pp-card px-3 py-1.5 text-sm font-semibold mb-5">
-              <MapPin size={15} /> Lansdale, PA · FBA prep & Shopify fulfillment
+            <div className="inline-flex items-center gap-2 pp-card px-3 py-1.5 text-sm font-semibold mb-4">
+              <MapPin size={15} /> Lansdale, PA · Philadelphia metro
             </div>
-            <h1 className="pp-display text-6xl md:text-8xl font-bold uppercase leading-[.85] tracking-tight">
-              FBA prep & Shopify fulfillment with a real loading dock.
+            <h1 className="pp-display text-5xl md:text-6xl font-bold uppercase leading-[.9] tracking-tight">
+              FBA prep & Shopify fulfillment in Lansdale, PA.
             </h1>
-            <p className="text-lg md:text-xl pp-sub mt-6 max-w-2xl">
-              Keystone runs FBA prep and 3PL out of a 6,000 sq ft staffed warehouse in Lansdale, PA — elevated dock at trailer height, a lot that takes full 48-foot containers, racked client storage, and receiving crews with years of international freight experience. Send a container or send a case; either way you watch every unit live in the portal.
+            <p className="text-lg md:text-xl pp-sub mt-4 max-w-xl">
+              Same-day shipping, dock-high receiving, and the owner answers your texts.
             </p>
-            <div className="flex flex-col sm:flex-row gap-3 mt-8">
+            <div className="flex flex-wrap gap-2 mt-5 text-sm font-semibold">
+              {['FBA prep from $0.55/unit', 'Orders by 2 PM ET ship same day', '1–2 days to NY/NJ'].map((x) => (
+                <span key={x} className="pp-card px-3 py-1.5 inline-flex items-center gap-1.5">
+                  <CheckCircle2 size={15} style={{ color: 'var(--ok)' }} /> {x}
+                </span>
+              ))}
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3 mt-7">
               <a href="#contact" className="pp-btn pp-btn-accent px-5 py-3 flex items-center justify-center gap-2">
                 Get your rate <ArrowRight size={18} />
               </a>
@@ -173,66 +180,24 @@ export default function Landing() {
                 <MessageCircle size={18} /> Text / WhatsApp us
               </a>
             </div>
-            <p className="text-xs pp-sub mt-4 max-w-xl">
-              Now onboarding new accounts. Inventory acceptance requires completed account setup and warehouse onboarding approval.
-            </p>
           </div>
 
-          <div className="pp-card p-5 shadow-sm">
-            <div className="border-2 border-dashed rounded-lg p-5" style={{ borderColor: 'var(--line)' }}>
-              <div className="flex justify-between items-start gap-4">
-                <div>
-                  <div className="text-xs font-semibold uppercase tracking-widest pp-sub">The facility</div>
-                  <h2 className="pp-display text-4xl font-bold uppercase mt-1">Built for freight</h2>
-                </div>
-                <Barcode size={34} className="pp-accent" />
-              </div>
-              <div className="grid grid-cols-2 gap-3 mt-5">
-                {FACILITY_SPECS.map(([value, label]) => (
-                  <MiniStat key={label} label={label} value={value} />
-                ))}
-              </div>
-              <div className="mt-5 space-y-2">
-                {TRUST_LINES.map((x) => (
-                  <div key={x} className="flex items-center gap-2 text-sm pp-card px-3 py-2">
-                    <CheckCircle2 size={16} style={{ color: 'var(--ok)' }} /> {x}
-                  </div>
-                ))}
-              </div>
+          <div className="pp-card overflow-hidden shadow-sm">
+            <img
+              src="/warehouse.jpg"
+              alt="Keystone Prep warehouse in Lansdale, PA — client inventory in labeled bins on steel racks, pack station and scale"
+              className="w-full object-cover aspect-[4/3]"
+            />
+            <div className="px-4 py-3 text-sm pp-sub flex items-center gap-2">
+              <Warehouse size={16} className="pp-accent shrink-0" /> Our floor in Lansdale. Come see it before you send anything.
             </div>
           </div>
         </section>
 
-        <section className="max-w-6xl mx-auto px-4 mb-14">
-          <div className="pp-card overflow-hidden">
-            <div className="grid md:grid-cols-[1.4fr_1fr]">
-              <img
-                src="/warehouse.jpg"
-                alt="Keystone Prep warehouse in Lansdale, PA — client inventory in labeled bins on steel racks, pack station and scale"
-                className="w-full h-full object-cover"
-                style={{ minHeight: '420px' }}
-              />
-              <div className="p-6 md:p-8 flex flex-col justify-center">
-                <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest pp-sub">
-                  <MapPin size={15} /> A real facility, not a middleman
-                </div>
-                <h2 className="pp-display text-4xl md:text-5xl font-bold uppercase leading-none mt-2">
-                  Your inventory, in our warehouse.
-                </h2>
-                <p className="pp-sub mt-3">
-                  Keystone runs out of an established, staffed warehouse in Lansdale, PA — racked storage, dedicated prep area, and hands-on receiving. When you send inventory, real people handle it in a real facility you can come see.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="max-w-6xl mx-auto px-4 -mt-8 md:-mt-14 mb-14">
-          <div className="pp-card p-4 md:p-5 grid md:grid-cols-3 gap-3">
-            {TRUST_LINES.map((line) => (
-              <div key={line} className="flex items-center gap-2 text-sm font-medium">
-                <CheckCircle2 size={17} style={{ color: 'var(--ok)' }} /> {line}
-              </div>
+        <section className="max-w-6xl mx-auto px-4 mb-10">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {FACILITY_SPECS.map(([value, label]) => (
+              <MiniStat key={label} label={label} value={value} />
             ))}
           </div>
         </section>
@@ -241,8 +206,18 @@ export default function Landing() {
           <div className="pp-card p-5 md:p-6 flex flex-col md:flex-row items-start md:items-center gap-4">
             <Warehouse size={28} className="pp-accent shrink-0" />
             <p className="text-sm md:text-base pp-sub">
-              <span className="font-semibold" style={{ color: 'var(--ink)' }}>Backed by an established warehouse operation.</span> Keystone runs out of the US facility of KT Trims, an apparel-trim manufacturer that supplies major global fashion brands — bringing years of hands-on international receiving, inspection, and labeling experience to your inventory.
+              <span className="font-semibold" style={{ color: 'var(--ink)' }}>Backed by an established warehouse operation.</span> Keystone runs out of the US facility of KT Trims, an apparel-trim manufacturer that supplies major global fashion brands. Our receiving crew brings years of international freight experience. Send a container or a single case.
             </p>
+          </div>
+        </section>
+
+        <section className="max-w-6xl mx-auto px-4 mb-14">
+          <div className="pp-card p-4 md:p-5 grid md:grid-cols-3 gap-3">
+            {TRUST_LINES.map((line) => (
+              <div key={line} className="flex items-center gap-2 text-sm font-medium">
+                <CheckCircle2 size={17} style={{ color: 'var(--ok)' }} /> {line}
+              </div>
+            ))}
           </div>
         </section>
 
