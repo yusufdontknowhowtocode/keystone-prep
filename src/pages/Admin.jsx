@@ -5,6 +5,7 @@ import { LoadingCard, ErrorCard } from '../components/PortalUI.jsx'
 import PhotoUploader from '../components/PhotoUploader.jsx'
 import AdminOverview from '../components/AdminOverview.jsx'
 import GoalTracker from '../components/GoalTracker.jsx'
+import StorageTab from '../components/StorageTab.jsx'
 
 /* ============================================================
    RATE SHEET — edit these numbers when pricing changes.
@@ -329,6 +330,7 @@ export default function Admin() {
                     ['inventory', `Inventory (${records.skus.length})`],
                     ['inbound', `Inbound (${records.inbound.length})`],
                     ['outbound', `Outbound (${records.outbound.length})`],
+                    ['storage', 'Storage'],
                     ['invoices', `Invoices (${records.invoices.length})`],
                   ].map(([k, label]) => (
                     <button
@@ -387,6 +389,8 @@ export default function Admin() {
                   <EditableTable columns={OUTBOUND_COLUMNS} rows={records.outbound} onSave={(row, patch) => saveRow('outbound_shipments', row, patch)} />
                 )
               )}
+
+              {!recordsLoading && clientTab === 'storage' && <StorageTab clientId={viewClientId} />}
 
               {!recordsLoading && clientTab === 'invoices' && (
                 <div className="space-y-5">
