@@ -7,6 +7,7 @@ import {
   Truck,
 } from 'lucide-react'
 import { SITE } from '../lib/config.js'
+import ServicesMenu from '../components/ServicesMenu.jsx'
 
 const PHONE_DISPLAY = '267-517-1112'
 const WHATSAPP_URL = 'https://wa.me/12675171112'
@@ -97,6 +98,8 @@ export default function FbaRemovalProcessing() {
           >
             <Boxes size={24} /> {SITE.name}
           </a>
+
+          <ServicesMenu />
 
           <div className="flex items-center gap-2">
             <a
