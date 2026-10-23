@@ -1,151 +1,124 @@
 import React, { useEffect, useState } from 'react'
-import { Loader2, Plus, Pencil, Check, X, Trash2 } from 'lucide-react'
+import { Loader2, Check } from 'lucide-react'
 import { supabase } from '../lib/supabase.js'
 
-// Billing model: free for `free_days` after arrival, then `rate` per pallet position
-// per month "or fraction thereof" — a started month bills as a full month.
+// One row per client: pallets × $/pallet per month, starting on "billing starts".
+// Charges repeat monthly on that date. Stored in storage_lots (one row per client).
 
 const toDate = s => (s ? new Date(s + 'T00:00:00') : null)
-const iso = d => d.toISOString().slice(0, 10)
 const fmt = d => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 const money = n => Number(n || 0).toLocaleString('en-US', { style: 'currency', currency: 'USD' })
 
 function addMonths(d, n) {
-  const x = new Date(d)
-  const day = x.getDate()
+  const x = new Date(d); const day = x.getDate()
   x.setMonth(x.getMonth() + n)
-  if (x.getDate() < day) x.setDate(0) // clamp (e.g. Jan 31 + 1 month)
+  if (x.getDate() < day) x.setDate(0)
   return x
 }
 
-export function lotMath(lot, today = new Date()) {
-  const arrived = toDate(lot.arrived_on)
-  const billableFrom = new Date(arrived); billableFrom.setDate(billableFrom.getDate() + Number(lot.free_days || 0)) // calendar days, DST-safe
-  const end = lot.ended_on ? toDate(lot.ended_on) : today
-  const monthly = Number(lot.pallet_positions || 0) * Number(lot.rate || 0)
-  let periods = 0
-  let cursor = billableFrom
-  while (cursor <= end) { periods++; cursor = addMonths(billableFrom, periods) }
-  const active = !lot.ended_on
-  const inFree = active && today < billableFrom
-  const nextCharge = active ? (inFree ? billableFrom : cursor) : null
-  return { billableFrom, monthly, periods, owedToDate: periods * monthly, nextCharge, inFree, active }
+function nextCharge(start, today) {
+  if (!start) return null
+  if (start >= today) return start
+  let n = 0, d = start
+  while (d < today) { n++; d = addMonths(start, n) }
+  return d
 }
 
-const blank = { label: '', arrived_on: iso(new Date()), pallet_positions: '1', rate: '35', free_days: '30', note: '' }
+const DEFAULT_RATE = 35
 
-export default function StorageTab({ clientId }) {
-  const [lots, setLots] = useState([])
+export default function StorageOverview({ clients }) {
+  const [rows, setRows] = useState({}) // client_id -> storage_lots row
+  const [drafts, setDrafts] = useState({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [form, setForm] = useState(blank)
-  const [editing, setEditing] = useState(null)
-  const [draft, setDraft] = useState({})
-  const [busy, setBusy] = useState(false)
+  const [savingId, setSavingId] = useState(null)
 
   async function load() {
     setLoading(true); setError('')
-    const { data, error: e } = await supabase.from('storage_lots').select('*').eq('client_id', clientId).order('arrived_on')
-    if (e) setError(e.message.includes('storage_lots') ? 'Storage table missing: run supabase/migrations/2026-10-23-storage-lots.sql' : e.message)
-    setLots(data || [])
+    const { data, error: e } = await supabase.from('storage_lots').select('*').is('ended_on', null).order('created_at')
+    if (e) setError(e.message)
+    const byClient = {}
+    for (const r of data || []) if (!byClient[r.client_id]) byClient[r.client_id] = r
+    setRows(byClient)
+    setDrafts(Object.fromEntries(clients.map(c => {
+      const r = byClient[c.id]
+      return [c.id, { pallets: r ? String(r.pallet_positions) : '', rate: r ? String(r.rate) : String(DEFAULT_RATE), start: r ? r.arrived_on : '', note: r?.note || '' }]
+    })))
     setLoading(false)
   }
-  useEffect(() => { load() }, [clientId])
+  useEffect(() => { load() }, [clients.length])
 
-  const num = v => (v === '' || v == null ? null : Number(v))
+  const set = (id, k, v) => setDrafts(d => ({ ...d, [id]: { ...d[id], [k]: v } }))
 
-  async function add(e) {
-    e.preventDefault(); setBusy(true); setError('')
-    const { error: err } = await supabase.from('storage_lots').insert({
-      client_id: clientId, label: form.label || 'Inbound', arrived_on: form.arrived_on,
-      pallet_positions: num(form.pallet_positions) ?? 1, rate: num(form.rate) ?? 35,
-      free_days: num(form.free_days) ?? 30, note: form.note || null,
-    })
-    setBusy(false)
-    if (err) return setError(err.message)
-    setForm(f => ({ ...blank, rate: f.rate, free_days: f.free_days })) // keep client's terms for the next lot
+  async function save(c) {
+    const d = drafts[c.id]
+    if (!d.start) return setError(`Set a "billing starts" date for ${c.name}.`)
+    setSavingId(c.id); setError('')
+    const payload = { pallet_positions: Number(d.pallets || 0), rate: Number(d.rate || 0), arrived_on: d.start, free_days: 0, note: d.note || null }
+    const existing = rows[c.id]
+    const { error: e } = existing
+      ? await supabase.from('storage_lots').update(payload).eq('id', existing.id)
+      : await supabase.from('storage_lots').insert({ ...payload, client_id: c.id, label: 'Storage' })
+    setSavingId(null)
+    if (e) return setError(e.message)
     load()
   }
 
-  async function save(lot) {
-    setBusy(true)
-    const patch = {
-      label: draft.label, arrived_on: draft.arrived_on, ended_on: draft.ended_on || null,
-      pallet_positions: num(draft.pallet_positions), rate: num(draft.rate), free_days: num(draft.free_days), note: draft.note || null,
-    }
-    const { error: err } = await supabase.from('storage_lots').update(patch).eq('id', lot.id)
-    setBusy(false)
-    if (err) return setError(err.message)
-    setEditing(null); load()
-  }
+  const today = new Date(); today.setHours(0, 0, 0, 0)
+  const list = clients.map(c => {
+    const d = drafts[c.id] || {}
+    const monthly = Number(d.pallets || 0) * Number(d.rate || 0)
+    const next = nextCharge(toDate(d.start), today)
+    const dirty = rows[c.id]
+      ? String(rows[c.id].pallet_positions) !== d.pallets || String(rows[c.id].rate) !== d.rate || rows[c.id].arrived_on !== d.start || (rows[c.id].note || '') !== d.note
+      : Boolean(d.pallets || d.start)
+    return { c, d, monthly, next, dirty }
+  }).sort((a, b) => (b.monthly > 0) - (a.monthly > 0) || ((a.next?.getTime() ?? 9e15) - (b.next?.getTime() ?? 9e15)))
 
-  async function remove(lot) {
-    if (!window.confirm(`Delete storage lot "${lot.label}"?`)) return
-    await supabase.from('storage_lots').delete().eq('id', lot.id)
-    load()
-  }
-
-  const today = new Date()
-  const rows = lots.map(l => ({ lot: l, m: lotMath(l, today) }))
-  const active = rows.filter(r => r.m.active)
-  const billingNow = active.filter(r => !r.m.inFree).reduce((n, r) => n + r.m.monthly, 0)
-  const whenAllBilling = active.reduce((n, r) => n + r.m.monthly, 0)
-  const positions = active.reduce((n, r) => n + Number(r.lot.pallet_positions || 0), 0)
-  const owed = rows.reduce((n, r) => n + r.m.owedToDate, 0)
-  const nextDates = active.map(r => r.m.nextCharge).filter(Boolean).sort((a, b) => a - b)
+  const totalMonthly = list.reduce((n, r) => n + r.monthly, 0)
+  const soon = list.filter(r => r.monthly > 0 && r.next && (r.next - today) / 86400000 <= 7)
 
   return (
-    <div className="space-y-4">
-      {error && <div className="text-sm" style={{ color: 'var(--bad)' }}>{error}</div>}
-
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-        <Stat label="Pallet positions" value={positions} />
-        <Stat label="Billing now / mo" value={money(billingNow)} />
-        <Stat label="Once free days end / mo" value={money(whenAllBilling)} />
-        <Stat label="Next charge" value={nextDates[0] ? fmt(nextDates[0]) : '—'} />
+    <section className="pp-card p-4 space-y-4">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h2 className="font-semibold">Storage</h2>
+          <div className="text-xs pp-sub">Edit pallets, rate, or start date, then hit ✓. Charges repeat monthly on the start date.</div>
+        </div>
+        <div className="text-sm">Total: <span className="pp-mono font-semibold">{money(totalMonthly)}</span>/mo</div>
       </div>
-      <div className="text-xs pp-sub">Billed to date across all lots (started months count as full): <span className="pp-mono">{money(owed)}</span>. Compare against storage lines already invoiced.</div>
+
+      {soon.length > 0 && (
+        <div className="text-sm" style={{ color: 'var(--accent)' }}>
+          Due in the next 7 days: {soon.map(r => `${r.c.name} ${money(r.monthly)} on ${fmt(r.next)}`).join(' · ')}
+        </div>
+      )}
+      {error && <div className="text-sm" style={{ color: 'var(--bad)' }}>{error}</div>}
 
       {loading ? <div className="text-sm pp-sub flex items-center gap-2"><Loader2 size={14} className="animate-spin" /> Loading…</div> : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="text-left pp-sub">
-                {['Lot', 'Arrived', 'Positions', 'Rate', 'Free days', 'Free until', 'Per month', 'Months billed', 'Owed to date', 'Next charge', 'Cleared', ''].map(h => <th key={h} className="py-2 pr-4 whitespace-nowrap">{h}</th>)}
+                {['Client', 'Pallets', '$ / pallet / mo', 'Billing starts', 'Next charge', 'Per month', 'Note', ''].map(h => <th key={h} className="py-2 pr-3 whitespace-nowrap">{h}</th>)}
               </tr>
             </thead>
             <tbody>
-              {rows.length === 0 && <tr><td colSpan={12} className="py-3 pp-sub">No storage lots yet. Add one per inbound shipment below.</td></tr>}
-              {rows.map(({ lot, m }) => editing === lot.id ? (
-                <tr key={lot.id} className="border-t" style={{ borderColor: 'var(--line)' }}>
-                  <td className="py-2 pr-2"><In v={draft.label} on={v => setDraft(d => ({ ...d, label: v }))} /></td>
-                  <td className="py-2 pr-2"><In type="date" v={draft.arrived_on} on={v => setDraft(d => ({ ...d, arrived_on: v }))} /></td>
-                  <td className="py-2 pr-2"><In type="number" v={draft.pallet_positions} on={v => setDraft(d => ({ ...d, pallet_positions: v }))} /></td>
-                  <td className="py-2 pr-2"><In type="number" v={draft.rate} on={v => setDraft(d => ({ ...d, rate: v }))} /></td>
-                  <td className="py-2 pr-2"><In type="number" v={draft.free_days} on={v => setDraft(d => ({ ...d, free_days: v }))} /></td>
-                  <td colSpan={5}></td>
-                  <td className="py-2 pr-2"><In type="date" v={draft.ended_on} on={v => setDraft(d => ({ ...d, ended_on: v }))} /></td>
-                  <td className="py-2 flex gap-1">
-                    <button onClick={() => save(lot)} disabled={busy} className="pp-btn pp-btn-accent px-2 py-1 text-xs"><Check size={13} /></button>
-                    <button onClick={() => setEditing(null)} className="pp-btn-ghost px-2 py-1 text-xs"><X size={13} /></button>
-                  </td>
-                </tr>
-              ) : (
-                <tr key={lot.id} className="border-t" style={{ borderColor: 'var(--line)', opacity: m.active ? 1 : 0.55 }}>
-                  <td className="py-2 pr-4">{lot.label}{lot.note ? <div className="text-xs pp-sub">{lot.note}</div> : null}</td>
-                  <td className="py-2 pr-4 pp-mono">{fmt(toDate(lot.arrived_on))}</td>
-                  <td className="py-2 pr-4 pp-mono">{lot.pallet_positions}</td>
-                  <td className="py-2 pr-4 pp-mono">{money(lot.rate)}</td>
-                  <td className="py-2 pr-4 pp-mono">{lot.free_days}</td>
-                  <td className="py-2 pr-4 pp-mono" style={m.inFree ? { color: 'var(--ok)' } : undefined}>{fmt(m.billableFrom)}</td>
-                  <td className="py-2 pr-4 pp-mono">{money(m.monthly)}</td>
-                  <td className="py-2 pr-4 pp-mono">{m.periods}</td>
-                  <td className="py-2 pr-4 pp-mono font-semibold">{money(m.owedToDate)}</td>
-                  <td className="py-2 pr-4 pp-mono">{m.nextCharge ? fmt(m.nextCharge) : '—'}</td>
-                  <td className="py-2 pr-4 pp-mono">{lot.ended_on ? fmt(toDate(lot.ended_on)) : '—'}</td>
-                  <td className="py-2 flex gap-1">
-                    <button onClick={() => { setEditing(lot.id); setDraft({ ...lot, ended_on: lot.ended_on || '' }) }} className="pp-btn-ghost px-2 py-1 text-xs" title="Edit"><Pencil size={13} /></button>
-                    <button onClick={() => remove(lot)} className="pp-btn-ghost px-2 py-1 text-xs" title="Delete"><Trash2 size={13} /></button>
+              {list.map(({ c, d, monthly, next, dirty }) => (
+                <tr key={c.id} className="border-t" style={{ borderColor: 'var(--line)' }}>
+                  <td className="py-2 pr-3 whitespace-nowrap">{c.name}<div className="text-xs pp-sub pp-mono">{c.account_code}</div></td>
+                  <td className="py-2 pr-3"><input className="pp-input py-1 text-sm" style={{ width: 80 }} type="number" step="0.5" value={d.pallets ?? ''} placeholder="0" onChange={e => set(c.id, 'pallets', e.target.value)} /></td>
+                  <td className="py-2 pr-3"><input className="pp-input py-1 text-sm" style={{ width: 80 }} type="number" value={d.rate ?? ''} onChange={e => set(c.id, 'rate', e.target.value)} /></td>
+                  <td className="py-2 pr-3"><input className="pp-input py-1 text-sm" type="date" value={d.start || ''} onChange={e => set(c.id, 'start', e.target.value)} /></td>
+                  <td className="py-2 pr-3 pp-mono whitespace-nowrap">{monthly > 0 && next ? fmt(next) : '—'}</td>
+                  <td className="py-2 pr-3 pp-mono font-semibold">{monthly > 0 ? money(monthly) : '—'}</td>
+                  <td className="py-2 pr-3"><input className="pp-input py-1 text-sm" style={{ minWidth: 140 }} value={d.note || ''} placeholder="e.g. 4 racks + 2 pallets" onChange={e => set(c.id, 'note', e.target.value)} /></td>
+                  <td className="py-2">
+                    {dirty && (
+                      <button onClick={() => save(c)} disabled={savingId === c.id} className="pp-btn pp-btn-accent px-2 py-1 text-xs" title="Save">
+                        {savingId === c.id ? <Loader2 size={13} className="animate-spin" /> : <Check size={13} />}
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}
@@ -153,27 +126,7 @@ export default function StorageTab({ clientId }) {
           </table>
         </div>
       )}
-
-      <form onSubmit={add} className="pp-card p-3 grid grid-cols-2 md:grid-cols-7 gap-2 items-end text-sm">
-        <Field label="Lot / shipment"><In v={form.label} on={v => setForm(f => ({ ...f, label: v }))} ph="e.g. Black harnesses" /></Field>
-        <Field label="Arrived"><In type="date" v={form.arrived_on} on={v => setForm(f => ({ ...f, arrived_on: v }))} /></Field>
-        <Field label="Pallet positions"><In type="number" v={form.pallet_positions} on={v => setForm(f => ({ ...f, pallet_positions: v }))} /></Field>
-        <Field label="$ / position / mo"><In type="number" v={form.rate} on={v => setForm(f => ({ ...f, rate: v }))} /></Field>
-        <Field label="Free days"><In type="number" v={form.free_days} on={v => setForm(f => ({ ...f, free_days: v }))} /></Field>
-        <Field label="Note"><In v={form.note} on={v => setForm(f => ({ ...f, note: v }))} /></Field>
-        <button disabled={busy} className="pp-btn pp-btn-accent px-3 py-2 flex items-center justify-center gap-1"><Plus size={14} /> Add lot</button>
-      </form>
-      <div className="text-xs pp-sub">Use the client's agreement terms (e.g. Bricklight $20 / 30 days per inbound; Authletic $25; standard $35). Set "Cleared" when a lot ships out or merges into another so it stops billing. Half positions (0.5) are fine.</div>
-    </div>
+      <div className="text-xs pp-sub">"Billing starts" = the day the free period ends (e.g. Bricklight Oct 16 stock → Nov 15). Rates per agreement: Bricklight $20, Authletic $25, NordPeak $25, standard $35. Leave pallets blank for clients with nothing billable.</div>
+    </section>
   )
-}
-
-function Stat({ label, value }) {
-  return <div className="pp-card p-3"><div className="text-xs uppercase tracking-wider pp-sub font-semibold">{label}</div><div className="pp-mono text-lg font-semibold mt-1">{value}</div></div>
-}
-function Field({ label, children }) {
-  return <label className="block"><span className="text-xs pp-sub">{label}</span>{children}</label>
-}
-function In({ v, on, type = 'text', ph = '' }) {
-  return <input className="pp-input py-1 text-sm w-full" style={{ minWidth: type === 'number' ? 70 : 110 }} type={type} value={v ?? ''} placeholder={ph} onChange={e => on(e.target.value)} />
 }

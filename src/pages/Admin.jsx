@@ -5,7 +5,7 @@ import { LoadingCard, ErrorCard } from '../components/PortalUI.jsx'
 import PhotoUploader from '../components/PhotoUploader.jsx'
 import AdminOverview from '../components/AdminOverview.jsx'
 import GoalTracker from '../components/GoalTracker.jsx'
-import StorageTab from '../components/StorageTab.jsx'
+import StorageOverview from '../components/StorageTab.jsx'
 
 /* ============================================================
    RATE SHEET — edit these numbers when pricing changes.
@@ -89,7 +89,7 @@ export default function Admin() {
   const [recordsLoading, setRecordsLoading] = useState(false)
 
   const [tab, setTab] = useState(() => {
-    try { const h = window.location.hash.slice(1); return ['home', 'clients', 'pipeline', 'goal', 'log'].includes(h) ? h : 'home' } catch { return 'home' }
+    try { const h = window.location.hash.slice(1); return ['home', 'clients', 'storage', 'pipeline', 'goal', 'log'].includes(h) ? h : 'home' } catch { return 'home' }
   })
   const [clientTab, setClientTab] = useState('inventory')
   const [logForm, setLogForm] = useState('inbound')
@@ -284,7 +284,7 @@ export default function Admin() {
   return (
     <AdminShell onRefresh={() => { loadAdmin(); if (viewClientId) loadRecords(viewClientId); setRefreshKey(k => k + 1) }}>
       <TabBar
-        tabs={[['home', 'Home'], ['clients', 'Clients'], ['pipeline', 'Pipeline'], ['goal', 'Goal'], ['log', '+ Log entry']]}
+        tabs={[['home', 'Home'], ['clients', 'Clients'], ['storage', 'Storage'], ['pipeline', 'Pipeline'], ['goal', 'Goal'], ['log', '+ Log entry']]}
         value={tab}
         onChange={go}
       />
@@ -299,6 +299,8 @@ export default function Admin() {
       {tab === 'pipeline' && (
         <AdminOverview key={'pipe' + refreshKey} view="pipeline" clients={clients} />
       )}
+
+      {tab === 'storage' && <StorageOverview key={'stor' + refreshKey} clients={realClients} />}
 
       {tab === 'goal' && <GoalTracker key={'goal' + refreshKey} />}
 
@@ -330,7 +332,6 @@ export default function Admin() {
                     ['inventory', `Inventory (${records.skus.length})`],
                     ['inbound', `Inbound (${records.inbound.length})`],
                     ['outbound', `Outbound (${records.outbound.length})`],
-                    ['storage', 'Storage'],
                     ['invoices', `Invoices (${records.invoices.length})`],
                   ].map(([k, label]) => (
                     <button
@@ -389,8 +390,6 @@ export default function Admin() {
                   <EditableTable columns={OUTBOUND_COLUMNS} rows={records.outbound} onSave={(row, patch) => saveRow('outbound_shipments', row, patch)} />
                 )
               )}
-
-              {!recordsLoading && clientTab === 'storage' && <StorageTab clientId={viewClientId} />}
 
               {!recordsLoading && clientTab === 'invoices' && (
                 <div className="space-y-5">
