@@ -1,0 +1,62 @@
+{
+  "subreddits": [
+    "3PL",
+    "ecommerce",
+    "shopify",
+    "FulfillmentByAmazon",
+    "AmazonSeller",
+    "smallbusiness",
+    "Entrepreneur",
+    "logistics",
+    "EtsySellers",
+    "bigcommerce"
+  ],
+  "hn_queries": [
+    "looking for a 3pl",
+    "fulfillment center recommendation"
+  ],
+  "extra_feeds": {},
+  "signals": {
+    "looking for a 3pl": 6,
+    "looking for 3pl": 6,
+    "need a 3pl": 6,
+    "new 3pl": 5,
+    "switch 3pl": 6,
+    "switching 3pl": 6,
+    "3pl recommendation": 6,
+    "recommend a 3pl": 6,
+    "3pl suggestions": 5,
+    "looking for a prep center": 6,
+    "prep center recommendation": 6,
+    "need a prep center": 6,
+    "fulfillment partner": 4,
+    "fulfillment center": 3,
+    "3pl": 2,
+    "prep center": 3,
+    "east coast": 3,
+    "pennsylvania": 4,
+    " pa ": 2,
+    "new jersey": 3,
+    "philadelphia": 4,
+    "new york": 2,
+    "orders/mo": 2,
+    "orders per month": 2,
+    "orders a month": 2,
+    "shopify": 1,
+    "dtc": 1,
+    "fba prep": 3,
+    "looking for": 3,
+    "recommendations": 2,
+    "any recommendations": 3,
+    "who do you use": 3
+  },
+  "negative": [
+    "hiring",
+    "job opening",
+    "we are a 3pl",
+    "our 3pl services",
+    "[for hire]",
+    "i run a 3pl"
+  ],
+  "min_score": 6
+}
