@@ -130,7 +130,7 @@ export default function FbaPrepPennsylvania() {
           <p className="text-lg pp-sub mt-6">
             Keystone Prep runs Amazon FBA prep and 3PL out of a 6,000 sq ft
             staffed warehouse in Lansdale, Pennsylvania — elevated dock at
-            trailer height, a lot that takes full 48-foot containers, and
+            trailer height, a lot that takes full 53-foot trailers, and
             racked client storage. Pennsylvania sits in the middle of the East
             Coast&apos;s Amazon fulfillment corridor, so inventory prepped here
             reaches FCs in the Lehigh Valley, Hazleton, and Carlisle fast and

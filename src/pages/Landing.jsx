@@ -64,7 +64,7 @@ const TESTIMONIALS = [
 
 const FACILITY_SPECS = [
   ['Dock-high', 'Receiving'],
-  ['48 ft', 'Trailer access'],
+  ['53 ft', 'Trailer access'],
   ['6,000', 'Sq ft facility'],
   ['9–5 M–F', 'Receiving hours'],
 ]
@@ -80,7 +80,7 @@ const FAQS = [
   },
   {
     q: 'Can you receive containers and pallet freight?',
-    a: 'Yes. The dock is elevated to trailer height, the lot takes full 48-foot trailers, and our receiving crew has years of international container experience through the parent warehouse operation. LTL, FTL, and parcel all work.',
+    a: 'Yes. The dock is elevated to trailer height, the lot takes full 53-foot trailers, and our receiving crew has years of international container experience through the parent warehouse operation. LTL, FTL, and parcel all work.',
   },
   {
     q: 'How do I send you inventory?',
