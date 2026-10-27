@@ -90,8 +90,17 @@ def extra_feed_items():
 
 
 def score(item):
-    t = (item["title"] + " " + item["text"]).lower()
+    t = " " + (item["title"] + " " + item["text"]).lower() + " "
+    # Gate: must be about outsourcing fulfillment AND show buyer intent.
+    # Generic "looking for" / "recommendations" alone no longer qualifies.
+    topic = [w for w in CFG.get("topic", []) if w in t]
+    intent = [w for w in CFG.get("intent", []) if w in t]
+    if not topic or not intent:
+        return 0, []
     s, hits = 0, []
+    # Volume mentioned (e.g. "200 orders a day", "1,500 orders/month") is the best sign of a real buyer.
+    if re.search(r"\b\d[\d,]*\+?\s*(orders|packages|shipments|units|pallets)\b", t):
+        s += 3; hits.append("volume")
     for phrase, pts in CFG["signals"].items():
         if phrase in t:
             s += pts; hits.append(phrase)
