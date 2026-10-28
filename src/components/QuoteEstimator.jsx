@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react'
 import { Calculator, Check, Loader2, Send } from 'lucide-react'
 import { hasSupabaseConfig, supabase } from '../lib/supabase.js'
+import { getAttribution } from '../lib/attribution.js'
 
 /* ============================================================
    RATE SHEET — keep in sync with src/pages/Admin.jsx
@@ -68,7 +69,8 @@ export default function QuoteEstimator() {
 
     setSending(true)
 
-    const source = new URLSearchParams(window.location.search).get('src') || 'organic'
+    const attribution = getAttribution()
+    const source = attribution.source
 
     // Triage tag for the notification subject: READY = shipping within a month with inventory in hand or ordered.
     const exploring = form.ship_window === 'Just exploring' || form.inventory_status === 'Still researching products'
@@ -123,6 +125,7 @@ export default function QuoteEstimator() {
             estimated_rate: `$${perUnit.toFixed(2)}/unit`,
             estimated_monthly: money(monthly),
             notes: payload.notes || '—',
+            source: `${source} (landed on ${attribution.landing}${attribution.term ? `, term: ${attribution.term}` : ''})`,
           }),
         })
         const json = await res.json()
