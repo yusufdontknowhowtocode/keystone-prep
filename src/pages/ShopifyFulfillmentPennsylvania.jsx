@@ -17,8 +17,10 @@ const PHONE_DISPLAY = '267-517-1112'
 const WHATSAPP_URL = 'https://wa.me/12675171112'
 
 const RATES = [
-  ['Pick & pack (first item)', '$4.50/order'],
-  ['Each additional item', '$1.00/item'],
+  ['Pick & pack (first item)', '$3.50/order'],
+  ['Each additional item', '$0.75/item'],
+  ['500–999 orders/month', '$3.25/order + $0.50/additional item'],
+  ['1,000+ orders/month', 'Custom quote'],
   ['Kitting / bundles', '$0.50 per item kitted'],
   ['Returns processing', '$4.00/return'],
   ['Storage', 'from $35/pallet/mo'],
@@ -50,7 +52,7 @@ const FAQS = [
   },
   {
     q: 'Are there monthly minimums or setup fees?',
-    a: 'No. There are no setup fees, no monthly order minimums, no bin or SKU fees, and no peak-season surcharge. Volume pricing is available from 300 orders a month.',
+    a: 'No. There are no setup fees, no monthly order minimums, no bin or SKU fees, and no peak-season surcharge. Volume pricing starts at 500 orders a month, and 1,000+ orders a month get a custom quote.',
   },
   {
     q: 'Which carriers do you use?',
@@ -72,7 +74,7 @@ export default function ShopifyFulfillmentPennsylvania() {
     if (desc) {
       desc.setAttribute(
         'content',
-        'Shopify fulfillment center in Lansdale, PA. $4.50/order pick & pack, 2 PM ET same-day cutoff, 1–2 day ground to the Northeast, branded packaging, no setup fees or minimums.'
+        'Shopify fulfillment center in Lansdale, PA. $3.50/order pick & pack, 2 PM ET same-day cutoff, 1–2 day ground to the Northeast, branded packaging, no setup fees or minimums.'
       )
     }
 
@@ -209,7 +211,7 @@ export default function ShopifyFulfillmentPennsylvania() {
 
           <p className="pp-sub mt-3">
             Straightforward per-order pricing. No setup, API, bin, or SKU fees,
-            and no peak-season surcharge. Volume pricing from 300 orders a
+            and no peak-season surcharge. Volume pricing from 500 orders a
             month.
           </p>
 
