@@ -27,6 +27,14 @@ function trackQuoteClick() {
   }
 }
 
+const DTC_RATES = [
+  ['First item', '$3.50/order'],
+  ['Each additional item', '$0.75/item'],
+  ['500–999 orders / mo', '$3.25 + $0.50/item'],
+  ['1,000+ orders / mo', 'Custom quote'],
+  ['Returns', '$4.00 + postage'],
+]
+
 const STANDARD_PREP = [
   ['Up to 1,000 units / mo', '$0.65/unit'],
   ['1,001–5,000 units / mo', '$0.60/unit'],
@@ -255,57 +263,35 @@ export default function Landing() {
           </div>
         </section>
 
-        <section id="pricing" className="max-w-6xl mx-auto px-4 py-14 grid lg:grid-cols-[.8fr_1.2fr] gap-8">
-          <div>
-            <SectionHeading eyebrow="Simple pricing" title="One rate. Fully compliant." />
-            <p className="pp-sub mt-3">
-              Amazon ended in-house FBA prep in January 2026 — every unit now has to arrive labeled and compliant, or you eat $0.32–$8.25/unit in defect fees. One per-unit rate covers the whole standard flow: receiving, inspection, FNSKU label, and outbound box prep.
-            </p>
-            <p className="text-sm pp-sub mt-3">
-              Shipping, Amazon fees, and special packaging materials are billed separately or paid directly by the client. Final rates depend on SKU complexity and monthly volume.
-            </p>
-          
-              <p className="text-sm pp-sub mt-3">
-              <strong>DTC / Shopify fulfillment:</strong> $3.50 per order + $0.75 per additional item. $3.25 + $0.50 at 500+ orders/month, custom pricing at 1,000+. No setup, API, or bin fees, no peak surcharge, and a 2 PM ET same-day cutoff.
-            </p>
-            <p className="text-sm pp-sub mt-3">
-              Shipping from Pennsylvania reaches NY, NJ, Boston, and DC customers in 1–2 days by ground, for faster delivery and lower postage than shipping from the West or South.
-            </p>
-            <a href="#contact" className="pp-btn pp-btn-accent px-5 py-3 mt-5 inline-flex items-center gap-2">
-              Get your rate <ArrowRight size={17} />
-            </a>
-          </div>
-          <div className="space-y-4">
-            <div className="pp-card overflow-hidden">
-              <div className="px-4 py-3 border-b flex items-center justify-between gap-4" style={{ borderColor: 'var(--line)' }}>
-                <span className="font-semibold">Standard prep — all-in per unit</span>
-                <span className="text-xs pp-sub font-semibold uppercase tracking-wider hidden sm:block">Receive · inspect · label · box</span>
-              </div>
-              {STANDARD_PREP.map(([name, price], i) => (
-                <div key={name} className={`flex items-center justify-between gap-4 p-4 ${i ? 'border-t' : ''}`} style={{ borderColor: 'var(--line)' }}>
-                  <span className="font-medium">{name}</span>
-                  <span className="pp-mono font-semibold">{price}</span>
-                </div>
-              ))}
-            </div>
+        <section id="pricing" className="max-w-6xl mx-auto px-4 py-14">
+          <SectionHeading eyebrow="Simple pricing" title="Per order or per unit. No surprises." />
+          <p className="pp-sub mt-3 max-w-3xl">
+            No setup, API, bin, or SKU fees, and no peak-season surcharge. Shipping, Amazon fees, and special packaging materials are billed separately or paid directly by the client. Final rates depend on SKU complexity and monthly volume.
+          </p>
 
-            <div className="pp-card overflow-hidden">
-              <div className="px-4 py-3 border-b" style={{ borderColor: 'var(--line)' }}>
-                <span className="font-semibold">Add-ons</span>
-                <span className="pp-sub text-sm"> — only if your SKU needs them</span>
-              </div>
-              {ADD_ONS.map(([name, price], i) => (
-                <div key={name} className={`flex items-center justify-between gap-4 p-4 ${i ? 'border-t' : ''}`} style={{ borderColor: 'var(--line)' }}>
-                  <span className="font-medium">{name}</span>
-                  <span className="pp-mono font-semibold">{price}</span>
-                </div>
-              ))}
-            </div>
-
+          <div className="grid lg:grid-cols-2 gap-6 mt-8 items-start">
+            <div className="space-y-4">
+              <RateCard title="Shopify / DTC fulfillment — per order" tag="Pick · pack · ship" rows={DTC_RATES} />
               <p className="text-sm pp-sub">
-                Shipping large wholesale lots? Ask about flat per-carton receiving — cheaper for cases of many low-cost units. More on our <a href="/fba-prep-pennsylvania" className="underline" style={{ color: 'var(--ink)' }}>Pennsylvania FBA prep</a> setup here.
+                Orders placed by 2 PM ET ship the same day, Monday to Friday. Shipping from Pennsylvania reaches NY, NJ, Boston, and DC customers in 1–2 days by ground, for faster delivery and lower postage than shipping from the West or South. More on our <a href="/shopify-fulfillment-pennsylvania" className="underline" style={{ color: 'var(--ink)' }}>Shopify fulfillment</a> setup.
               </p>
+            </div>
+
+            <div className="space-y-4">
+              <RateCard title="Amazon FBA prep — all-in per unit" tag="Receive · inspect · label · box" rows={STANDARD_PREP} />
+              <p className="text-sm pp-sub">
+                Amazon ended in-house FBA prep in January 2026, so every unit now has to arrive labeled and compliant, or you eat $0.32–$8.25/unit in defect fees. One per-unit rate covers receiving, inspection, FNSKU label, and outbound box prep. Shipping large wholesale lots? Ask about flat per-carton receiving. More on our <a href="/fba-prep-pennsylvania" className="underline" style={{ color: 'var(--ink)' }}>Pennsylvania FBA prep</a> setup.
+              </p>
+            </div>
           </div>
+
+          <div className="mt-6">
+            <RateCard title="Add-ons — only if your SKU needs them" rows={ADD_ONS} />
+          </div>
+
+          <a href="#contact" className="pp-btn pp-btn-accent px-5 py-3 mt-6 inline-flex items-center gap-2">
+            Get your rate <ArrowRight size={17} />
+          </a>
         </section>
 
         <section id="reviews" className="max-w-6xl mx-auto px-4 pb-14">
@@ -458,6 +444,23 @@ function MiniStat({ label, value, accent }) {
 
 function Feature({ icon: Icon, title, text }) {
   return <div className="pp-card p-5"><Icon size={22} className="pp-accent" /><h3 className="font-bold mt-4">{title}</h3><p className="text-sm pp-sub mt-2">{text}</p></div>
+}
+
+function RateCard({ title, tag, rows }) {
+  return (
+    <div className="pp-card overflow-hidden">
+      <div className="px-4 py-3 border-b flex items-center justify-between gap-4" style={{ borderColor: 'var(--line)' }}>
+        <span className="font-semibold">{title}</span>
+        {tag && <span className="text-xs pp-sub font-semibold uppercase tracking-wider hidden sm:block">{tag}</span>}
+      </div>
+      {rows.map(([name, price], i) => (
+        <div key={name} className={`flex items-center justify-between gap-4 p-4 ${i ? 'border-t' : ''}`} style={{ borderColor: 'var(--line)' }}>
+          <span className="font-medium">{name}</span>
+          <span className="pp-mono font-semibold text-right">{price}</span>
+        </div>
+      ))}
+    </div>
+  )
 }
 
 function SectionHeading({ eyebrow, title }) {
