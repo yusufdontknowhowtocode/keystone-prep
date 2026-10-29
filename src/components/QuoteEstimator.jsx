@@ -20,6 +20,27 @@ const ADDONS = [
 
 const FREE_TRIAL_UNITS = 100
 
+// DTC / Shopify fulfillment, per order. Keep in sync with the pricing section in Landing.jsx.
+const DTC_TIERS = [
+  { max: 499, first: 3.50, extra: 0.75, label: 'Under 500 orders/mo' },
+  { max: 999, first: 3.25, extra: 0.50, label: '500–999 orders/mo' },
+  { max: Infinity, first: 3.25, extra: 0.50, label: '1,000+ orders/mo · custom quote', custom: true },
+]
+
+const PLATFORMS = ['Shopify', 'WooCommerce', 'TikTok Shop', 'Etsy', 'Amazon FBM', 'Other']
+
+function initialMode() {
+  try {
+    const p = new URLSearchParams(window.location.search)
+    if (p.get('mode') === 'dtc') return 'dtc'
+    const a = getAttribution()
+    const hint = `${a.landing || ''} ${a.term || ''}`.toLowerCase()
+    if (/fba|amazon|prep/.test(hint)) return 'fba'
+    if (/shopify|dtc|fulfillment|3pl|ecommerce/.test(hint)) return 'dtc'
+  } catch { /* default below */ }
+  return 'fba'
+}
+
 const PRODUCT_TYPES = [
   'General merchandise', 'Grocery / consumables', 'Health & personal care',
   'Pet supplies', 'Apparel', 'Home & kitchen', 'Toys & games', 'Other',
@@ -34,7 +55,12 @@ const CURRENT_PROVIDERS = ['Another prep center / 3PL', 'We do it ourselves', 'N
 const WEB3FORMS_KEY = import.meta.env.VITE_WEB3FORMS_KEY
 
 export default function QuoteEstimator() {
+  const [mode, setMode] = useState(initialMode)
+  const isDtc = mode === 'dtc'
   const [units, setUnits] = useState(500)
+  const [orders, setOrders] = useState(300)
+  const [items, setItems] = useState(2)
+  const [platform, setPlatform] = useState('')
   const [addons, setAddons] = useState({})
   const [form, setForm] = useState({ name: '', email: '', brand: '', phone: '', product_type: '', ship_window: '', inventory_status: '', current_provider: '', notes: '' })
   const [sending, setSending] = useState(false)
@@ -55,6 +81,11 @@ export default function QuoteEstimator() {
 
   const selectedPrep = ADDONS.filter(a => addons[a.key]).map(a => a.label)
 
+  const dtcTier = useMemo(() => DTC_TIERS.find(t => Number(orders || 0) <= t.max) || DTC_TIERS[DTC_TIERS.length - 1], [orders])
+  const itemCount = Math.max(Number(items) || 1, 1)
+  const perOrder = dtcTier.first + (itemCount - 1) * dtcTier.extra
+  const dtcMonthly = Number(orders || 0) * perOrder
+
   function set(key, value) { setForm(f => ({ ...f, [key]: value })) }
 
   async function submit(e) {
@@ -66,6 +97,7 @@ export default function QuoteEstimator() {
     if (!form.inventory_status) return setError('Please tell us where your inventory is right now.')
     if (!form.ship_window) return setError('Please select when your first shipment would go out.')
     if (!form.current_provider) return setError('Please tell us who handles your prep or fulfillment today.')
+    if (isDtc && !platform) return setError('Please select your store platform.')
 
     setSending(true)
 
@@ -78,6 +110,7 @@ export default function QuoteEstimator() {
     const leadTag = exploring ? '[EXPLORING]' : soon ? '[READY]' : '[LATER]'
 
 
+    const dtcSummary = `DTC fulfillment: ${orders} orders/mo, avg ${itemCount} items/order, platform ${platform}`
     const payload = {
         source,
         name: form.name.trim() || null,
@@ -85,13 +118,13 @@ export default function QuoteEstimator() {
         brand: form.brand.trim() || null,
         phone: form.phone.trim() || null,
         product_type: form.product_type || null,
-        monthly_units: Number(units) || null,
-        prep_needs: selectedPrep,
+        monthly_units: isDtc ? (Number(orders) || null) : (Number(units) || null),
+        prep_needs: isDtc ? ['DTC fulfillment'] : selectedPrep,
         ship_window: form.ship_window || null,
       inventory_status: form.inventory_status || null,
-        notes: [`Current provider: ${form.current_provider}`, form.notes.trim()].filter(Boolean).join(' | '),
-        est_rate: Number(perUnit.toFixed(4)),
-        est_monthly: Number(monthly.toFixed(2)),
+        notes: [isDtc ? dtcSummary : null, `Current provider: ${form.current_provider}`, form.notes.trim()].filter(Boolean).join(' | '),
+        est_rate: Number((isDtc ? perOrder : perUnit).toFixed(4)),
+        est_monthly: Number((isDtc ? dtcMonthly : monthly).toFixed(2)),
     }
 
     // 1. Durable record in Supabase. Failure here shouldn't block the email.
@@ -110,20 +143,22 @@ export default function QuoteEstimator() {
           headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
           body: JSON.stringify({
             access_key: WEB3FORMS_KEY,
-            subject: `${leadTag} New prep quote request — ${form.brand || form.email}`,
+            subject: `${leadTag} New ${isDtc ? 'DTC fulfillment' : 'prep'} quote request — ${form.brand || form.email}`,
+            service: isDtc ? 'DTC / Shopify fulfillment' : 'Amazon FBA prep',
             from_name: 'Keystone Prep Center',
             name: payload.name || '—',
             email: payload.email,
             brand: payload.brand || '—',
             phone: payload.phone || '—',
             product_type: payload.product_type || '—',
-            monthly_units: payload.monthly_units || '—',
-            prep_needs: selectedPrep.length ? selectedPrep.join(', ') : 'FNSKU only',
+            ...(isDtc
+              ? { monthly_orders: orders || '—', avg_items_per_order: itemCount, platform: platform || '—' }
+              : { monthly_units: payload.monthly_units || '—', prep_needs: selectedPrep.length ? selectedPrep.join(', ') : 'FNSKU only' }),
             ship_window: payload.ship_window || '—',
             inventory_status: payload.inventory_status || '—',
             current_provider: form.current_provider || '—',
-            estimated_rate: `$${perUnit.toFixed(2)}/unit`,
-            estimated_monthly: money(monthly),
+            estimated_rate: isDtc ? `$${perOrder.toFixed(2)}/order${dtcTier.custom ? ' (1,000+ = custom quote)' : ''}` : `$${perUnit.toFixed(2)}/unit`,
+            estimated_monthly: money(isDtc ? dtcMonthly : monthly),
             notes: payload.notes || '—',
             source: `${source} (landed on ${attribution.landing}${attribution.term ? `, term: ${attribution.term}` : ''})`,
           }),
@@ -155,9 +190,9 @@ export default function QuoteEstimator() {
         </div>
         <h2 className="pp-display text-3xl font-bold uppercase">Got it</h2>
         <p className="text-sm pp-sub mt-2 max-w-md mx-auto">
-          Your estimate came out around <span className="pp-mono">${perUnit.toFixed(2)}/unit</span>. We'll confirm your exact rate by email, usually within a couple of hours.
+          Your estimate came out around <span className="pp-mono">{isDtc ? `$${perOrder.toFixed(2)}/order` : `$${perUnit.toFixed(2)}/unit`}</span>. We'll confirm your exact rate by email, usually within a couple of hours.
         </p>
-        <p className="text-xs pp-sub mt-4">Your first test shipment (up to {FREE_TRIAL_UNITS} units) is on us either way — no card, no commitment.</p>
+        {!isDtc && <p className="text-xs pp-sub mt-4">Your first test shipment (up to {FREE_TRIAL_UNITS} units) is on us either way — no card, no commitment.</p>}
                 <button
           onClick={() => { setSent(false); setError('') }}
           className="pp-btn-ghost px-4 py-2 text-sm mt-4"
@@ -175,11 +210,88 @@ export default function QuoteEstimator() {
         <h2 className="pp-display text-3xl sm:text-4xl font-bold uppercase">Estimate your cost</h2>
       </div>
       <p className="text-sm pp-sub mt-1">
-        Move the numbers around to see where you'd land. Your first test shipment — up to {FREE_TRIAL_UNITS} units — is on us.
+        Move the numbers around to see where you'd land.{!isDtc && ` Your first test shipment — up to ${FREE_TRIAL_UNITS} units — is on us.`}
       </p>
+
+      <div className="mt-4 inline-flex rounded border p-1 gap-1" style={{ borderColor: 'var(--line)' }} role="tablist" aria-label="Service">
+        {[['fba', 'Amazon FBA prep'], ['dtc', 'Shopify / DTC fulfillment']].map(([key, label]) => (
+          <button
+            key={key}
+            type="button"
+            role="tab"
+            aria-selected={mode === key}
+            onClick={() => { setMode(key); setError('') }}
+            className="px-3 py-1.5 text-sm font-semibold rounded"
+            style={mode === key ? { background: 'var(--ink)', color: 'var(--card)' } : { color: 'var(--ink)' }}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
 
       <form onSubmit={submit} className="mt-6 grid lg:grid-cols-2 gap-6">
         {/* ---------- LEFT: the calculator ---------- */}
+        {isDtc ? (
+        <div className="space-y-5">
+          <div>
+            <label className="block text-sm font-semibold">Orders per month</label>
+            <input
+              type="range" min="50" max="2000" step="50"
+              value={Math.min(Math.max(Number(orders) || 50, 50), 2000)}
+              onChange={e => setOrders(Number(e.target.value))}
+              className="w-full mt-2"
+              style={{ accentColor: 'var(--accent)' }}
+            />
+            <div className="flex items-center gap-2 mt-1">
+              <input
+                type="number" min="1"
+                className="pp-input py-1.5 text-sm"
+                style={{ width: 110 }}
+                value={orders}
+                onChange={e => setOrders(e.target.value === '' ? '' : Number(e.target.value))}
+              />
+              <span className="text-xs pp-sub">{dtcTier.label}</span>
+            </div>
+          </div>
+
+          <div className="grid sm:grid-cols-2 gap-3">
+            <Field label="Average items per order">
+              <input
+                type="number" min="1" max="20" step="1"
+                className="pp-input"
+                value={items}
+                onChange={e => setItems(e.target.value === '' ? '' : Number(e.target.value))}
+              />
+            </Field>
+            <Field label="Store platform" required>
+              <select className="pp-input" value={platform} onChange={e => setPlatform(e.target.value)}>
+                <option value="">Select…</option>
+                {PLATFORMS.map(p => <option key={p} value={p}>{p}</option>)}
+              </select>
+            </Field>
+          </div>
+
+          <div className="p-4 rounded" style={{ background: 'var(--card)', border: '2px solid var(--ink)' }}>
+            <div className="flex items-end justify-between gap-3">
+              <div>
+                <div className="text-xs uppercase tracking-wide pp-sub">Per order</div>
+                <div className="pp-display text-4xl font-bold leading-none">${perOrder.toFixed(2)}</div>
+              </div>
+              <div className="text-right">
+                <div className="text-xs uppercase tracking-wide pp-sub">Typical month</div>
+                <div className="pp-display text-3xl font-bold leading-none">{money(dtcMonthly)}</div>
+              </div>
+            </div>
+            <div className="mt-3 pt-3 text-sm flex items-center justify-between" style={{ borderTop: '1px solid var(--line)' }}>
+              <span>First item / each extra item</span>
+              <span className="pp-mono font-bold">${dtcTier.first.toFixed(2)} / ${dtcTier.extra.toFixed(2)}</span>
+            </div>
+            <p className="text-xs pp-sub mt-2">
+              {dtcTier.custom ? 'At 1,000+ orders a month we quote a custom rate, at or below this estimate. ' : ''}Estimate only, before postage. Postage is billed at cost. Storage: first 30 days included, then from $35/pallet/month. Returns $4.00 + postage. No setup, API, or bin fees.
+            </p>
+          </div>
+        </div>
+        ) : (
         <div className="space-y-5">
           <div>
             <label className="block text-sm font-semibold">Units per month</label>
@@ -245,6 +357,7 @@ export default function QuoteEstimator() {
             </p>
           </div>
         </div>
+        )}
 
         {/* ---------- RIGHT: who are you ---------- */}
         <div className="space-y-3">
@@ -255,7 +368,7 @@ export default function QuoteEstimator() {
             <input className="pp-input" type="email" required value={form.email} onChange={e => set('email', e.target.value)} placeholder="you@brand.com" />
           </Field>
           <div className="grid sm:grid-cols-2 gap-3">
-            <Field label="Amazon store / brand">
+            <Field label={isDtc ? 'Store / brand' : 'Amazon store / brand'}>
               <input className="pp-input" value={form.brand} onChange={e => set('brand', e.target.value)} placeholder="Brand name" />
             </Field>
             <Field label="Phone (optional)">
@@ -274,7 +387,7 @@ export default function QuoteEstimator() {
               {INVENTORY_STATUS.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
           </Field>
-          <Field label="When would you send a first shipment?" required>
+          <Field label={isDtc ? 'When would you want to start?' : 'When would you send a first shipment?'} required>
             <select className="pp-input" required value={form.ship_window} onChange={e => set('ship_window', e.target.value)}>
               <option value="">Select…</option>
               {SHIP_WINDOWS.map(s => <option key={s} value={s}>{s}</option>)}
@@ -287,7 +400,7 @@ export default function QuoteEstimator() {
             </select>
           </Field>
           <Field label="Anything else we should know?">
-            <textarea className="pp-input min-h-20" value={form.notes} onChange={e => set('notes', e.target.value)} placeholder="Expiration dates, fragile items, case packs…" />
+            <textarea className="pp-input min-h-20" value={form.notes} onChange={e => set('notes', e.target.value)} placeholder={isDtc ? 'Branded packaging, inserts, number of SKUs…' : 'Expiration dates, fragile items, case packs…'} />
           </Field>
 
           {error && <div className="text-sm p-3 rounded" style={{ background: '#FEF2F2', color: 'var(--bad)' }}>{error}</div>}
