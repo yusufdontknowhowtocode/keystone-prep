@@ -51,7 +51,7 @@ export default function AdminOverview({ clients, view = 'home', onOpenClient, on
     <>
       {error && <div className="pp-card p-3 text-sm" style={{ color: 'var(--bad)', borderColor: 'var(--bad)' }}>Couldn't load: {error}</div>}
       {view === 'pipeline'
-        ? <Pipeline leads={data.leads} leadsMissing={leadsMissing} setData={setData} setError={setError} reload={load} />
+        ? <Pipeline clients={clients} leads={data.leads} leadsMissing={leadsMissing} setData={setData} setError={setError} reload={load} />
         : <Home clients={clients} data={data} onOpenClient={onOpenClient} onGoPipeline={onGoPipeline} />}
     </>
   )
@@ -172,14 +172,14 @@ function Home({ clients, data, onOpenClient, onGoPipeline }) {
 
 // Simple list grouped by when the next step is due. No red: overdue just sits in "Up next".
 const STAGE_STYLE = {
-  new: { label: 'New', bg: 'rgba(154,160,168,.15)', fg: 'var(--sub)' },
-  quoted: { label: 'Quoted', bg: 'rgba(224,163,58,.15)', fg: 'var(--warn)' },
-  agreement_sent: { label: 'Agreement sent', bg: 'rgba(52,196,106,.15)', fg: 'var(--ok)' },
-  signed: { label: 'Signed', bg: 'rgba(52,196,106,.15)', fg: 'var(--ok)' },
-  lost: { label: 'Lost', bg: 'rgba(154,160,168,.10)', fg: 'var(--sub)' },
+  new: { label: 'New', bg: 'rgba(160,165,172,.14)', fg: 'var(--sub)' },
+  quoted: { label: 'Quoted', bg: 'rgba(160,165,172,.20)', fg: 'var(--ink)' },
+  agreement_sent: { label: 'Agreement sent', bg: 'rgba(147,191,160,.16)', fg: 'var(--ok)' },
+  signed: { label: 'Signed', bg: 'rgba(147,191,160,.16)', fg: 'var(--ok)' },
+  lost: { label: 'Lost', bg: 'rgba(160,165,172,.08)', fg: 'var(--sub)' },
 }
 
-function Pipeline({ leads, leadsMissing, setData, setError, reload }) {
+function Pipeline({ clients = [], leads, leadsMissing, setData, setError, reload }) {
   const [showClosed, setShowClosed] = useState(false)
   const [adding, setAdding] = useState(false)
   const [form, setForm] = useState(blankLead)
@@ -191,7 +191,8 @@ function Pipeline({ leads, leadsMissing, setData, setError, reload }) {
   }
 
   const active = leads.filter(l => !CLOSED.includes(l.stage || 'new'))
-  const closed = leads.filter(l => CLOSED.includes(l.stage || 'new'))
+  const lost = leads.filter(l => l.stage === 'lost')
+  const clientList = clients.filter(c => !c.is_admin && c.account_code !== 'ADMIN-001').sort((a, b) => String(b.created_at || '').localeCompare(String(a.created_at || '')))
   const today = startOfToday()
   const weekOut = new Date(today); weekOut.setDate(weekOut.getDate() + 7)
   const byDate = (a, b) => String(a.next_date || '9999').localeCompare(String(b.next_date || '9999'))
@@ -273,7 +274,7 @@ function Pipeline({ leads, leadsMissing, setData, setError, reload }) {
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div>
           <h2 className="font-semibold">Pipeline</h2>
-          <div className="text-xs pp-sub">{active.length} active leads · tap a lead to edit</div>
+          <div className="text-xs pp-sub">{active.length} active leads · {clientList.length} clients · tap a lead to edit</div>
         </div>
         <button onClick={() => setAdding(a => !a)} className="pp-btn pp-btn-accent px-3 py-2 text-sm flex items-center gap-1">
           {adding ? <X size={14} /> : <Plus size={14} />} {adding ? 'Cancel' : 'Add lead'}
@@ -301,10 +302,26 @@ function Pipeline({ leads, leadsMissing, setData, setError, reload }) {
         </div>
       ))}
 
-      {closed.length > 0 && (
+      <div>
+        <div className="text-xs uppercase tracking-wide pp-sub mb-1">Clients · {clientList.length}</div>
+        {clientList.map(c => (
+          <div key={c.id} className="py-3 border-t flex items-start gap-3" style={{ borderColor: 'var(--line)' }}>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="font-medium">{c.name}</span>
+                <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: STAGE_STYLE.signed.bg, color: STAGE_STYLE.signed.fg }}>Client</span>
+              </div>
+              <div className="text-xs pp-sub mt-0.5 pp-mono">{c.account_code}</div>
+            </div>
+            <div className="text-xs pp-sub shrink-0">{c.created_at ? `since ${shortDate(c.created_at)}` : ''}</div>
+          </div>
+        ))}
+      </div>
+
+      {lost.length > 0 && (
         <div>
-          <button onClick={() => setShowClosed(s => !s)} className="text-xs pp-sub hover:underline">{showClosed ? 'Hide' : 'Show'} signed / lost ({closed.length})</button>
-          {showClosed && closed.map(l => <Row key={l.id} l={l} />)}
+          <button onClick={() => setShowClosed(s => !s)} className="text-xs pp-sub hover:underline">{showClosed ? 'Hide' : 'Show'} lost leads ({lost.length})</button>
+          {showClosed && lost.map(l => <Row key={l.id} l={l} />)}
         </div>
       )}
     </section>
