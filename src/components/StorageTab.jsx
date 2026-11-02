@@ -25,6 +25,14 @@ function nextCharge(start, today) {
 }
 
 const DEFAULT_RATE = 35
+// Agreed storage rates per client (from signed agreements). Anything not listed = standard $35.
+const AGREED = {
+  'BRIC-0001': { rate: 20, note: 'agreement rate' },
+  'AUTH-0001': { rate: 25, note: 'agreement rate' },
+  'NORD-0001': { rate: 25, note: 'agreement rate' },
+  'AXIS-0001': { rate: 35, note: '1 pallet free 30 days; extra pallets $35 → $45 (mo 2) → $50' },
+}
+const agreed = c => AGREED[c.account_code] || { rate: DEFAULT_RATE, note: 'standard rate' }
 
 export default function StorageOverview({ clients }) {
   const [rows, setRows] = useState({}) // client_id -> storage_lots row
@@ -32,6 +40,7 @@ export default function StorageOverview({ clients }) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [savingId, setSavingId] = useState(null)
+  const [showAll, setShowAll] = useState(false)
 
   async function load() {
     setLoading(true); setError('')
@@ -42,7 +51,7 @@ export default function StorageOverview({ clients }) {
     setRows(byClient)
     setDrafts(Object.fromEntries(clients.map(c => {
       const r = byClient[c.id]
-      return [c.id, { pallets: r ? String(r.pallet_positions) : '', rate: r ? String(r.rate) : String(DEFAULT_RATE), start: r ? r.arrived_on : '', note: r?.note || '' }]
+      return [c.id, { pallets: r ? String(r.pallet_positions) : '', rate: r ? String(r.rate) : String(agreed(c).rate), start: r ? r.arrived_on : '', note: r?.note || '' }]
     })))
     setLoading(false)
   }
@@ -76,6 +85,9 @@ export default function StorageOverview({ clients }) {
   }).sort((a, b) => (b.monthly > 0) - (a.monthly > 0) || ((a.next?.getTime() ?? 9e15) - (b.next?.getTime() ?? 9e15)))
 
   const totalMonthly = list.reduce((n, r) => n + r.monthly, 0)
+  const billing = list.filter(r => r.monthly > 0 || r.dirty || rows[r.c.id])
+  const idle = list.filter(r => !billing.includes(r))
+  const visible = showAll ? [...billing, ...idle] : billing
   const soon = list.filter(r => r.monthly > 0 && r.next && (r.next - today) / 86400000 <= 7)
 
   return (
@@ -104,9 +116,9 @@ export default function StorageOverview({ clients }) {
               </tr>
             </thead>
             <tbody>
-              {list.map(({ c, d, monthly, next, dirty }) => (
+              {visible.map(({ c, d, monthly, next, dirty }) => (
                 <tr key={c.id} className="border-t" style={{ borderColor: 'var(--line)' }}>
-                  <td className="py-2 pr-3 whitespace-nowrap">{c.name}<div className="text-xs pp-sub pp-mono">{c.account_code}</div></td>
+                  <td className="py-2 pr-3 whitespace-nowrap">{c.name}<div className="text-xs pp-sub"><span className="pp-mono">{c.account_code}</span> · {agreed(c).note}</div></td>
                   <td className="py-2 pr-3"><input className="pp-input py-1 text-sm" style={{ width: 80 }} type="number" step="0.5" value={d.pallets ?? ''} placeholder="0" onChange={e => set(c.id, 'pallets', e.target.value)} /></td>
                   <td className="py-2 pr-3"><input className="pp-input py-1 text-sm" style={{ width: 80 }} type="number" value={d.rate ?? ''} onChange={e => set(c.id, 'rate', e.target.value)} /></td>
                   <td className="py-2 pr-3"><input className="pp-input py-1 text-sm" type="date" value={d.start || ''} onChange={e => set(c.id, 'start', e.target.value)} /></td>
@@ -124,9 +136,15 @@ export default function StorageOverview({ clients }) {
               ))}
             </tbody>
           </table>
+          {billing.length === 0 && !showAll && <div className="text-sm pp-sub py-3">No one is being billed for storage yet.</div>}
+          {idle.length > 0 && (
+            <button onClick={() => setShowAll(v => !v)} className="text-xs pp-sub hover:underline mt-2">
+              {showAll ? 'Hide' : 'Show'} clients with no storage ({idle.length}) — click to add one
+            </button>
+          )}
         </div>
       )}
-      <div className="text-xs pp-sub">"Billing starts" = the day the free period ends (e.g. Bricklight Oct 16 stock → Nov 15). Rates per agreement: Bricklight $20, Authletic $25, NordPeak $25, standard $35. Leave pallets blank for clients with nothing billable.</div>
+      <div className="text-xs pp-sub">Each client's rate is pre-filled from their agreement. "Billing starts" = the day the free period ends.</div>
     </section>
   )
 }

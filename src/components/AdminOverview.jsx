@@ -103,7 +103,7 @@ function Home({ clients, data, onOpenClient, onGoPipeline }) {
       onClick: () => onOpenClient?.(i.client_id, 'invoices'),
     })),
     ...followUps.map(l => ({
-      key: 'lead' + l.id, bad: new Date(l.next_date + 'T00:00:00') < startOfToday(),
+      key: 'lead' + l.id, bad: false,
       text: `${l.brand || l.name || 'Lead'}: ${l.next_action || 'follow up'}${l.next_date ? ` (${shortDate(l.next_date)})` : ''}`,
       onClick: onGoPipeline,
     })),
@@ -143,7 +143,7 @@ function Home({ clients, data, onOpenClient, onGoPipeline }) {
       <section className="pp-card p-4">
         <div className="flex items-center justify-between mb-3">
           <h2 className="font-semibold">Clients</h2>
-          <button onClick={onGoPipeline} className="text-xs pp-sub hover:underline">{activeLeads.length} active leads · {money(sum(activeLeads.map(l => Number(l.est_monthly || 0))))}/mo →</button>
+          <button onClick={onGoPipeline} className="text-xs pp-sub hover:underline">{activeLeads.length} active leads →</button>
         </div>
         {clientRows.length === 0 ? <div className="text-sm pp-sub">No clients yet.</div> : (
           <div className="overflow-x-auto">
@@ -170,25 +170,37 @@ function Home({ clients, data, onOpenClient, onGoPipeline }) {
 
 /* ---------------- PIPELINE ---------------- */
 
+// Simple list grouped by when the next step is due. No red: overdue just sits in "Up next".
+const STAGE_STYLE = {
+  new: { label: 'New', bg: 'rgba(154,160,168,.15)', fg: 'var(--sub)' },
+  quoted: { label: 'Quoted', bg: 'rgba(224,163,58,.15)', fg: 'var(--warn)' },
+  agreement_sent: { label: 'Agreement sent', bg: 'rgba(52,196,106,.15)', fg: 'var(--ok)' },
+  signed: { label: 'Signed', bg: 'rgba(52,196,106,.15)', fg: 'var(--ok)' },
+  lost: { label: 'Lost', bg: 'rgba(154,160,168,.10)', fg: 'var(--sub)' },
+}
+
 function Pipeline({ leads, leadsMissing, setData, setError, reload }) {
   const [showClosed, setShowClosed] = useState(false)
   const [adding, setAdding] = useState(false)
   const [form, setForm] = useState(blankLead)
   const [saving, setSaving] = useState(false)
+  const [openId, setOpenId] = useState(null)
 
   if (leadsMissing) {
     return <div className="pp-card p-4 text-sm pp-sub">The <span className="pp-mono">leads</span> table doesn't exist yet. Run the leads migration in the Supabase SQL editor, then refresh.</div>
   }
 
   const active = leads.filter(l => !CLOSED.includes(l.stage || 'new'))
-  const closedCount = leads.length - active.length
-  // Leads with a follow-up date first (soonest first), then newest.
-  const shown = (showClosed ? leads : active).slice().sort((a, b) => {
-    if (a.next_date && b.next_date) return a.next_date.localeCompare(b.next_date)
-    if (a.next_date) return -1
-    if (b.next_date) return 1
-    return String(b.created_at).localeCompare(String(a.created_at))
-  })
+  const closed = leads.filter(l => CLOSED.includes(l.stage || 'new'))
+  const today = startOfToday()
+  const weekOut = new Date(today); weekOut.setDate(weekOut.getDate() + 7)
+  const byDate = (a, b) => String(a.next_date || '9999').localeCompare(String(b.next_date || '9999'))
+  const groups = [
+    ['Up next', active.filter(l => l.next_date && new Date(l.next_date + 'T00:00:00') <= today).sort(byDate)],
+    ['This week', active.filter(l => l.next_date && new Date(l.next_date + 'T00:00:00') > today && new Date(l.next_date + 'T00:00:00') <= weekOut).sort(byDate)],
+    ['Later', active.filter(l => l.next_date && new Date(l.next_date + 'T00:00:00') > weekOut).sort(byDate)],
+    ['Waiting on them', active.filter(l => !l.next_date)],
+  ].filter(([, list]) => list.length)
 
   async function addLead(e) {
     e.preventDefault()
@@ -209,10 +221,7 @@ function Pipeline({ leads, leadsMissing, setData, setError, reload }) {
     setData(d => ({ ...d, leads: d.leads.map(l => (l.id === id ? { ...l, ...patch } : l)) }))
   }
 
-  // One click after any email/text/call: stamps today as last contact and,
-  // if there's no future follow-up date, sets one a week out.
   function markContacted(l) {
-    const today = startOfToday()
     const patch = { last_contact: localISO(today) }
     if (!l.next_date || new Date(l.next_date + 'T00:00:00') <= today) {
       const next = new Date(today); next.setDate(next.getDate() + 7)
@@ -221,21 +230,54 @@ function Pipeline({ leads, leadsMissing, setData, setError, reload }) {
     updateLead(l.id, patch)
   }
 
+  const Row = ({ l }) => {
+    const stage = l.stage || 'new'
+    const st = STAGE_STYLE[stage] || STAGE_STYLE.new
+    const open = openId === l.id
+    return (
+      <div className="py-3 border-t" style={{ borderColor: 'var(--line)', opacity: stage === 'lost' ? 0.55 : 1 }}>
+        <button onClick={() => setOpenId(open ? null : l.id)} className="w-full text-left flex items-start gap-3">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-medium">{l.brand || l.name || '—'}</span>
+              <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: st.bg, color: st.fg }}>{st.label}</span>
+            </div>
+            <div className="text-sm mt-0.5" style={{ color: 'var(--ink)', opacity: 0.85 }}>{l.next_action || <span className="pp-sub">No next step set</span>}</div>
+          </div>
+          <div className="text-right shrink-0">
+            <div className="text-sm pp-mono">{l.next_date ? shortDate(l.next_date) : '—'}</div>
+            <div className="text-xs pp-sub">{l.last_contact ? `last ${daysAgoLabel(l.last_contact)}` : ''}</div>
+          </div>
+        </button>
+        {open && (
+          <div className="mt-3 grid grid-cols-1 sm:grid-cols-4 gap-2 items-center">
+            <select className="pp-input py-1.5 text-sm" value={stage} onChange={e => updateLead(l.id, { stage: e.target.value })}>
+              {LEAD_STAGES.map(s => <option key={s} value={s}>{STAGE_STYLE[s]?.label || labelize(s)}</option>)}
+            </select>
+            <input className="pp-input py-1.5 text-sm sm:col-span-2" defaultValue={l.next_action || ''} placeholder="Next step" onBlur={e => e.target.value !== (l.next_action || '') && updateLead(l.id, { next_action: e.target.value || null })} />
+            <input key={l.next_date || 'none'} type="date" className="pp-input py-1.5 text-sm" defaultValue={l.next_date || ''} onChange={e => updateLead(l.id, { next_date: e.target.value || null })} />
+            <div className="text-xs pp-sub sm:col-span-3">{[l.email && !l.email.endsWith('@manual.entry') ? l.email : null, l.phone, l.source].filter(Boolean).join(' · ')}</div>
+            {!CLOSED.includes(stage) && (
+              <button onClick={() => markContacted(l)} className="pp-btn-ghost px-2 py-1.5 text-xs flex items-center justify-center gap-1">
+                <PhoneCall size={12} /> Contacted today
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+    )
+  }
+
   return (
     <section className="pp-card p-4 space-y-4">
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div>
           <h2 className="font-semibold">Pipeline</h2>
-          <div className="text-xs pp-sub">{active.length} active · {money(sum(active.map(l => Number(l.est_monthly || 0))))}/mo estimated</div>
+          <div className="text-xs pp-sub">{active.length} active leads · tap a lead to edit</div>
         </div>
-        <div className="flex items-center gap-2">
-          {closedCount > 0 && (
-            <button onClick={() => setShowClosed(s => !s)} className="pp-btn-ghost px-3 py-2 text-sm">{showClosed ? 'Hide' : 'Show'} signed/lost ({closedCount})</button>
-          )}
-          <button onClick={() => setAdding(a => !a)} className="pp-btn pp-btn-accent px-3 py-2 text-sm flex items-center gap-1">
-            {adding ? <X size={14} /> : <Plus size={14} />} {adding ? 'Cancel' : 'Add lead'}
-          </button>
-        </div>
+        <button onClick={() => setAdding(a => !a)} className="pp-btn pp-btn-accent px-3 py-2 text-sm flex items-center gap-1">
+          {adding ? <X size={14} /> : <Plus size={14} />} {adding ? 'Cancel' : 'Add lead'}
+        </button>
       </div>
 
       {adding && (
@@ -244,7 +286,7 @@ function Pipeline({ leads, leadsMissing, setData, setError, reload }) {
           <input className="pp-input" placeholder="Email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
           <input className="pp-input" placeholder="Where they came from" value={form.source} onChange={e => setForm({ ...form, source: e.target.value })} />
           <input className="pp-input" type="number" placeholder="Est $/mo" value={form.est_monthly} onChange={e => setForm({ ...form, est_monthly: e.target.value })} />
-          <input className="pp-input" placeholder="Next action" value={form.next_action} onChange={e => setForm({ ...form, next_action: e.target.value })} />
+          <input className="pp-input" placeholder="Next step" value={form.next_action} onChange={e => setForm({ ...form, next_action: e.target.value })} />
           <input className="pp-input" type="date" value={form.next_date} onChange={e => setForm({ ...form, next_date: e.target.value })} />
           <button className="pp-btn pp-btn-accent px-3 py-2 text-sm flex items-center justify-center gap-1 sm:col-span-2" disabled={saving}>
             {saving ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />} Save lead
@@ -252,42 +294,17 @@ function Pipeline({ leads, leadsMissing, setData, setError, reload }) {
         </form>
       )}
 
-      {shown.length === 0 ? <div className="text-sm pp-sub">No active leads.</div> : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead><tr className="text-left pp-sub text-xs uppercase"><th className="py-2 font-medium">Lead</th><th className="font-medium">Stage</th><th className="font-medium">Next action</th><th className="font-medium">Last contact</th><th className="font-medium">Follow up</th><th className="text-right font-medium">Est/mo</th></tr></thead>
-            <tbody>
-              {shown.map(l => {
-                const stage = l.stage || 'new'
-                const late = l.next_date && !CLOSED.includes(stage) && new Date(l.next_date + 'T00:00:00') < startOfToday()
-                return (
-                  <tr key={l.id} className="border-t align-top" style={{ borderColor: 'var(--line)', opacity: stage === 'lost' ? 0.5 : 1 }}>
-                    <td className="py-2.5 pr-3">
-                      <div className="font-medium">{l.brand || l.name || '—'}</div>
-                      <div className="text-xs pp-sub">{[l.email && !l.email.endsWith('@manual.entry') ? l.email : null, l.phone, l.source, l.created_at ? `${daysSince(l.created_at)}d ago` : null].filter(Boolean).join(' · ')}</div>
-                      {l.product_type && <div className="text-xs pp-sub">{l.product_type}{l.monthly_units ? ` · ${l.monthly_units}/mo` : ''}</div>}
-                    </td>
-                    <td className="py-2 pr-2">
-                      <select className="pp-input py-1 text-sm" value={stage} onChange={e => updateLead(l.id, { stage: e.target.value })}>
-                        {LEAD_STAGES.map(s => <option key={s} value={s}>{labelize(s)}</option>)}
-                      </select>
-                    </td>
-                    <td className="py-2 pr-2"><input className="pp-input py-1 text-sm" defaultValue={l.next_action || ''} placeholder="—" onBlur={e => e.target.value !== (l.next_action || '') && updateLead(l.id, { next_action: e.target.value || null })} /></td>
-                    <td className="py-2 pr-2 whitespace-nowrap">
-                      <div className="text-xs pp-mono">{l.last_contact ? `${shortDate(l.last_contact)} · ${daysAgoLabel(l.last_contact)}` : 'never'}</div>
-                      {!CLOSED.includes(stage) && (
-                        <button onClick={() => markContacted(l)} className="pp-btn-ghost mt-1 px-2 py-0.5 text-xs flex items-center gap-1" title="Mark contacted today (sets follow-up +7 days if none)">
-                          <PhoneCall size={12} /> Contacted today
-                        </button>
-                      )}
-                    </td>
-                    <td className="py-2 pr-2"><input key={l.next_date || 'none'} type="date" className="pp-input py-1 text-sm" style={late ? { color: 'var(--bad)', fontWeight: 700 } : undefined} defaultValue={l.next_date || ''} onChange={e => updateLead(l.id, { next_date: e.target.value || null })} /></td>
-                    <td className="py-2.5 text-right pp-mono">{l.est_monthly ? money(l.est_monthly) : '—'}</td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
+      {groups.length === 0 ? <div className="text-sm pp-sub">No active leads.</div> : groups.map(([title, list]) => (
+        <div key={title}>
+          <div className="text-xs uppercase tracking-wide pp-sub mb-1">{title} · {list.length}</div>
+          {list.map(l => <Row key={l.id} l={l} />)}
+        </div>
+      ))}
+
+      {closed.length > 0 && (
+        <div>
+          <button onClick={() => setShowClosed(s => !s)} className="text-xs pp-sub hover:underline">{showClosed ? 'Hide' : 'Show'} signed / lost ({closed.length})</button>
+          {showClosed && closed.map(l => <Row key={l.id} l={l} />)}
         </div>
       )}
     </section>
