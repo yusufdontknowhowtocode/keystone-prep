@@ -93,12 +93,12 @@ export default function ShopifyFulfillmentPennsylvania() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-[var(--paper)] text-[var(--ink)]">
+    <div className="site-dark kp-svc min-h-screen text-[var(--ink)]">
       <header
         className="border-b-2"
         style={{
           borderColor: 'var(--ink)',
-          background: 'var(--card)',
+          background: 'rgba(22,24,29,.97)',
         }}
       >
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between gap-4">
@@ -178,7 +178,7 @@ export default function ShopifyFulfillmentPennsylvania() {
           className="border-y"
           style={{
             borderColor: 'var(--line)',
-            background: '#fff',
+            background: 'var(--paper2)',
           }}
         >
           <div className="max-w-4xl mx-auto px-4 py-12">
@@ -241,7 +241,7 @@ export default function ShopifyFulfillmentPennsylvania() {
           className="border-y"
           style={{
             borderColor: 'var(--line)',
-            background: '#fff',
+            background: 'var(--paper2)',
           }}
         >
           <div className="max-w-4xl mx-auto px-4 py-12">
@@ -316,7 +316,7 @@ export default function ShopifyFulfillmentPennsylvania() {
           className="border-t"
           style={{
             borderColor: 'var(--line)',
-            background: '#fff',
+            background: 'var(--paper2)',
           }}
         >
           <div className="max-w-4xl mx-auto px-4 py-12 text-center">

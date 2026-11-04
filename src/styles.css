@@ -126,3 +126,11 @@ button, input, textarea, select { font: inherit; }
 .admin-dark .pp-row:hover{ background:#2D3034; }
 .admin-dark .pp-navbtn.active{ color:#1F2124; }
 .admin-dark .pp-navbtn:not(.active):hover{ background:#303338; }
+
+/* service pages: same look as the static homepage (public/kp/site.css) */
+.kp-svc{ --paper:#16181D; --paper2:#1D1F22; --card:#23262C; --ink:#F6F6F4; --sub:#A9ABAF; --line:#3A3D44; --accent:#FF4F00; --ok:#F2C200; background:#16181D; }
+.kp-svc header{ border-color:#3A3D44 !important; position:sticky; top:0; z-index:30; }
+.kp-svc .pp-display{ font-weight:900; }
+.kp-svc .pp-btn-accent{ color:#16181D; font-weight:800; }
+.kp-svc .pp-btn-ghost{ border-color:#5A5D64; }
+.kp-svc a.pp-btn-ghost:hover{ background:#2A2D34; }
