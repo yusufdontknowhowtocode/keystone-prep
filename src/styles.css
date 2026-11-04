@@ -31,6 +31,46 @@ button, input, textarea, select { font: inherit; }
 .pp-input:focus{ border-color:var(--accent); box-shadow:0 0 0 3px rgba(255,79,0,.12); }
 @media (prefers-reduced-motion: reduce){ *{ transition:none !important; animation:none !important; scroll-behavior:auto !important; } }
 
+/* ---------- Public site: dark warehouse theme ---------- */
+.site-dark{
+  --paper:#16181D; --paper2:#1B1E24; --card:#22252C; --ink:#F2F0EA; --sub:#A4A7AE;
+  --line:#353841; --accent:#E5372B; --ok:#45C176; --warn:#F2C230; --bad:#FF7A7A; --yellow:#F2C230;
+  color-scheme: dark;
+}
+.site-dark .pp-btn{ background:var(--ink); color:#16181D; }
+.site-dark .pp-btn-accent{ background:var(--accent); color:#fff; }
+.site-dark .pp-btn-ghost{ color:var(--ink); }
+.site-dark .pp-btn-ghost:hover{ background:#2A2D34; }
+.site-dark .pp-input{ background:#1A1C21; color:var(--ink); }
+.site-dark .pp-input::placeholder{ color:#6E727B; }
+.site-dark .pp-input:focus{ box-shadow:0 0 0 3px rgba(229,55,43,.22); }
+.site-dark .pp-row:hover{ background:#262931; }
+.site-dark select.pp-input option{ background:#1A1C21; color:var(--ink); }
+
+/* yellow floor-line divider */
+.kp-floorline{ height:10px; background:repeating-linear-gradient(-45deg, var(--yellow) 0 14px, #16181D 14px 28px); opacity:.9; }
+.kp-steel{ border-left:4px solid var(--accent); }
+.kp-eyebrow-line{ display:inline-block; width:28px; height:3px; background:var(--yellow); vertical-align:middle; margin-right:8px; }
+
+/* shipping-label rate calculator */
+.kp-label{ position:relative; background:#FAF8F1; color:#16181D; border-radius:6px; padding:20px 20px 16px;
+  box-shadow:0 18px 40px rgba(0,0,0,.45); transform:rotate(1.2deg); transition:transform .25s ease; }
+.kp-label:hover{ transform:rotate(0deg) translateY(-2px); }
+.kp-label::after{ content:''; position:absolute; top:0; right:0; width:34px; height:34px;
+  background:linear-gradient(225deg, #16181D 0 50%, #E2DED2 50% 100%); border-bottom-left-radius:6px;
+  box-shadow:-3px 3px 6px rgba(0,0,0,.18); }
+.kp-label-top{ display:flex; justify-content:space-between; font-family:'IBM Plex Mono',monospace; font-size:11px;
+  letter-spacing:.06em; font-weight:600; padding-right:30px; }
+.kp-barcode{ display:flex; height:46px; margin:10px 0 6px; overflow:hidden; }
+.kp-barcode span{ display:block; height:100%; flex:none; }
+.kp-label-rate{ display:flex; align-items:baseline; gap:10px; border-top:2px solid #16181D; padding-top:8px; }
+.kp-label-rate .pp-display{ font-size:56px; font-weight:700; line-height:1; }
+.kp-label-rate span:last-child{ font-weight:600; font-size:14px; }
+.kp-label-cell{ border:1.5px solid #16181D; border-radius:4px; padding:8px 10px; font-size:12px; font-weight:600; }
+.kp-label-cell strong{ display:block; font-size:22px; margin-top:2px; }
+.kp-label-fine{ font-size:11px; color:#55585F; margin-top:10px; line-height:1.4; }
+.kp-range{ width:100%; margin-top:8px; accent-color:#E5372B; }
+
 /* ---------- Admin night mode ---------- */
 .admin-dark{
   --paper:#1F2124; --card:#27292D; --ink:#DCDDDF; --sub:#999CA1;

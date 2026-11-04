@@ -403,7 +403,7 @@ export default function QuoteEstimator() {
             <textarea className="pp-input min-h-20" value={form.notes} onChange={e => set('notes', e.target.value)} placeholder={isDtc ? 'Branded packaging, inserts, number of SKUs…' : 'Expiration dates, fragile items, case packs…'} />
           </Field>
 
-          {error && <div className="text-sm p-3 rounded" style={{ background: '#FEF2F2', color: 'var(--bad)' }}>{error}</div>}
+          {error && <div className="text-sm p-3 rounded" style={{ background: 'rgba(200,30,30,.12)', color: 'var(--bad)' }}>{error}</div>}
 
           <button className="pp-btn pp-btn-accent w-full py-3 flex items-center justify-center gap-2" disabled={sending}>
             {sending ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}

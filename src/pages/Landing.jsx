@@ -3,6 +3,7 @@ import { ArrowRight, Barcode, Boxes, Camera, CheckCircle2, Clock, MapPin, Messag
 import { SITE } from '../lib/config.js'
 import ServicesMenu from '../components/ServicesMenu.jsx'
 import QuoteEstimator from '../components/QuoteEstimator.jsx'
+import LabelCalc from '../components/LabelCalc.jsx'
 
 const PHONE_DISPLAY = '267-517-1112'
 const PHONE_TEL = '+12675171112'
@@ -125,7 +126,7 @@ export default function Landing() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-[var(--paper)] text-[var(--ink)]">
+    <div className="site-dark min-h-screen bg-[var(--paper)] text-[var(--ink)]">
       <header className="border-b-2" style={{ borderColor: 'var(--ink)', background: 'var(--card)' }}>
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between gap-4">
           <a href="/" className="flex items-center gap-2 font-bold pp-display text-2xl uppercase tracking-wide">
@@ -190,15 +191,11 @@ export default function Landing() {
             </div>
           </div>
 
-          <div className="pp-card overflow-hidden shadow-sm">
-            <img
-              src="/warehouse.jpg"
-              alt="Keystone Prep warehouse in Lansdale, PA — client inventory in labeled bins on steel racks, pack station and scale"
-              className="w-full object-cover aspect-[4/3]"
-            />
-            <div className="px-4 py-3 text-sm pp-sub flex items-center gap-2">
-              <Warehouse size={16} className="pp-accent shrink-0" /> Our floor in Lansdale. Come see it before you send anything.
-            </div>
+          <div className="lg:pl-6">
+            <LabelCalc />
+            <a href="#contact" className="text-sm pp-sub mt-4 inline-flex items-center gap-1 hover:underline">
+              Want an exact number? Get your rate <ArrowRight size={14} />
+            </a>
           </div>
         </section>
 
@@ -207,6 +204,17 @@ export default function Landing() {
             {FACILITY_SPECS.map(([value, label]) => (
               <MiniStat key={label} label={label} value={value} />
             ))}
+          </div>
+          <div className="pp-card overflow-hidden mt-3">
+            <img
+              src="/warehouse.jpg"
+              alt="Keystone Prep warehouse in Lansdale, PA — client inventory in labeled bins on steel racks, pack station and scale"
+              className="w-full object-cover"
+              style={{ height: '340px' }}
+            />
+            <div className="px-4 py-3 text-sm pp-sub flex items-center gap-2">
+              <Warehouse size={16} className="pp-accent shrink-0" /> Our floor in Lansdale. Come see it before you send anything.
+            </div>
           </div>
         </section>
 
@@ -229,7 +237,8 @@ export default function Landing() {
           </div>
         </section>
 
-        <section id="services" className="border-y" style={{ borderColor: 'var(--line)', background: '#fff' }}>
+        <div className="kp-floorline" />
+        <section id="services" className="border-y" style={{ borderColor: 'var(--line)', background: 'var(--paper2)' }}>
           <div className="max-w-6xl mx-auto px-4 py-14">
             <SectionHeading eyebrow="Services" title="One warehouse. Every channel." />
             <p className="pp-sub mt-3 max-w-2xl">Whether you sell on Amazon, your own store, or TikTok, we receive, prep, store, and ship your inventory — and you watch all of it in real time in the portal.</p>
@@ -243,7 +252,7 @@ export default function Landing() {
           </div>
         </section>
 
-        <section id="process" className="border-y" style={{ borderColor: 'var(--line)', background: '#fff' }}>
+        <section id="process" className="border-y" style={{ borderColor: 'var(--line)', background: 'var(--paper2)' }}>
           <div className="max-w-6xl mx-auto px-4 py-14">
             <SectionHeading eyebrow="Process" title="The boring workflow sellers actually want." />
             <div className="pp-card overflow-hidden mt-8">
@@ -301,7 +310,7 @@ export default function Landing() {
               {TESTIMONIALS.map(t => (
                 <figure key={t.name} className="pp-card p-5 flex flex-col gap-3">
                   <div className="flex gap-1" aria-label="5 out of 5 stars">
-                    {[...Array(5)].map((_, i) => <Star key={i} size={16} fill="currentColor" style={{ color: 'var(--ok)' }} />)}
+                    {[...Array(5)].map((_, i) => <Star key={i} size={16} fill="currentColor" style={{ color: 'var(--yellow)' }} />)}
                   </div>
                   <blockquote className="text-sm leading-relaxed">“{t.quote}”</blockquote>
                   <figcaption className="mt-auto text-xs pp-sub">
@@ -319,7 +328,7 @@ export default function Landing() {
             <div>
               <SectionHeading eyebrow="Good fit" title="Who we want first." />
               <ul className="mt-4 space-y-3 text-sm">
-                {['Wholesale & private-label FBA sellers', 'Sellers receiving containers or pallet freight', 'Shopify / DTC brands', 'TikTok Shop sellers', '1,000+ units or orders / month preferred', 'Brands that value East Coast speed and real-time visibility'].map(x => <li key={x} className="flex gap-2"><CheckCircle2 size={17} style={{ color: 'var(--ok)' }} /> {x}</li>)}
+                {['Wholesale & private-label FBA sellers', 'Sellers receiving containers or pallet freight', 'Shopify / DTC brands', 'TikTok Shop sellers', 'Test shipments welcome, then scale with us', 'Brands that value East Coast speed and real-time visibility'].map(x => <li key={x} className="flex gap-2"><CheckCircle2 size={17} style={{ color: 'var(--ok)' }} /> {x}</li>)}
               </ul>
             </div>
             <div>
@@ -347,7 +356,7 @@ export default function Landing() {
         </section>
 
         {/* ---------- FAQ ---------- */}
-        <section id="faq" className="border-t" style={{ borderColor: 'var(--line)', background: '#fff' }}>
+        <section id="faq" className="border-t" style={{ borderColor: 'var(--line)', background: 'var(--paper2)' }}>
           <div className="max-w-4xl mx-auto px-4 py-14">
             <SectionHeading eyebrow="FAQ" title="Questions sellers actually ask." />
             <div className="mt-8 space-y-3">
@@ -373,7 +382,8 @@ export default function Landing() {
         </section>
 
         {/* ---------- QUOTE ESTIMATOR + CONTACT ---------- */}
-        <section id="contact" className="border-t" style={{ borderColor: 'var(--line)', background: '#fff' }}>
+        <div className="kp-floorline" />
+        <section id="contact" className="border-t" style={{ borderColor: 'var(--line)', background: 'var(--paper2)' }}>
           <div className="max-w-6xl mx-auto px-4 py-14 space-y-8">
             <div>
               <SectionHeading eyebrow="New accounts." title="Get your rate." />
@@ -443,7 +453,7 @@ function MiniStat({ label, value, accent }) {
 }
 
 function Feature({ icon: Icon, title, text }) {
-  return <div className="pp-card p-5"><Icon size={22} className="pp-accent" /><h3 className="font-bold mt-4">{title}</h3><p className="text-sm pp-sub mt-2">{text}</p></div>
+  return <div className="pp-card kp-steel p-5"><Icon size={22} className="pp-accent" /><h3 className="font-bold mt-4">{title}</h3><p className="text-sm pp-sub mt-2">{text}</p></div>
 }
 
 function RateCard({ title, tag, rows }) {
@@ -464,5 +474,5 @@ function RateCard({ title, tag, rows }) {
 }
 
 function SectionHeading({ eyebrow, title }) {
-  return <div><div className="text-xs font-semibold uppercase tracking-widest pp-sub">{eyebrow}</div><h2 className="pp-display text-4xl md:text-5xl font-bold uppercase leading-none mt-1">{title}</h2></div>
+  return <div><div className="text-xs font-semibold uppercase tracking-widest pp-sub"><span className="kp-eyebrow-line" />{eyebrow}</div><h2 className="pp-display text-4xl md:text-5xl font-bold uppercase leading-none mt-1">{title}</h2></div>
 }
