@@ -120,6 +120,6 @@ export function mountStaticLanding() {
   if (id) {
     const target = ALIASES[id] || id
     if (target !== id) history.replaceState(null, '', '#' + target)
-    setTimeout(() => document.getElementById(target)?.scrollIntoView(), 50)
+    setTimeout(() => document.getElementById(target)?.scrollIntoView({ behavior: 'instant' }), 300)
   }
 }
