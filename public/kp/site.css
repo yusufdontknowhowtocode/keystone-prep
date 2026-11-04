@@ -341,7 +341,22 @@ address{font-style:normal;margin-top:24px;line-height:1.45}
 /* tweaks: smaller orange "why" band; 4th workflow step (Store) */
 .rule{padding:clamp(36px,4vw,64px) var(--gut);gap:40px;align-items:center}
 .rule h2{font-size:clamp(30px,3.3vw,54px);line-height:.97}
-@media(min-width:1081px){
-  .k-steps .step-text{grid-column:span 6}
-  .k-steps .step-wide{grid-column:1/-1;grid-template-columns:minmax(0,640px) minmax(0,1fr)}
+/* workflow: numbered row of steps, then Approve full width */
+.k-track{list-style:none;margin:clamp(40px,5vw,72px) 0 0;padding:0 0 0 clamp(32px,5vw,72px);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(18px,2vw,32px)}
+.tk{display:flex;flex-direction:column}
+.tk-pic{margin:0 0 18px;background:#fff;padding:7px;box-shadow:0 12px 26px rgba(20,20,20,.25)}
+.tk-pic img{width:100%;height:auto;aspect-ratio:4/5;object-fit:cover;display:block}
+.tk-kraft{position:relative;display:block;width:100%;aspect-ratio:4/5;background:#a97f55 url(img/kraft.webp) center/260%}
+.tk-kraft .sp-lab{left:17%;top:24%;width:66%;height:52%}
+.tk-n{display:block;font:700 15px/1 var(--mono);color:var(--steel2);border-top:3px solid var(--ink);padding-top:10px;margin-bottom:8px}
+.tk h3{margin-bottom:8px}
+.tk p{font-size:17px;line-height:1.38}
+.tk-approve{margin:clamp(48px,5vw,80px) 0 0 clamp(32px,5vw,72px);display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:clamp(24px,3vw,56px);align-items:center}
+.tk-approve h3{margin-bottom:10px}
+.tk-approve p{font-size:19px;line-height:1.38;max-width:30em}
+.tk-approve .under{display:inline-block;margin-top:14px}
+@media(max-width:1080px){.k-track{grid-template-columns:repeat(2,minmax(0,1fr))}.tk-approve{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:700px){
+  .k-track{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding-left:clamp(32px,5vw,72px);gap:16px;padding-bottom:12px;margin-right:calc(-1 * var(--gut));padding-right:var(--gut)}
+  .tk{flex:0 0 78%;scroll-snap-align:start}
 }
