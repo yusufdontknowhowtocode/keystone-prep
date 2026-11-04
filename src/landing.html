@@ -1,0 +1,327 @@
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="cubes" viewBox="0 0 100 92"><g fill="none" stroke="currentColor" stroke-width="5.4" stroke-linejoin="round" stroke-linecap="round"><path id="c1" d="M50 4 67.3 14V34L50 44 32.700 34V14ZM32.700 14 50 24 67.3 14M50 24V44"/><path d="M32.700 34 50 44V64L32.700 74 15.400 64V44ZM15.400 44 32.700 54 50 44M32.700 54V74"/><path d="M67.3 34 84.600 44V64L67.3 74 50 64V44ZM50 44 67.3 54 84.600 44M67.3 54V74"/></g></symbol>
+</defs></svg>
+
+<header class="bar" id="bar">
+  <a class="k-mark" href="#top" aria-label="Keystone Prep, top of page"><svg width="40" height="37"><use href="#cubes"/></svg><span>Keystone <i>Prep</i></span></a>
+  <nav class="bar-links" aria-label="Sections">
+    <a href="#workflow">Process</a>
+    <a href="#channels">Services</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#questions">FAQ</a>
+    <a href="/portal">Portal demo</a>
+  </nav>
+  <a class="bar-text" href="sms:+12675171112">Text 267-517-1112</a>
+</header>
+
+<main>
+<!-- OPENING: the label -->
+<section class="k-top" id="top">
+  <div class="lines" aria-hidden="true"><i></i><i></i></div>
+  <div class="top-copy">
+    <h1>FBA prep &amp;&nbsp;Shopify <br class="d">fulfillment in <br class="d"><span class="nw">Lansdale, PA.</span></h1>
+    <p class="lead">Same-day shipping, dock-high receiving, and the owner answers your&nbsp;texts.</p>
+
+    <form class="press" id="press" aria-label="Estimate your cost" onsubmit="return false">
+      <div class="press-tabs" role="group" aria-label="What you sell through">
+        <button type="button" class="k-on" data-mode="fba" aria-pressed="true">Amazon FBA prep</button>
+        <button type="button" data-mode="dtc" aria-pressed="false">Shopify / DTC</button>
+      </div>
+      <label class="slide"><span class="slide-top"><span id="vol-name">Units per month</span> <output id="vol-out">500</output></span>
+        <input type="range" id="vol" min="100" max="10000" step="100" value="500">
+      </label>
+      <div class="adds" id="adds">
+        <label><input type="checkbox" data-add="poly"><span>Polybag <b>+$0.25</b></span></label>
+        <label><input type="checkbox" data-add="bubble"><span>Bubble wrap <b>+$0.40</b></span></label>
+        <label><input type="checkbox" data-add="bundle"><span>Bundling <b>+$0.50</b></span></label>
+      </div>
+      <div class="k-items" id="items" hidden>
+        <span>Items per order</span>
+        <div class="stepper"><button type="button" id="it-minus" aria-label="One item fewer">&minus;</button><output id="it-out">1</output><button type="button" id="it-plus" aria-label="One item more">+</button></div>
+      </div>
+      <label class="brandline"><span>Your brand, on the label</span><input id="brand" type="text" maxlength="22" placeholder="Your brand" autocomplete="organization"></label>
+    </form>
+  </div>
+
+  <div class="bench">
+    <div class="carton" id="carton">
+      <div class="tape" aria-hidden="true"></div>
+      <div class="arrows" aria-hidden="true"><svg viewBox="0 0 60 44" width="60" height="44"><path d="M12 42V12M3 21l9-11 9 11M46 42V12M37 21l9-11 9 11" fill="none" stroke="currentColor" stroke-width="5"/></svg></div>
+      <div class="upc" id="upc" aria-hidden="true"><svg id="upc-bars" preserveAspectRatio="none"></svg><span>0 84219 60317 5</span></div>
+      <div class="spot" id="spot" aria-hidden="true"></div>
+      <p class="marker" id="marker" aria-live="polite">Drag the label over the barcode</p>
+      <div class="label" id="label" role="group" aria-label="Your estimate, printed as a label">
+        <div class="label-print" id="print">
+          <div class="l-head"><svg width="24" height="22"><use href="#cubes"/></svg><b>Keystone Prep</b><span>Lansdale, PA</span></div>
+          <svg class="l-bars" id="bars" preserveAspectRatio="none" role="img" aria-label="Barcode"></svg>
+          <div class="l-code" id="code">KP-500U-065</div>
+          <div class="l-brand" id="l-brand">Your brand</div>
+          <div class="l-rate"><strong id="l-rate">$0.65</strong><span id="l-per">per unit, all-in</span></div>
+          <dl class="l-rows">
+            <div><dt id="l-vol-n">Units / month</dt><dd id="l-vol">500</dd></div>
+            <div><dt>Typical month</dt><dd id="l-month">$325</dd></div>
+            <div id="l-first-row"><dt>First shipment</dt><dd id="l-first">$260</dd></div>
+          </dl>
+          <p class="l-note" id="l-note">Up to 100 units on us. Estimate only, before postage.</p>
+        </div>
+      </div>
+    </div>
+    <div class="bench-do">
+      <button class="k-go" id="stick" type="button">Stick the label on</button>
+      <a class="k-go k-hidden" id="quote" href="#rate">Send me an exact quote</a>
+      <button class="peel k-hidden" id="peel" type="button">Peel it off</button>
+    </div>
+  </div>
+</section>
+
+<!-- WHY NOW -->
+<section class="rule" id="why">
+  <h2>Amazon ended in-house FBA prep in January&nbsp;2026, so every unit now has to arrive labeled and compliant, or you eat <span class="nw">$0.32 to $8.25/unit</span> in defect&nbsp;fees.</h2>
+  <p>One per-unit rate covers receiving, inspection, FNSKU label, and outbound box prep. Add-ons are only billed on SKUs that actually need them. Your first test shipment, up to 100 units, is on us, so you can see the work before you commit volume.</p>
+</section>
+
+<!-- WHAT THEY SAID -->
+<section class="said" id="said">
+  <div class="said-list">
+    <figure class="review">
+      <blockquote>Excellent communication with my company. They kept on top of everything and were able to provide additional information when I needed it for my suppliers and for Amazon as well. Due to his quick response, even after hours, they responded to several inquiries.</blockquote>
+      <figcaption><b class="r-name">Ryan D.</b> <span class="r-co">Dooley Core Enterprise LLC</span> <span class="r-src">Google review</span></figcaption>
+      <p class="k-reply"><span>Keystone replied</span> <em class="r-reply">Thanks, Ryan! Appreciate you trusting us with the first run. Glad it went smoothly.</em></p>
+    </figure>
+    <figure class="review">
+      <blockquote>Great work and smooth process. Yusuf and the team handled everything so cleanly and efficiently. Highly recommended!</blockquote>
+      <figcaption><b class="r-name">Liubomyr</b> <span class="r-co">NordPeak Distribution</span> <span class="r-src">Google review</span></figcaption>
+      <p class="k-reply"><span>Keystone replied</span> <em class="r-reply">Thank you, Liubomyr! It's been great working with you. Looking forward to the next shipment.</em></p>
+    </figure>
+  </div>
+</section>
+
+<!-- THE WORKFLOW, down the floor line -->
+<section class="flow" id="workflow">
+  <div class="flow-head">
+    <h2>The boring workflow sellers actually&nbsp;want.</h2>
+    <p>You watch all of it in real time in the portal, and nothing leaves until you say so.</p>
+  </div>
+  <ol class="k-steps">
+    <li class="step">
+      <figure class="k-shot"><img src="/kp/img/floor-dock.webp" width="450" height="600" loading="lazy" alt="The Keystone warehouse floor in Lansdale: red steel overhead, a yellow floor line leading to the dock door, pallets staged to the left"><figcaption>The dock end of the floor, Lansdale</figcaption></figure>
+      <div><h3>Receive</h3><p>Containers and parcel freight arrive at the Lansdale dock and get logged against the client account.</p></div>
+    </li>
+    <li class="step">
+      <figure class="k-shot"><img src="/kp/img/floor-racks.webp" width="450" height="600" loading="lazy" alt="Racking with cartons and flat packed boxes along a white wall, yellow floor lines running to the dock doors"><figcaption>Racks and floor lines, Lansdale</figcaption></figure>
+      <div><h3>Photograph</h3><p>Cartons and exceptions are photographed at check-in so clients know exactly what arrived. Discrepancies and damage are documented and reported to you the same&nbsp;day.</p></div>
+    </li>
+    <li class="step step-text">
+      <div class="specimen" aria-hidden="true"><span class="sp-upc"></span><span class="sp-lab"></span></div>
+      <div><h3>Prep</h3><p>Inspect, label, polybag, bundle, and stage wholesale or private-label inventory for FBA, with the manufacturer barcode covered and every count verified.</p></div>
+    </li>
+    <li class="step step-wide">
+      <figure class="k-shot shot-screen"><img src="/kp/img/portal.webp" srcset="/kp/img/portal-780.webp 780w, /kp/img/portal.webp 1560w" sizes="(max-width:760px) 88vw, 640px" width="1560" height="1200" loading="lazy" alt="The Keystone client portal in demo mode: units in storage, two shipments staged and awaiting approval, and an activity log"><figcaption>Your portal, shown here in its demo account</figcaption></figure>
+      <div><h3>Approve</h3><p>Clients review outbound shipments in the portal before anything leaves the warehouse. Box counts, photos, issues and invoices are all in one&nbsp;place.</p><a class="under" href="/portal">Open the portal demo</a></div>
+    </li>
+  </ol>
+</section>
+
+<!-- CHANNELS -->
+<section class="chan" id="channels">
+  <h2>One warehouse. Every&nbsp;channel.</h2>
+  <p class="chan-sub">Whether you sell on Amazon, your own store, or TikTok, we receive, prep, store, and ship your inventory.</p>
+  <div class="doors">
+    <details class="door" name="door" open>
+      <summary><span>Amazon FBA prep</span><small>from $0.55/unit</small></summary>
+      <div class="door-in">
+        <p>Receiving, inspection, FNSKU labeling, polybag, bundle, and box prep to Amazon's spec, so nothing gets rejected or hit with defect fees. Most standard prep ships within 1 to 2 business days once inventory and label files are in hand.</p>
+        <ul><li>Receiving &amp; photographed check-in</li><li>Inspection &amp; count verification</li><li>FNSKU labeling (manufacturer barcode covered)</li><li>Polybagging &amp; suffocation warnings</li><li>Bundling &amp; multipack assembly</li><li>Case-pack and carton prep to Amazon spec</li><li>Racked storage between shipments</li><li>Outbound to any U.S. Amazon FC</li></ul>
+      </div>
+    </details>
+    <details class="door" name="door">
+      <summary><span>Shopify &amp; DTC fulfillment</span><small>$3.50/order</small></summary>
+      <div class="door-in">
+        <p>Store your inventory with us and we pick, pack, and ship individual orders straight to your customers. You add us as a staff member in your Shopify admin; we pull orders directly and tracking writes back to the customer automatically. UPS, FedEx, and USPS, on your account or ours at cost.</p>
+        <ul><li>Orders by 2 PM ET ship same day, Mon to Fri</li><li>1 to 2 day ground to NYC, New Jersey, Philly, Baltimore, DC, and Boston</li><li>Your branded boxes, inserts, and thank-you cards</li><li>Multi-SKU kits, bundles, and gift sets</li><li>Wholesale / B2B carton orders to retailers</li><li>Returns inspected and photographed</li></ul>
+      </div>
+    </details>
+    <details class="door" name="door">
+      <summary><span>TikTok Shop</span><small>same warehouse</small></summary>
+      <div class="door-in">
+        <p>Fulfillment for TikTok Shop sellers: we handle the orders so you can focus on the content that drives them. Same pick and pack rates, same 2 PM ET cutoff, and one warehouse covers your other channels from the same inventory.</p>
+      </div>
+    </details>
+    <details class="door" name="door">
+      <summary><span>Container &amp; pallet receiving</span><small>53 ft trailers</small></summary>
+      <div class="door-in">
+        <ol class="k-mini"><li><b>Schedule the delivery.</b> Send us the container or trailer details (carrier, PO, and ETA) and we set a receiving appointment so the driver is unloaded without waiting.</li><li><b>Unload at the dock.</b> Floor-loaded or palletized both work.</li><li><b>Count, inspect, photograph.</b> Every carton is counted against your packing list and photographed at check-in.</li><li><b>Prep and forward.</b> Units go to Amazon fulfillment centers under your Seller Central labels. Anything staying behind goes into racked, client-separated storage.</li></ol>
+        <p>Your forwarder or customs broker can deliver directly to our dock. Your customs broker handles clearance before delivery and we receive cleared freight; DDP shipments also work. Receiving is included in the per-unit prep rate when we prep the goods. For large wholesale lots of many low-cost units, ask about flat per-carton receiving.</p>
+      </div>
+    </details>
+    <details class="door" name="door">
+      <summary><span>FBA removals</span><small>$2 per box</small></summary>
+      <div class="door-in">
+        <ol class="k-mini"><li><b>Create the removal order.</b> In Seller Central, enter our address as the ship-to and send us the removal order ID.</li><li><b>We receive and match every box.</b> Removals arrive in waves, often weeks apart. Each box is logged against your ID, so you always know what has landed and what is still missing.</li><li><b>Inspect, count, photograph.</b> A clear count by SKU and condition: sellable, damaged, or customer return. Exactly what you need for any reimbursement claims.</li><li><b>Re-prep, store, or move on.</b> Sellable units can go back into FBA, stay in storage, ship to your own customers, or be set aside for liquidation. Nothing is thrown away without your written approval.</li></ol>
+        <p>Receiving is $2 per box, waived for boxes with 5+ units. Units we re-prep for FBA are billed at the standard all-in rate. We have consolidated US removals for sellers moving inventory to Amazon Canada, and can relabel for Walmart WFS.</p>
+      </div>
+    </details>
+    <details class="door" name="door">
+      <summary><span>Storage &amp; returns</span><small>30 days included</small></summary>
+      <div class="door-in">
+        <p>Separated client storage by SKU, plus inbound receiving and returns processing as you scale. First 30 days included, then from $35/pallet/month, tracked in your portal. Returns are inspected and photographed at $4.00 + postage.</p>
+      </div>
+    </details>
+  </div>
+</section>
+
+<!-- THE DOCK, TO SCALE -->
+<section class="dock" id="dock">
+  <div class="dock-copy">
+    <h2>Send a container or a single&nbsp;case.</h2>
+    <p>Keystone runs out of the US facility of KT Trims, an apparel-trim manufacturer that supplies major global fashion brands. The crew that receives KT's international freight receives yours.</p>
+  </div>
+  <figure class="scale" aria-label="To scale: a 53 foot trailer, a 40 foot container and a single carton">
+    <svg viewBox="0 0 1120 330" role="img" aria-labelledby="scale-t">
+      <title id="scale-t">A 53 foot dry van, a 40 foot container and one carton drawn to the same scale, all backing up to the dock</title>
+      <g class="s-wall"><path d="M1040 16V314"/><path d="M1040 314H1120"/></g>
+      <text class="s-t" x="1054" y="40">Your</text><text class="s-t" x="1054" y="62">dock</text>
+      <!-- 53 ft = 954 units, 18u per ft -->
+      <g class="s-van"><rect x="84" y="36" width="954" height="74"/><text x="104" y="84">53-foot dry van</text></g>
+      <g class="s-can"><rect x="318" y="148" width="720" height="74"/><text x="338" y="196">40-foot container</text></g>
+      <g class="s-case"><rect x="1012" y="276" width="26" height="26"/><path d="M1012 289H1038"/><text x="996" y="296" text-anchor="end">A single case</text></g>
+      <path class="s-floor" d="M0 314H1040"/>
+    </svg>
+    <figcaption>Drawn to one scale. Send whichever you have.</figcaption>
+  </figure>
+  <dl class="spec">
+    <div><dt>Dock-high</dt><dd>Elevated dock at standard trailer height, unloading straight&nbsp;in</dd></div>
+    <div><dt>Drive-in door</dt><dd>Ground-level door for box trucks and courier&nbsp;freight</dd></div>
+    <div><dt>6,000 sq ft</dt><dd>Racked storage with separated client&nbsp;zones</dd></div>
+    <div><dt>9 to 5, M to F</dt><dd>Receiving hours. Parcel, LTL, and container freight&nbsp;accepted</dd></div>
+  </dl>
+</section>
+
+<!-- PRICE SHEET -->
+<section class="k-price" id="pricing">
+  <div class="sheet">
+    <div class="sheet-head"><h2>Per order or per unit. No&nbsp;surprises.</h2>
+    <p>No setup, API, bin, or SKU fees, and no peak-season surcharge. Shipping, Amazon fees, and special packaging materials are billed separately or paid directly by the client. Final rates depend on SKU complexity and monthly volume.</p></div>
+    <div class="sheet-cols">
+      <div class="rates" id="rates-fba">
+        <h3>Amazon FBA prep <small>all-in per unit</small></h3>
+        <div class="row"><span class="r-k">Up to 1,000 units / mo</span><span class="r-v">$0.65/unit</span></div>
+        <div class="row"><span class="r-k">1,001 to 5,000 units / mo</span><span class="r-v">$0.60/unit</span></div>
+        <div class="row"><span class="r-k">5,001+ units / mo</span><span class="r-v">$0.55/unit</span></div>
+      </div>
+      <div class="rates" id="rates-dtc">
+        <h3>Shopify / DTC <small>pick, pack, ship</small></h3>
+        <div class="row"><span class="r-k">First item</span><span class="r-v">$3.50/order</span></div>
+        <div class="row"><span class="r-k">Each additional item</span><span class="r-v">$0.75/item</span></div>
+        <div class="row"><span class="r-k">500 to 999 orders / mo</span><span class="r-v">$3.25 + $0.50/item</span></div>
+        <div class="row"><span class="r-k">1,000+ orders / mo</span><span class="r-v">Custom quote</span></div>
+        <div class="row"><span class="r-k">Returns</span><span class="r-v">$4.00 + postage</span></div>
+      </div>
+      <div class="rates rates-wide" id="rates-add">
+        <h3>Add-ons <small>only if your SKU needs them</small></h3>
+        <div class="row"><span class="r-k">Polybagging</span><span class="r-v">$0.25/unit</span></div>
+        <div class="row"><span class="r-k">Bubble wrap</span><span class="r-v">$0.40/unit</span></div>
+        <div class="row"><span class="r-k">Bundling / kitting</span><span class="r-v">$0.50 per unit bundled</span></div>
+        <div class="row"><span class="r-k">Pallet storage</span><span class="r-v">First 30 days included, then from $35/pallet/mo</span></div>
+        <div class="row"><span class="r-k">Inbound minimum</span><span class="r-v">$25/shipment, $50 freight</span></div>
+      </div>
+    </div>
+    <p class="cutoff" id="cutoff">Orders placed by 2 PM ET ship the same day, Monday to Friday.</p>
+    <div class="tear" aria-hidden="true"></div>
+  </div>
+</section>
+
+<!-- FIT -->
+<section class="fit" id="fit">
+  <div>
+    <h2>Who we want first.</h2>
+    <ul class="yes"><li>Wholesale &amp; private-label FBA sellers</li><li>Sellers receiving containers or pallet freight</li><li>Shopify / DTC brands</li><li>TikTok Shop sellers</li><li>1,000+ units or orders / month preferred</li><li>Brands that value East Coast speed and real-time visibility</li></ul>
+  </div>
+  <div>
+    <h2>What we decline at&nbsp;first.</h2>
+    <ul class="no"><li>Hazmat, meltables, or regulated goods</li><li>Oversize/heavy freight</li><li>Clothing with tons of size/color variants</li><li>Very fragile items</li><li>Unsealed or unpackaged absorbent goods (e.g. open food products)</li></ul>
+    <p class="fit-note">If you are unsure whether your product qualifies, ask. A two-minute email saves everyone a&nbsp;headache.</p>
+  </div>
+</section>
+
+<!-- QUESTIONS -->
+<section class="faq" id="questions">
+  <h2>Questions sellers actually&nbsp;ask.</h2>
+  <div class="faq-list">
+    <details class="qa"><summary>What does the per-unit rate include?</summary><p>Everything in the standard flow: receiving your inbound shipment, physical inspection and count verification, FNSKU labeling with the manufacturer barcode covered, and outbound box prep to Amazon spec. Add-ons like polybagging or bundling are only billed on SKUs that actually need them.</p></details>
+    <details class="qa"><summary>How fast is turnaround?</summary><p>Most standard prep ships within 1 to 2 business days once we have your inventory and label files in hand. Receiving is logged the day freight arrives, and you can watch every step in the portal.</p></details>
+    <details class="qa"><summary>Can you receive containers and pallet freight?</summary><p>Yes. The dock is elevated to trailer height, the lot takes full 53-foot trailers, and our receiving crew has years of international container experience through the parent warehouse operation. LTL, FTL, and parcel all work.</p></details>
+    <details class="qa"><summary>How do I send you inventory?</summary><p>Get a rate below, and once your account is set up we send the ship-to address and your portal login. You (or your supplier) ship to us, we photograph and log everything at check-in, and you track it live.</p></details>
+    <details class="qa"><summary>Do I have to be in Pennsylvania to use you?</summary><p>No. Most clients never visit. Suppliers ship directly to our dock from anywhere (domestic parcel, LTL, or international containers), and you watch receiving, prep, and outbound live in the client portal.</p></details>
+    <details class="qa"><summary>Do you handle expiration-dated products?</summary><p>Yes. Consumables need the expiration date visible on the sellable unit for FBA, and we verify that during prep, including on multipacks and case packs, where the date has to show on the outside of the finished unit.</p></details>
+    <details class="qa"><summary>How does billing work?</summary><p>You get an itemized invoice after your shipment goes out, payable by card link or bank transfer. No setup fees, no monthly minimums, no long-term contracts.</p></details>
+    <details class="qa"><summary>Can I visit the warehouse?</summary><p>Please do. Philly-metro sellers are welcome to schedule a walkthrough before sending anything. We would rather you see the racks, the dock, and the prep bench in person than take our word for it.</p></details>
+  </div>
+</section>
+
+<!-- GET YOUR RATE -->
+<section class="rate" id="rate">
+  <div class="rate-copy">
+    <h2>New accounts. Get your&nbsp;rate.</h2>
+    <p>Send it over and we'll confirm your exact rate by email, usually within a couple of hours. If it's a good fit we'll walk you through the portal.</p>
+    <p class="rate-summary" id="rate-sum"></p>
+    <div class="reach">
+      <a href="sms:+12675171112">Text 267-517-1112</a>
+      <a href="https://wa.me/12675171112">WhatsApp</a>
+      <a href="mailto:hello@keystoneprepcenter.com">hello@keystoneprepcenter.com</a>
+    </div>
+    <address>805 West Fifth Street, Suite 10<br>Lansdale, PA 19446<br><a class="under" href="https://www.google.com/maps/search/?api=1&amp;query=Keystone+Prep+805+W+Fifth+St+Lansdale+PA+19446">Tours welcome for local sellers</a></address>
+  </div>
+  <form class="form" id="form" novalidate>
+    <div class="f2">
+      <label>Your name<input name="name" autocomplete="name"></label>
+      <label>Email *<input name="email" type="email" required autocomplete="email"></label>
+      <label><span id="f-brand">Amazon store / brand</span><input name="brand" id="f-brand-in" autocomplete="organization"></label>
+      <label>Phone (optional)<input name="phone" type="tel" autocomplete="tel"></label>
+      <label>Product type *<select name="product" required><option value="">Select...</option><option>Grocery / consumables</option><option>Health &amp; personal care</option><option>Pet supplies</option><option>Apparel</option><option>Home &amp; kitchen</option><option>Toys &amp; games</option><option>Other</option></select></label>
+      <label>Where is the inventory right now? *<select name="status" required><option value="">Select...</option><option>Available now</option><option>Ordered - in transit</option><option>Still researching products</option></select></label>
+      <label><span id="f-when">When would you send a first shipment?</span> *<select name="when" required><option value="">Select...</option><option>Within 2 weeks</option><option>2 to 4 weeks</option><option>1 to 2 months</option><option>Just exploring</option></select></label>
+      <label>Who handles your prep or fulfillment today? *<select name="now" required><option value="">Select...</option><option>Another prep center / 3PL</option><option>We do it ourselves</option><option>Not selling yet</option></select></label>
+      <label class="f-plat" id="f-plat" hidden>Store platform *<select name="platform"><option value="">Select...</option><option>Shopify</option><option>WooCommerce</option><option>TikTok Shop</option><option>Etsy</option><option>Amazon FBM</option><option>Other</option></select></label>
+    </div>
+    <label class="f-note">Anything else we should know?<textarea name="notes" rows="3" placeholder="Expiration dates, fragile items, case packs..."></textarea></label>
+    <p class="f-err" id="f-err" role="alert" hidden></p>
+    <button class="k-go" type="submit">Send me an exact quote</button>
+    <p class="f-ok" id="f-ok" role="status" hidden></p>
+  </form>
+</section>
+</main>
+
+<footer class="foot">
+  <a class="k-mark" href="#top"><svg width="34" height="31"><use href="#cubes"/></svg><span>Keystone <i>Prep</i></span></a>
+  <p>© 2026 Keystone Prep Center LLC. 805 West Fifth Street, Suite 10, Lansdale, PA 19446. <a href="tel:+12675171112">267-517-1112</a> · <a href="mailto:hello@keystoneprepcenter.com">hello@keystoneprepcenter.com</a> · <a href="/portal">Client portal</a></p>
+  <p class="foot-links"><a href="/fba-prep-pennsylvania">PA FBA prep</a> · <a href="/shopify-fulfillment-pennsylvania">Shopify fulfillment</a> · <a href="/container-receiving">Container receiving</a> · <a href="/fba-removal-processing">FBA removals</a></p>
+</footer>
+
+<!-- HELPER -->
+<button class="ask-btn" id="ask-btn" type="button" aria-expanded="false" aria-controls="ask"><svg width="22" height="20" aria-hidden="true"><use href="#cubes"/></svg>Ask Keystone</button>
+<aside class="k-ask" id="ask" hidden aria-label="Ask Keystone">
+  <div class="ask-top"><b>Ask Keystone</b><button id="ask-x" type="button" aria-label="Close">×</button></div>
+  <div class="ask-log" id="ask-log" aria-live="polite"></div>
+  <div class="ask-chips" id="ask-chips"></div>
+  <form class="ask-form" id="ask-form"><input id="ask-in" placeholder="Ask about rates, freight, cutoffs..." aria-label="Your question" autocomplete="off"><button type="submit">Ask</button></form>
+  <div class="ask-hand" id="ask-hand"><span>Or ask the owner</span><a id="h-sms" href="sms:+12675171112">Text</a><a id="h-wa" href="https://wa.me/12675171112">WhatsApp</a><a id="h-mail" href="mailto:hello@keystoneprepcenter.com">Email</a></div>
+</aside>
+
+<script type="application/json" id="site-data">
+{
+ "rates":{"fba_to_1000":0.65,"fba_to_5000":0.60,"fba_over_5000":0.55,"poly":0.25,"bubble":0.40,"bundle":0.50,"free_units":100,"dtc_first":3.50,"dtc_extra":0.75,"dtc_500_first":3.25,"dtc_500_extra":0.50},
+ "assistant":{
+  "hours":"Receiving hours are 9 to 5, Monday to Friday. Orders placed by 2 PM ET ship the same day.",
+  "address":"805 West Fifth Street, Suite 10, Lansdale, PA 19446, in the Philadelphia metro, minutes off the PA Turnpike Northeast Extension. Philly-metro sellers are welcome to schedule a walkthrough.",
+  "rates":"Amazon FBA prep is all-in per unit: $0.65 up to 1,000 units a month, $0.60 from 1,001 to 5,000, $0.55 from 5,001. Add-ons only if your SKU needs them: polybag $0.25, bubble wrap $0.40, bundling $0.50. Your first test shipment, up to 100 units, is on us.",
+  "shopify":"Shopify and DTC is $3.50 an order plus $0.75 per additional item. From 500 orders a month it is $3.25 plus $0.50, and 1,000+ orders get a custom quote. Postage is billed at cost. Orders by 2 PM ET ship the same day, with 1 to 2 day ground to NY, NJ, PA, MD, DC and much of New England.",
+  "storage":"Storage is included for the first 30 days, then from $35 per pallet per month, in separated client zones. Returns are $4.00 plus postage.",
+  "freight":"Yes. Dock-high door at standard trailer height, an open lot that takes full 53-foot dry vans and 40-foot containers, and a drive-in door for box trucks. Parcel, LTL and FTL all work. Your customs broker handles clearance before delivery, and DDP works too. Freight has a $50 inbound minimum.",
+  "removals":"Enter the Keystone address as the ship-to on your removal order and send the order ID. Each box is matched, every unit is sorted and photographed, and you choose what happens next. Receiving is $2 per box, waived for boxes with 5+ units.",
+  "decline":"Declined at first: hazmat, meltables or regulated goods, oversize or heavy freight, clothing with tons of size and color variants, very fragile items, and unsealed or unpackaged absorbent goods. If you are unsure, ask.",
+  "portal":"The client portal shows inventory, inbound, outbound, issues and billing live. Cartons are photographed at check-in, and outbound shipments wait for your approval before pickup. There is a demo at keystoneprepcenter.com/portal.",
+  "start":"Send the quote form on this page. Once your account is set up you get the ship-to address and your portal login, then you or your supplier ship to the dock. No setup fees, no monthly minimums, no long-term contracts."
+ }
+}
+</script>

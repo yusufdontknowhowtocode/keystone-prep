@@ -53,6 +53,12 @@
     </script>
 
     <meta charset="UTF-8" />
+    <script>
+      // Homepage styles load up front so the static page doesn't flash unstyled.
+      if ((location.pathname.replace(/\/$/, '') || '/') === '/') {
+        document.write('<link rel="stylesheet" href="/kp/fonts.css"><link rel="stylesheet" href="/kp/site.css"><meta name="theme-color" content="#16181d">')
+      }
+    </script>
 
     <meta
       name="viewport"
