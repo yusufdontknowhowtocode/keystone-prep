@@ -128,45 +128,38 @@ export default function Landing() {
 
   return (
     <div className="site-dark min-h-screen bg-[var(--paper)] text-[var(--ink)]">
-      <header className="border-b-2" style={{ borderColor: 'var(--ink)', background: 'var(--card)' }}>
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between gap-4">
-          <a href="/" className="flex items-center gap-2 font-bold pp-display text-2xl uppercase tracking-wide">
-            <Boxes size={24} /> {SITE.name}
+      <header>
+        <div className="max-w-7xl mx-auto px-4 md:px-8 py-5 flex items-center justify-between gap-4">
+          <a href="/" className="flex items-center gap-2 md:gap-3 font-bold pp-display text-2xl md:text-3xl uppercase whitespace-nowrap">
+            <Boxes size={34} /> <span>Keystone <span style={{ color: 'var(--accent)' }}>Prep</span></span>
           </a>
-          <nav className="hidden md:flex items-center gap-6 text-sm font-semibold">
-            <ServicesMenu />
+          <nav className="hidden lg:flex items-center gap-9 text-lg ml-auto mr-4">
             <a href="#process" className="hover:underline">Process</a>
+            <ServicesMenu />
             <a href="#pricing" className="hover:underline">Pricing</a>
             <a href="#faq" className="hover:underline">FAQ</a>
             <a href="/portal" className="hover:underline">Portal demo</a>
           </nav>
-          <ServicesMenu className="md:hidden" />
-          <div className="flex items-center gap-2">
-            <a
-              href={WHATSAPP_URL}
-              target="_blank"
-              rel="noreferrer"
-              onClick={trackQuoteClick}
-              className="pp-btn-ghost px-3 py-2 text-sm hidden sm:flex items-center gap-1.5"
-              title={`Text or WhatsApp ${PHONE_DISPLAY}`}
-            >
-              <MessageCircle size={16} /> {PHONE_DISPLAY}
-            </a>
-            <a href="#contact" className="pp-btn pp-btn-accent px-4 py-2 text-sm"> Get your rate </a>
-          </div>
+          <a
+            href={WHATSAPP_URL}
+            target="_blank"
+            rel="noreferrer"
+            onClick={trackQuoteClick}
+            className="px-3 md:px-6 py-2.5 md:py-3 font-semibold text-sm md:text-lg shrink-0 whitespace-nowrap"
+            style={{ background: 'var(--ink)', color: '#16181D', borderRadius: 2 }}
+          >
+            <span className="hidden sm:inline">Text {PHONE_DISPLAY}</span><span className="sm:hidden">Text us</span>
+          </a>
         </div>
       </header>
 
       <main>
-        <section className="max-w-6xl mx-auto px-4 pt-10 pb-8 md:pt-16 md:pb-10 grid lg:grid-cols-[1fr_1fr] gap-8 lg:gap-12 items-start">
+        <section className="max-w-7xl mx-auto px-4 md:px-8 pt-10 pb-12 md:pt-24 md:pb-16 grid lg:grid-cols-[1fr_1fr] gap-10 lg:gap-16 items-start">
           <div>
-            <div className="inline-flex items-center gap-2 pp-card px-3 py-1.5 text-sm font-semibold mb-4">
-              <MapPin size={15} /> Lansdale, PA · Philadelphia metro
-            </div>
-            <h1 className="pp-display text-5xl md:text-6xl font-bold uppercase leading-[.9] tracking-tight">
+            <h1 className="pp-display text-5xl sm:text-6xl md:text-7xl xl:text-[92px] font-bold uppercase leading-[.92] tracking-tight break-words">
               FBA prep & Shopify fulfillment in Lansdale, PA.
             </h1>
-            <p className="text-lg md:text-xl pp-sub mt-4 max-w-xl">
+            <p className="text-xl md:text-[28px] leading-snug mt-6 max-w-xl" style={{ color: 'var(--ink)' }}>
               Same-day shipping, dock-high receiving, and the owner answers your texts.
             </p>
             <CalcControls c={calc} />

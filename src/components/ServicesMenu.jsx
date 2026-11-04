@@ -53,7 +53,7 @@ export default function ServicesMenu({ className = '' }) {
     >
       <button
         type="button"
-        className="flex items-center gap-1 text-sm font-semibold hover:underline"
+        className="flex items-center gap-1 hover:underline"
         aria-expanded={open}
         aria-haspopup="true"
         onClick={() => setOpen((v) => !v)}

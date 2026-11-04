@@ -1,4 +1,5 @@
 import React, { useMemo, useRef, useState } from 'react'
+import { Boxes } from 'lucide-react'
 
 /* Rate sheet: keep in sync with QuoteEstimator.jsx and the pricing section in Landing.jsx */
 const FBA_TIERS = [
@@ -20,8 +21,8 @@ const FBA_STEPS = [100, 250, 500, 750, 1000, 1500, 2500, 5000, 7500, 10000]
 const DTC_STEPS = [50, 100, 200, 300, 500, 750, 1000]
 
 // Where the label sits, in % of the box. "home" = waiting, "stuck" = over the barcode.
-const HOME = { x: 54, y: 20, r: 4 }
-const STUCK = { x: 6, y: 27, r: -1 }
+const HOME = { x: 55, y: 21, r: 4 }
+const STUCK = { x: 6, y: 24, r: -1 }
 
 const money = (n, d = 0) =>
   n.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: d, maximumFractionDigits: d })
@@ -73,7 +74,7 @@ export function useLabelCalc() {
 
 export function CalcControls({ c }) {
   return (
-    <div className="pp-card p-5 md:p-6 mt-7">
+    <div className="kp-panel p-5 md:p-6 mt-8">
       <div className="grid grid-cols-2 gap-2">
         {[
           ['fba', 'Amazon FBA prep'],
@@ -83,8 +84,8 @@ export function CalcControls({ c }) {
             key={k}
             type="button"
             onClick={() => c.setMode(k)}
-            className="py-3 font-semibold rounded"
-            style={c.mode === k ? { background: 'var(--accent)', color: '#fff' } : { border: '1px solid var(--line)', color: 'var(--ink)' }}
+            className="py-3 font-semibold text-lg"
+            style={c.mode === k ? { background: 'var(--accent)', color: '#16181D', border: '1px solid var(--accent)' } : { border: '1px solid #5A5D64', color: 'var(--ink)' }}
           >
             {l}
           </button>
@@ -93,12 +94,13 @@ export function CalcControls({ c }) {
 
       <label className="block mt-5">
         <div className="flex items-baseline justify-between">
-          <span className="font-semibold">{c.fba ? 'Units per month' : 'Orders per month'}</span>
-          <span className="pp-mono text-xl font-semibold">{c.qty.toLocaleString()}</span>
+          <span className="text-lg">{c.fba ? 'Units per month' : 'Orders per month'}</span>
+          <span className="pp-mono text-2xl font-semibold">{c.qty.toLocaleString()}</span>
         </div>
         <input
           type="range"
           className="kp-range"
+          style={{ '--pct': `${((c.fba ? c.fbaStep : c.dtcStep) / ((c.fba ? FBA_STEPS : DTC_STEPS).length - 1)) * 100}%` }}
           min={0}
           max={(c.fba ? FBA_STEPS : DTC_STEPS).length - 1}
           value={c.fba ? c.fbaStep : c.dtcStep}
@@ -108,16 +110,16 @@ export function CalcControls({ c }) {
       </label>
 
       {c.fba ? (
-        <div className="flex flex-wrap gap-x-5 gap-y-2 mt-4 text-sm">
+        <div className="flex flex-wrap gap-x-6 gap-y-2 mt-4 text-lg">
           {ADDONS.map((a) => (
             <label key={a.key} className="inline-flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
                 checked={!!c.addons[a.key]}
                 onChange={(e) => c.setAddons({ ...c.addons, [a.key]: e.target.checked })}
-                style={{ accentColor: 'var(--accent)', width: 18, height: 18 }}
+                className="kp-check"
               />
-              {a.label} <span className="pp-mono pp-sub">+${a.rate.toFixed(2)}</span>
+              {a.label} <span className="pp-mono">+${a.rate.toFixed(2)}</span>
             </label>
           ))}
         </div>
@@ -139,8 +141,8 @@ export function CalcControls({ c }) {
       )}
 
       <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mt-5 pt-4 border-t" style={{ borderColor: 'var(--line)' }}>
-        <span className="font-semibold text-sm shrink-0">Your brand on the label</span>
-        <input className="pp-input" placeholder="Your brand" maxLength={24} value={c.brand} onChange={(e) => c.setBrand(e.target.value)} />
+        <span className="text-lg shrink-0">Your brand, on the label</span>
+        <input className="pp-input kp-brand" placeholder="Your brand" maxLength={24} value={c.brand} onChange={(e) => c.setBrand(e.target.value)} />
       </div>
     </div>
   )
@@ -177,21 +179,25 @@ export function CalcBox({ c }) {
   const fba = c.fba
   return (
     <div>
+      <div className="kp-box-wrap">
+      <div className="kp-floor-diag" aria-hidden="true" />
       <div ref={boxRef} className="kp-box" style={{ touchAction: 'none' }}>
         <div className="kp-box-tape" />
         {!stuck && (
           <div className="kp-marker" aria-hidden="true">
-            drag the label
+            Drag the label
             <br />
-            over the barcode
-            <span className="kp-marker-arrow">↓</span>
+            over the
+            <br />
+            barcode
+            <span className="kp-marker-line" />
           </div>
         )}
         <div className="kp-box-upc">
-          <Barcode seed={42} height={64} n={40} />
-          <div className="pp-mono text-center text-sm mt-1">0 84219 60317 5</div>
+          <Barcode seed={42} height={96} n={40} />
+          <div className="pp-mono text-center mt-1" style={{ fontSize: 'clamp(9px,1.15vw,16px)' }}>0 84219 60317 5</div>
         </div>
-        <div className="kp-box-arrows" aria-hidden="true">↑↑</div>
+        <div className="kp-box-arrows" aria-hidden="true">↑ ↑</div>
 
         <div
           className={`kp-label kp-label-drag ${dragging ? 'is-dragging' : ''} ${stuck ? 'is-stuck' : ''}`}
@@ -204,12 +210,12 @@ export function CalcBox({ c }) {
           aria-label={`Estimate: ${money(c.rate, 2)} ${fba ? 'per unit' : 'per order'}`}
         >
           <div className="kp-label-top">
-            <span className="pp-display" style={{ fontSize: 18, letterSpacing: 0 }}>KEYSTONE PREP</span>
-            <span>LANSDALE, PA</span>
+            <span className="flex items-center gap-1.5"><Boxes size={18} /><span className="pp-display kp-label-brand">KEYSTONE PREP</span></span>
+            <span>Lansdale, PA</span>
           </div>
-          <div className="mt-2"><Barcode seed={c.qty + (fba ? 1 : 9)} height={38} /></div>
-          <div className="pp-mono text-center text-[11px] mt-0.5">KP-{c.qty}{fba ? 'U' : 'O'}-{Math.round(c.rate * 100)}</div>
-          <div className="text-sm font-bold mt-2 truncate">{c.brand.trim() || 'Your brand'}</div>
+          <div className="mt-2.5"><Barcode seed={c.qty + (fba ? 1 : 9)} height={52} n={60} /></div>
+          <div className="pp-mono text-center mt-0.5" style={{ fontSize: 'clamp(9px,1vw,13px)', fontWeight: 600 }}>KP-{c.qty}{fba ? 'U' : 'O'}-{Math.round(c.rate * 100)}</div>
+          <div className="font-semibold mt-2 truncate" style={{ fontSize: 'clamp(11px,1.2vw,16px)' }}>{c.brand.trim() || 'Your brand'}</div>
           <div className="kp-label-rate">
             <span className="pp-display">{money(c.rate, 2)}</span>
             <span>{fba ? 'per unit, all-in' : 'per order'}</span>
@@ -220,11 +226,12 @@ export function CalcBox({ c }) {
             {fba && <div><span>First shipment</span><span>{money(c.first)}</span></div>}
           </div>
           <p className="kp-label-fine">
-            {fba ? `First ${FREE_UNITS} units on us. ` : 'Pick, pack and box included. '}Estimate only, before postage.
+            {fba ? `Up to ${FREE_UNITS} units on us. ` : 'Pick, pack and box included. '}Estimate only, before postage.
           </p>
         </div>
       </div>
-      <div className="text-center mt-5">
+      </div>
+      <div className="text-center mt-5 relative">
         <button type="button" className="kp-stick" onClick={() => setPos(stuck ? HOME : STUCK)}>
           {stuck ? 'Peel it off' : 'Stick the label on'}
         </button>
