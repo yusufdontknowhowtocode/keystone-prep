@@ -337,3 +337,11 @@ address{font-style:normal;margin-top:24px;line-height:1.45}
 
 .foot-links{margin-top:6px}
 .foot-links a{text-decoration:underline}
+
+/* tweaks: smaller orange "why" band; 4th workflow step (Store) */
+.rule{padding:clamp(36px,4vw,64px) var(--gut);gap:40px;align-items:center}
+.rule h2{font-size:clamp(30px,3.3vw,54px);line-height:.97}
+@media(min-width:1081px){
+  .k-steps .step-text{grid-column:span 6}
+  .k-steps .step-wide{grid-column:1/-1;grid-template-columns:minmax(0,640px) minmax(0,1fr)}
+}
