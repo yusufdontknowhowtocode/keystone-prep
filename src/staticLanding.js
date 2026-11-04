@@ -113,7 +113,13 @@ export function mountStaticLanding() {
   s.src = '/kp/site.js'
   document.body.appendChild(s)
 
-  // Arriving via /#pricing etc.: jump once the markup exists.
+  // Arriving via /#pricing etc.: jump once the markup exists. Old section names
+  // (used by the service pages and ad links) map to the new ones.
+  const ALIASES = { contact: 'rate', faq: 'questions', process: 'workflow', services: 'channels', reviews: 'said' }
   const id = window.location.hash.slice(1)
-  if (id) setTimeout(() => document.getElementById(id)?.scrollIntoView(), 50)
+  if (id) {
+    const target = ALIASES[id] || id
+    if (target !== id) history.replaceState(null, '', '#' + target)
+    setTimeout(() => document.getElementById(target)?.scrollIntoView(), 50)
+  }
 }
