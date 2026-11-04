@@ -9,6 +9,10 @@ import {
 } from '../lib/demoData.js'
 import { Barcode, Stamp, Photos, Stat, SectionTitle, LoadingCard, ErrorCard, formatDateTime, formatMoney, formatShortDate } from '../components/PortalUI.jsx'
 
+// Invite and password-reset links land here with #...type=invite|recovery in the URL.
+// Read it at module load, before supabase-js clears the hash, so we can ask for a password.
+const ARRIVED_TO_SET_PASSWORD = typeof window !== 'undefined' && /type=(invite|recovery)/.test(window.location.hash)
+
 const NAV = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { id: 'inventory', label: 'Inventory', icon: Boxes },
@@ -75,6 +79,7 @@ export default function Portal() {
   const [loading, setLoading] = useState(hasSupabaseConfig)
   const [error, setError] = useState('')
   const [toast, setToast] = useState(null)
+  const [needsPassword, setNeedsPassword] = useState(ARRIVED_TO_SET_PASSWORD)
 
   const ping = (msg) => { setToast(msg); window.setTimeout(() => setToast(null), 2600) }
 
@@ -87,7 +92,8 @@ export default function Portal() {
       setMode(sessionData.session ? 'live' : 'login')
       setLoading(false)
     })
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, newSession) => {
+    const { data: listener } = supabase.auth.onAuthStateChange((event, newSession) => {
+      if (event === 'PASSWORD_RECOVERY') setNeedsPassword(true)
       setSession(newSession)
       setMode(newSession ? 'live' : 'login')
     })
@@ -171,6 +177,24 @@ export default function Portal() {
 
   if (loading) return <PortalShell client={data.client} mode={mode}><LoadingCard message="Loading portal…" /></PortalShell>
   if (mode === 'login') return <LoginScreen onDemo={() => { setMode('demo'); setData(demoData()) }} />
+  if (mode === 'live' && needsPassword) {
+    return (
+      <PortalShell client={data.client} mode={mode} signOut={signOut}>
+        <div className="max-w-md mx-auto py-10">
+          <h2 className="pp-display text-2xl font-bold uppercase">Set your password</h2>
+          <p className="text-sm pp-sub mt-2">Choose a password so you can sign in to your portal any time.</p>
+          <ChangePassword
+            title="New password"
+            onDone={() => {
+              setNeedsPassword(false)
+              window.history.replaceState(null, '', window.location.pathname)
+              ping('Password set. Welcome to your portal.')
+            }}
+          />
+        </div>
+      </PortalShell>
+    )
+  }
 
   const client = data.client || DEMO_CLIENT
   const openIssues = data.issues.filter(i => i.status === 'open').length
@@ -494,7 +518,7 @@ function Prefs({ client, updatePrefs, mode }) {
   )
 }
 
-function ChangePassword() {
+function ChangePassword({ title = 'Change password', onDone } = {}) {
   const [pw, setPw] = useState('')
   const [pw2, setPw2] = useState('')
   const [msg, setMsg] = useState(null)
@@ -513,11 +537,12 @@ function ChangePassword() {
     if (error) return setMsg({ ok: false, text: error.message })
     setPw(''); setPw2('')
     setMsg({ ok: true, text: 'Password updated.' })
+    if (onDone) onDone()
   }
 
   return (
     <div className="pp-card p-4 mt-4">
-      <div className="text-xs font-semibold uppercase tracking-wider pp-sub">Change password</div>
+      <div className="text-xs font-semibold uppercase tracking-wider pp-sub">{title}</div>
       <p className="text-sm pp-sub mt-2">Update the password you use to sign in to this portal.</p>
       <form onSubmit={submit} className="space-y-3 mt-4 max-w-sm">
         <input className="pp-input" type="password" placeholder="New password" autoComplete="new-password" value={pw} onChange={e => setPw(e.target.value)} />
