@@ -64,7 +64,7 @@ export default function ContainerReceiving() {
     if (desc) {
       desc.setAttribute(
         'content',
-        'Container and pallet freight receiving for Amazon FBA sellers in Lansdale, PA — dock-high door, 48–53 ft trailer access, carton-level counts, photo check-ins, FNSKU prep, and forwarding to any US Amazon FC.'
+        'Container and pallet freight receiving for Amazon FBA sellers in Lansdale, PA — dock-high door, 53 ft trailer access, carton-level counts, photo check-ins, FNSKU prep, and forwarding to any US Amazon FC.'
       )
     }
 
@@ -83,12 +83,12 @@ export default function ContainerReceiving() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-[var(--paper)] text-[var(--ink)]">
+    <div className="site-dark kp-svc min-h-screen text-[var(--ink)]">
       <header
         className="border-b-2"
         style={{
           borderColor: 'var(--ink)',
-          background: 'var(--card)',
+          background: 'rgba(22,24,29,.97)',
         }}
       >
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between gap-4">
@@ -135,7 +135,7 @@ export default function ContainerReceiving() {
             Importing wholesale or private-label inventory? Keystone Prep
             receives your container or pallet freight at a real dock in
             Lansdale, Pennsylvania — elevated door at trailer height, a lot
-            that takes full 48- and 53-foot trailers, and a receiving crew with
+            that takes full 53-foot trailers, and a receiving crew with
             years of international container experience. Your freight is
             counted, inspected, and photographed the day it arrives, then
             FBA-prepped and forwarded to Amazon fulfillment centers.
@@ -170,7 +170,7 @@ export default function ContainerReceiving() {
           className="border-y"
           style={{
             borderColor: 'var(--line)',
-            background: '#fff',
+            background: 'var(--paper2)',
           }}
         >
           <div className="max-w-4xl mx-auto px-4 py-12">
@@ -213,7 +213,7 @@ export default function ContainerReceiving() {
                 'Standard trailer height — containers and dry vans unload straight in',
               ],
               [
-                '48–53 ft trailer access',
+                '53 ft trailer access',
                 'Open paved lot with room for full-size trailers to back in',
               ],
               [
@@ -256,7 +256,7 @@ export default function ContainerReceiving() {
           className="border-y"
           style={{
             borderColor: 'var(--line)',
-            background: '#fff',
+            background: 'var(--paper2)',
           }}
         >
           <div className="max-w-4xl mx-auto px-4 py-12">

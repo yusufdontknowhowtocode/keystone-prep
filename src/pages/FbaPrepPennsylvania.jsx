@@ -60,7 +60,7 @@ export default function FbaPrepPennsylvania() {
     if (desc) {
       desc.setAttribute(
         'content',
-        'Pennsylvania FBA prep center in Lansdale, PA — dock-high receiving, 48-ft trailer access, FNSKU labeling, polybagging, bundling, and storage. $0.55–$0.65/unit all-in. Minutes from the PA Amazon FC corridor.'
+        'Pennsylvania FBA prep center in Lansdale, PA — dock-high receiving, 53-ft trailer access, FNSKU labeling, polybagging, bundling, and storage. $0.55–$0.65/unit all-in. Minutes from the PA Amazon FC corridor.'
       )
     }
 
@@ -79,12 +79,12 @@ export default function FbaPrepPennsylvania() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-[var(--paper)] text-[var(--ink)]">
+    <div className="site-dark kp-svc min-h-screen text-[var(--ink)]">
       <header
         className="border-b-2"
         style={{
           borderColor: 'var(--ink)',
-          background: 'var(--card)',
+          background: 'rgba(22,24,29,.97)',
         }}
       >
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between gap-4">
@@ -167,7 +167,7 @@ export default function FbaPrepPennsylvania() {
           className="border-y"
           style={{
             borderColor: 'var(--line)',
-            background: '#fff',
+            background: 'var(--paper2)',
           }}
         >
           <div className="max-w-4xl mx-auto px-4 py-12">
@@ -229,7 +229,7 @@ export default function FbaPrepPennsylvania() {
           className="border-y"
           style={{
             borderColor: 'var(--line)',
-            background: '#fff',
+            background: 'var(--paper2)',
           }}
         >
           <div className="max-w-4xl mx-auto px-4 py-12">
@@ -244,7 +244,7 @@ export default function FbaPrepPennsylvania() {
                   'Elevated dock at standard trailer height',
                 ],
                 [
-                  '48-ft trailer access',
+                  '53-ft trailer access',
                   'Open paved lot with room to maneuver full containers',
                 ],
                 [
@@ -304,7 +304,7 @@ export default function FbaPrepPennsylvania() {
           className="border-t"
           style={{
             borderColor: 'var(--line)',
-            background: '#fff',
+            background: 'var(--paper2)',
           }}
         >
           <div className="max-w-4xl mx-auto px-4 py-12 text-center">
