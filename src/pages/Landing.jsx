@@ -3,7 +3,7 @@ import { ArrowRight, Barcode, Boxes, Camera, CheckCircle2, Clock, MapPin, Messag
 import { SITE } from '../lib/config.js'
 import ServicesMenu from '../components/ServicesMenu.jsx'
 import QuoteEstimator from '../components/QuoteEstimator.jsx'
-import LabelCalc from '../components/LabelCalc.jsx'
+import { useLabelCalc, CalcControls, CalcBox } from '../components/LabelCalc.jsx'
 
 const PHONE_DISPLAY = '267-517-1112'
 const PHONE_TEL = '+12675171112'
@@ -114,6 +114,7 @@ const FAQS = [
 ]
 
 export default function Landing() {
+  const calc = useLabelCalc()
   // Arriving from another page via /#contact etc: the browser tries to jump
   // before React renders the section, so scroll once the page is mounted.
   useEffect(() => {
@@ -157,7 +158,7 @@ export default function Landing() {
       </header>
 
       <main>
-        <section className="max-w-6xl mx-auto px-4 pt-10 pb-8 md:pt-16 md:pb-10 grid lg:grid-cols-[1fr_1fr] gap-8 lg:gap-10 items-center">
+        <section className="max-w-6xl mx-auto px-4 pt-10 pb-8 md:pt-16 md:pb-10 grid lg:grid-cols-[1fr_1fr] gap-8 lg:gap-12 items-start">
           <div>
             <div className="inline-flex items-center gap-2 pp-card px-3 py-1.5 text-sm font-semibold mb-4">
               <MapPin size={15} /> Lansdale, PA · Philadelphia metro
@@ -168,16 +169,10 @@ export default function Landing() {
             <p className="text-lg md:text-xl pp-sub mt-4 max-w-xl">
               Same-day shipping, dock-high receiving, and the owner answers your texts.
             </p>
-            <div className="flex flex-wrap gap-2 mt-5 text-sm font-semibold">
-              {['FBA prep from $0.55/unit', 'Orders by 2 PM ET ship same day', '1–2 days to NY/NJ'].map((x) => (
-                <span key={x} className="pp-card px-3 py-1.5 inline-flex items-center gap-1.5">
-                  <CheckCircle2 size={15} style={{ color: 'var(--ok)' }} /> {x}
-                </span>
-              ))}
-            </div>
-            <div className="flex flex-col sm:flex-row gap-3 mt-7">
+            <CalcControls c={calc} />
+            <div className="flex flex-col sm:flex-row gap-3 mt-5">
               <a href="#contact" className="pp-btn pp-btn-accent px-5 py-3 flex items-center justify-center gap-2">
-                Get your rate <ArrowRight size={18} />
+                Get your exact rate <ArrowRight size={18} />
               </a>
               <a
                 href={WHATSAPP_URL}
@@ -191,11 +186,8 @@ export default function Landing() {
             </div>
           </div>
 
-          <div className="lg:pl-6">
-            <LabelCalc />
-            <a href="#contact" className="text-sm pp-sub mt-4 inline-flex items-center gap-1 hover:underline">
-              Want an exact number? Get your rate <ArrowRight size={14} />
-            </a>
+          <div className="lg:pl-4">
+            <CalcBox c={calc} />
           </div>
         </section>
 

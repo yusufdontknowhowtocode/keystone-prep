@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Permanent+Marker&display=swap');
 @import "tailwindcss";
 
 :root{
@@ -52,24 +52,40 @@ button, input, textarea, select { font: inherit; }
 .kp-steel{ border-left:4px solid var(--accent); }
 .kp-eyebrow-line{ display:inline-block; width:28px; height:3px; background:var(--yellow); vertical-align:middle; margin-right:8px; }
 
-/* shipping-label rate calculator */
-.kp-label{ position:relative; background:#FAF8F1; color:#16181D; border-radius:6px; padding:20px 20px 16px;
-  box-shadow:0 18px 40px rgba(0,0,0,.45); transform:rotate(1.2deg); transition:transform .25s ease; }
-.kp-label:hover{ transform:rotate(0deg) translateY(-2px); }
-.kp-label::after{ content:''; position:absolute; top:0; right:0; width:34px; height:34px;
-  background:linear-gradient(225deg, #16181D 0 50%, #E2DED2 50% 100%); border-bottom-left-radius:6px;
-  box-shadow:-3px 3px 6px rgba(0,0,0,.18); }
-.kp-label-top{ display:flex; justify-content:space-between; font-family:'IBM Plex Mono',monospace; font-size:11px;
-  letter-spacing:.06em; font-weight:600; padding-right:30px; }
-.kp-barcode{ display:flex; height:46px; margin:10px 0 6px; overflow:hidden; }
-.kp-barcode span{ display:block; height:100%; flex:none; }
-.kp-label-rate{ display:flex; align-items:baseline; gap:10px; border-top:2px solid #16181D; padding-top:8px; }
-.kp-label-rate .pp-display{ font-size:56px; font-weight:700; line-height:1; }
-.kp-label-rate span:last-child{ font-weight:600; font-size:14px; }
-.kp-label-cell{ border:1.5px solid #16181D; border-radius:4px; padding:8px 10px; font-size:12px; font-weight:600; }
-.kp-label-cell strong{ display:block; font-size:22px; margin-top:2px; }
-.kp-label-fine{ font-size:11px; color:#55585F; margin-top:10px; line-height:1.4; }
-.kp-range{ width:100%; margin-top:8px; accent-color:#E5372B; }
+/* box + shipping-label rate calculator */
+.kp-box{ position:relative; aspect-ratio:1/1; border-radius:4px; overflow:hidden; user-select:none;
+  background:
+    radial-gradient(ellipse at 30% 20%, rgba(255,255,255,.10), transparent 60%),
+    repeating-linear-gradient(90deg, rgba(0,0,0,.025) 0 2px, transparent 2px 7px),
+    linear-gradient(160deg, #C8955A 0%, #B98348 55%, #A8733C 100%);
+  box-shadow:0 30px 60px rgba(0,0,0,.5), inset 0 0 0 1px rgba(0,0,0,.15); }
+.kp-box-tape{ position:absolute; left:-2%; right:-2%; top:6%; height:15%;
+  background:linear-gradient(180deg, rgba(222,190,140,.85), rgba(200,165,115,.85));
+  box-shadow:0 1px 0 rgba(255,255,255,.25) inset, 0 2px 4px rgba(0,0,0,.15); }
+.kp-marker{ position:absolute; left:7%; top:27%; font-family:'Permanent Marker',cursive; color:#2A1D10;
+  font-size:clamp(16px,2.2vw,26px); line-height:1.15; transform:rotate(-3deg); }
+.kp-marker-arrow{ display:block; font-size:1.4em; margin-left:18%; }
+.kp-box-upc{ position:absolute; left:7%; top:58%; width:36%; background:#FFFFFF; padding:6% 5% 4%; border-radius:2px;
+  box-shadow:0 1px 3px rgba(0,0,0,.2); color:#16181D; }
+.kp-box-arrows{ position:absolute; right:5%; bottom:3%; font-size:clamp(22px,3vw,40px); font-weight:700; color:#3A2814; letter-spacing:-.1em; }
+.kp-label{ position:absolute; width:41%; background:#FAF8F1; color:#16181D; border-radius:4px; padding:3.2% 3% 2.6%;
+  box-shadow:0 14px 30px rgba(0,0,0,.35); cursor:grab; touch-action:none;
+  transition:left .35s ease, top .35s ease, transform .35s ease, box-shadow .2s; }
+.kp-label.is-dragging{ cursor:grabbing; transition:none; box-shadow:0 24px 44px rgba(0,0,0,.45); }
+.kp-label.is-stuck{ box-shadow:0 2px 6px rgba(0,0,0,.25); }
+.kp-label-top{ display:flex; justify-content:space-between; align-items:baseline; font-family:'IBM Plex Mono',monospace;
+  font-size:10px; font-weight:600; border-bottom:2px solid #16181D; padding-bottom:4px; }
+.kp-label-rate{ display:flex; flex-direction:column; }
+.kp-label-rate .pp-display{ font-size:clamp(34px,4.6vw,58px); font-weight:700; line-height:.95; }
+.kp-label-rate span:last-child{ font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:600; }
+.kp-label-rows{ margin-top:6px; font-size:11px; font-weight:600; }
+.kp-label-rows div{ display:flex; justify-content:space-between; border-top:1.5px solid #16181D; padding:3px 0; }
+.kp-label-fine{ font-size:10px; color:#55585F; margin-top:4px; line-height:1.35; }
+.kp-range{ width:100%; margin-top:10px; accent-color:var(--accent); }
+.kp-stick{ background:var(--accent); color:#fff; font-family:'Barlow Condensed',sans-serif; font-weight:700; text-transform:uppercase;
+  font-size:24px; letter-spacing:.02em; padding:10px 34px; border-radius:2px; box-shadow:0 6px 0 #9E2219; transition:transform .1s; }
+.kp-stick:active{ transform:translateY(3px); box-shadow:0 3px 0 #9E2219; }
+@media (max-width:640px){ .kp-label{ width:48%; } .kp-label-rows,.kp-label-top{ font-size:9px; } .kp-label-fine{ display:none; } }
 
 /* ---------- Admin night mode ---------- */
 .admin-dark{
