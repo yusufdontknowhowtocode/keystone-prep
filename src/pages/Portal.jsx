@@ -634,7 +634,9 @@ function Orders({ orders, photos, invoices, storage }) {
           <Stat label="Orders this month" value={thisMonth.length} sub={`${orders.length} shipped all-time`} />
           <Stat label="Fulfillment this month" value={formatMoney(feesMonth)} sub="pick & pack, est. · postage billed at cost" />
           <Stat label="Storage" value={storageMonthly ? `${formatMoney(storageMonthly)}/mo` : '—'} sub={positions ? `${positions} pallet position${positions === 1 ? '' : 's'}` : 'no storage charges'} />
-          <Stat label="Paid to date" value={formatMoney(paid)} sub={open ? `${formatMoney(open)} open` : 'nothing open'} accent={open > 0} />
+          {invoices.length > 0
+            ? <Stat label="Paid to date" value={formatMoney(paid)} sub={open ? `${formatMoney(open)} open` : 'nothing open'} accent={open > 0} />
+            : <Stat label="Billing" value="Weekly" sub="invoiced through Stripe" />}
         </div>
       </div>
 
