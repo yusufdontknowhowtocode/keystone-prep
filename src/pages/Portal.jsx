@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import {
   Boxes, AlertTriangle, CreditCard, Settings, LayoutDashboard, Check, Search,
-  ChevronRight, Bell, ArrowDownToLine, ArrowUpFromLine, X, LogOut, RefreshCw
+  ChevronRight, Bell, ArrowDownToLine, ArrowUpFromLine, X, LogOut, RefreshCw, Package, Eye
 } from 'lucide-react'
 import { hasSupabaseConfig, supabase } from '../lib/supabase.js'
 import {
@@ -11,6 +11,9 @@ import { Barcode, Stamp, Photos, Stat, SectionTitle, LoadingCard, ErrorCard, for
 
 // Invite and password-reset links land here with #...type=invite|recovery in the URL.
 // Read it at module load, before supabase-js clears the hash, so we can ask for a password.
+// Admins can open /portal?as=<client_id> to see exactly what a client sees (read-only).
+const VIEW_AS = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('as') : null
+
 const ARRIVED_TO_SET_PASSWORD = typeof window !== 'undefined' && /type=(invite|recovery)/.test(window.location.hash)
 
 const NAV = [
@@ -18,13 +21,14 @@ const NAV = [
   { id: 'inventory', label: 'Inventory', icon: Boxes },
   { id: 'inbound', label: 'Inbound', icon: ArrowDownToLine },
   { id: 'outbound', label: 'Outbound', icon: ArrowUpFromLine },
+  { id: 'orders', label: 'Orders', icon: Package },
   { id: 'issues', label: 'Issues', icon: AlertTriangle },
   { id: 'billing', label: 'Billing', icon: CreditCard },
   { id: 'settings', label: 'Settings', icon: Settings },
 ]
 
 function emptyData() {
-  return { client: null, skus: [], inbound: [], outbound: [], issues: [], invoices: [], activity: [] }
+  return { client: null, skus: [], inbound: [], outbound: [], issues: [], invoices: [], activity: [], orders: [], orderPhotos: [], storage: [] }
 }
 
 function demoData() {
@@ -36,15 +40,19 @@ function demoData() {
     issues: DEMO_ISSUES,
     invoices: DEMO_INVOICES,
     activity: DEMO_ACTIVITY,
+    orders: [], orderPhotos: [], storage: [],
   }
 }
 
 async function fetchPortalData(userId) {
-  const { data: client, error: clientError } = await supabase
-    .from('clients')
-    .select('*')
-    .eq('user_id', userId)
-    .single()
+  let q = supabase.from('clients').select('*')
+  if (VIEW_AS) {
+    const { data: me, error: meErr } = await supabase.from('clients').select('is_admin').eq('user_id', userId).single()
+    if (meErr) throw meErr
+    if (!me?.is_admin) throw new Error('Only admins can view another client portal.')
+    q = q.eq('id', VIEW_AS)
+  } else q = q.eq('user_id', userId)
+  const { data: client, error: clientError } = await q.single()
   if (clientError) throw clientError
 
   const [skus, inbound, outbound, issues, invoices, activity] = await Promise.all([
@@ -55,8 +63,13 @@ async function fetchPortalData(userId) {
     supabase.from('invoices').select('*, invoice_lines(*)').eq('client_id', client.id).order('created_at', { ascending: false }),
     supabase.from('activity_log').select('*').eq('client_id', client.id).order('created_at', { ascending: false }).limit(25),
   ])
+  const [orders, orderPhotos, storage] = await Promise.all([
+    supabase.from('fulfilled_orders').select('*').eq('client_id', client.id).order('packed_on', { ascending: false }).order('order_no', { ascending: false }),
+    supabase.from('order_photos').select('id,order_no,path,taken_at').eq('client_id', client.id).not('order_no', 'is', null).order('taken_at'),
+    supabase.from('storage_lots').select('*').eq('client_id', client.id).is('ended_on', null),
+  ])
 
-  for (const result of [skus, inbound, outbound, issues, invoices, activity]) {
+  for (const result of [skus, inbound, outbound, issues, invoices, activity, orders, orderPhotos, storage]) {
     if (result.error) throw result.error
   }
 
@@ -68,6 +81,9 @@ async function fetchPortalData(userId) {
     issues: issues.data || [],
     invoices: invoices.data || [],
     activity: activity.data || [],
+    orders: orders.data || [],
+    orderPhotos: orderPhotos.data || [],
+    storage: storage.data || [],
   }
 }
 
@@ -126,6 +142,7 @@ export default function Portal() {
   }
 
   async function approve(id) {
+    if (VIEW_AS) return ping('Read-only: you are viewing as this client.')
     if (mode === 'demo') {
       setData(prev => ({
         ...prev,
@@ -142,6 +159,7 @@ export default function Portal() {
   }
 
   async function resolveIssue(id, resolution) {
+    if (VIEW_AS) return ping('Read-only: you are viewing as this client.')
     if (mode === 'demo') {
       setData(prev => ({
         ...prev,
@@ -158,6 +176,7 @@ export default function Portal() {
   }
 
   async function updatePrefs(nextPrefs) {
+    if (VIEW_AS) return ping('Read-only: you are viewing as this client.')
     if (mode === 'demo') {
       setData(prev => ({ ...prev, client: { ...prev.client, prefs: nextPrefs } }))
       ping('Demo preferences saved.')
@@ -203,10 +222,16 @@ export default function Portal() {
 
   return (
     <PortalShell client={client} mode={mode} signOut={signOut} refresh={refresh}>
+      {VIEW_AS && (
+        <div className="mt-4 pp-card px-4 py-2 text-sm flex items-center justify-between gap-2" style={{ borderColor: 'var(--accent)' }}>
+          <span className="flex items-center gap-2"><Eye size={15} /> Viewing as <b>{client.name}</b> · read-only</span>
+          <a href="/admin#clients" className="underline text-xs">Back to admin</a>
+        </div>
+      )}
       {error && <ErrorCard message={error} />}
       <nav className="border-b pp-line sticky top-0 z-10 -mx-4 px-2 mb-6" style={{ background: 'var(--paper)' }}>
         <div className="max-w-5xl mx-auto flex gap-1 overflow-x-auto py-2">
-          {NAV.map(n => (
+          {NAV.filter(n => n.id !== 'orders' || data.orders.length > 0).map(n => (
             <button key={n.id} onClick={() => setPage(n.id)}
               className={`pp-navbtn px-3 py-1.5 text-sm flex items-center gap-1.5 whitespace-nowrap ${page === n.id ? 'active' : ''}`}>
               <n.icon size={15} />
@@ -222,6 +247,7 @@ export default function Portal() {
         {page === 'inventory' && <Inventory skus={data.skus} />}
         {page === 'inbound' && <Inbound inbound={data.inbound} />}
         {page === 'outbound' && <Outbound outbound={data.outbound} approve={approve} />}
+        {page === 'orders' && <Orders orders={data.orders} photos={data.orderPhotos} invoices={data.invoices} storage={data.storage} />}
         {page === 'issues' && <Issues issues={data.issues} resolve={resolveIssue} />}
         {page === 'billing' && <Billing invoices={data.invoices} ping={ping} />}
         {page === 'settings' && <Prefs client={client} updatePrefs={updatePrefs} mode={mode} />}
@@ -559,6 +585,95 @@ function Toast({ message, onDismiss }) {
     <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm text-white shadow-lg" style={{ background: 'var(--ink)' }}>
       <Check size={15} style={{ color: 'var(--ok)' }} /> {message}
       <button onClick={onDismiss} aria-label="Dismiss"><X size={14} className="opacity-60" /></button>
+    </div>
+  )
+}
+function Orders({ orders, photos, invoices, storage }) {
+  const [q, setQ] = useState('')
+  const [urls, setUrls] = useState({})
+  const [shown, setShown] = useState(40)
+
+  const photosByOrder = useMemo(() => {
+    const m = {}
+    for (const p of photos) (m[p.order_no] ||= []).push(p)
+    return m
+  }, [photos])
+
+  const filtered = useMemo(() => {
+    const t = q.trim().toLowerCase().replace(/^#/, '')
+    if (!t) return orders
+    return orders.filter(o => `${o.order_no} ${o.items || ''} ${o.box || ''} ${o.tracking || ''}`.toLowerCase().includes(t))
+  }, [orders, q])
+  const visible = filtered.slice(0, shown)
+
+  // Photos live in a private bucket: sign URLs for the orders on screen (1 hour).
+  useEffect(() => {
+    const need = visible.flatMap(o => photosByOrder[o.order_no] || []).map(p => p.path).filter(p => !urls[p])
+    if (!need.length) return
+    supabase.storage.from('order-photos').createSignedUrls(need, 3600).then(({ data }) => {
+      if (data) setUrls(u => ({ ...u, ...Object.fromEntries(data.filter(d => d.signedUrl).map(d => [d.path, d.signedUrl])) }))
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visible, photosByOrder])
+
+  const now = new Date()
+  const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+  const thisMonth = orders.filter(o => (o.packed_on || '').startsWith(monthKey))
+  const feesMonth = thisMonth.reduce((s, o) => s + Number(o.fee || 0), 0)
+  const invTotal = inv => (inv.invoice_lines || []).reduce((s, l) => s + Number(l.qty || 0) * Number(l.rate || 0), 0)
+  const paid = invoices.filter(i => i.status === 'paid').reduce((s, i) => s + invTotal(i), 0)
+  const open = invoices.filter(i => i.status === 'open').reduce((s, i) => s + invTotal(i), 0)
+  const storageMonthly = storage.reduce((s, l) => s + Number(l.pallet_positions || 0) * Number(l.rate || 0), 0)
+  const positions = storage.reduce((s, l) => s + Number(l.pallet_positions || 0), 0)
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <SectionTitle>Your account</SectionTitle>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <Stat label="Orders this month" value={thisMonth.length} sub={`${orders.length} shipped all-time`} />
+          <Stat label="Fulfillment this month" value={formatMoney(feesMonth)} sub="pick & pack, est. · postage billed at cost" />
+          <Stat label="Storage" value={storageMonthly ? `${formatMoney(storageMonthly)}/mo` : '—'} sub={positions ? `${positions} pallet position${positions === 1 ? '' : 's'}` : 'no storage charges'} />
+          <Stat label="Paid to date" value={formatMoney(paid)} sub={open ? `${formatMoney(open)} open` : 'nothing open'} accent={open > 0} />
+        </div>
+      </div>
+
+      <div>
+        <SectionTitle right={
+          <div className="relative w-56 max-w-[50vw]"><Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 pp-sub" />
+            <input value={q} onChange={e => { setQ(e.target.value); setShown(40) }} placeholder="Order #, SKU, box…" className="pp-input w-full pl-8 pr-3 py-1.5 text-sm" /></div>
+        }>Orders</SectionTitle>
+        <div className="space-y-2">
+          {visible.map(o => {
+            const ps = photosByOrder[o.order_no] || []
+            return (
+              <div key={o.id} className="pp-card p-3 flex gap-3 items-start">
+                <div className="flex gap-1.5 shrink-0">
+                  {ps.length === 0 && <div className="w-16 h-16 rounded flex items-center justify-center text-[10px] pp-sub text-center" style={{ border: '1px dashed var(--line)' }}>no photo</div>}
+                  {ps.slice(0, 2).map(p => urls[p.path]
+                    ? <a key={p.id} href={urls[p.path]} target="_blank" rel="noreferrer"><img src={urls[p.path]} alt={`Order ${o.order_no} packed`} className="w-16 h-16 object-cover rounded" loading="lazy" /></a>
+                    : <div key={p.id} className="w-16 h-16 rounded" style={{ background: 'var(--line)' }} />)}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-baseline justify-between gap-2 flex-wrap">
+                    <span className="pp-mono font-bold">#{o.order_no.replace('+', ' + #')}</span>
+                    <span className="text-xs pp-sub">{formatShortDate(o.packed_on + 'T12:00')} · {o.carrier}</span>
+                  </div>
+                  <div className="text-sm mt-0.5 break-words">{o.items}</div>
+                  <div className="text-xs pp-sub mt-1 flex gap-3 flex-wrap">
+                    <span>{o.box}</span><span>{o.scale_weight?.replace(';', ' lb ')} oz</span>
+                    {o.tracking && <span className="pp-mono">{o.tracking}</span>}
+                    {o.fee != null && <span className="pp-mono">fee {formatMoney(o.fee)}</span>}
+                  </div>
+                </div>
+              </div>
+            )
+          })}
+          {filtered.length === 0 && <div className="pp-card p-4 text-sm pp-sub">No orders match.</div>}
+          {filtered.length > shown && <button onClick={() => setShown(n => n + 40)} className="pp-btn-ghost w-full py-2 text-sm">Show more ({filtered.length - shown} left)</button>}
+        </div>
+        <p className="text-xs pp-sub mt-3">Every box is photographed on the scale before it ships. Fees shown are estimates; your weekly invoice is the final amount.</p>
+      </div>
     </div>
   )
 }

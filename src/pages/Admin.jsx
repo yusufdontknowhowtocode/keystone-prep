@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { ArrowLeft, Loader2, Plus, RefreshCw, Pencil, Check, X, Trash2, CreditCard, Link as LinkIcon } from 'lucide-react'
+import { ArrowLeft, Loader2, Plus, RefreshCw, Pencil, Check, X, Trash2, CreditCard, Link as LinkIcon, Eye, Camera } from 'lucide-react'
 import { hasSupabaseConfig, supabase } from '../lib/supabase.js'
 import { LoadingCard, ErrorCard } from '../components/PortalUI.jsx'
 import PhotoUploader from '../components/PhotoUploader.jsx'
@@ -326,6 +326,9 @@ export default function Admin() {
 
           {viewClientId && (
             <>
+              <div className="flex justify-end">
+                <a href={`/portal?as=${viewClientId}`} target="_blank" rel="noreferrer" className="pp-btn-ghost px-3 py-1.5 text-sm flex items-center gap-1.5"><Eye size={14} /> View their portal</a>
+              </div>
               <div className="flex items-end justify-between gap-3 flex-wrap border-b" style={{ borderColor: 'var(--line)' }}>
                 <div className="flex gap-1">
                   {[
@@ -837,7 +840,10 @@ function AdminShell({ children, onRefresh }) {
       <header className="border-b-2" style={{ borderColor: 'var(--ink)', background: 'var(--card)' }}>
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between gap-4">
           <div><a href="/" className="text-xs pp-sub font-semibold uppercase tracking-widest hover:underline flex items-center gap-1"><ArrowLeft size={14}/> Back to site</a><h1 className="pp-display text-3xl font-bold uppercase">Keystone Admin</h1></div>
+          <div className="flex items-center gap-2">
+          <a href="/pack" className="pp-btn-accent px-3 py-2 text-sm flex items-center gap-1"><Camera size={14}/> Pack camera</a>
           {onRefresh && <button onClick={onRefresh} className="pp-btn-ghost px-3 py-2 text-sm flex items-center gap-1"><RefreshCw size={14}/> Refresh</button>}
+          </div>
         </div>
       </header>
       <main className="max-w-6xl mx-auto px-4 py-6 space-y-4">{children}</main>
