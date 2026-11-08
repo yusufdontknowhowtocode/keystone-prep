@@ -7,6 +7,7 @@ import FbaPrepPennsylvania from './pages/FbaPrepPennsylvania.jsx'
 import ContainerReceiving from './pages/ContainerReceiving.jsx'
 import ShopifyFulfillmentPennsylvania from './pages/ShopifyFulfillmentPennsylvania.jsx'
 import FbaRemovalProcessing from './pages/FbaRemovalProcessing.jsx'
+import SwitchOffer from './pages/SwitchOffer.jsx'
 
 export default function App() {
   const path = useMemo(() => window.location.pathname.replace(/\/$/, '') || '/', [])
@@ -17,5 +18,6 @@ export default function App() {
   if (path === '/container-receiving') return <ContainerReceiving />
   if (path === '/shopify-fulfillment-pennsylvania') return <ShopifyFulfillmentPennsylvania />
   if (path === '/fba-removal-processing') return <FbaRemovalProcessing />
+  if (path === '/switch') return <SwitchOffer />
   return <Landing />
 }
