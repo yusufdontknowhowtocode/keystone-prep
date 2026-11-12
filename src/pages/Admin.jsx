@@ -6,6 +6,7 @@ import PhotoUploader from '../components/PhotoUploader.jsx'
 import AdminOverview from '../components/AdminOverview.jsx'
 import GoalTracker from '../components/GoalTracker.jsx'
 import StorageOverview from '../components/StorageTab.jsx'
+import ClientBoard from '../components/ClientBoard.jsx'
 
 /* ============================================================
    RATE SHEET — edit these numbers when pricing changes.
@@ -307,26 +308,14 @@ export default function Admin() {
       {/* ---------- CLIENTS ---------- */}
       {tab === 'clients' && (
         <section className="pp-card p-4 space-y-4">
-          <div className="flex flex-wrap gap-2">
-            {realClients.map(c => (
-              <button
-                key={c.id}
-                onClick={() => setViewClientId(c.id)}
-                className="px-3 py-1.5 text-sm rounded-full"
-                style={c.id === viewClientId
-                  ? { background: 'var(--accent)', color: '#fff', fontWeight: 600 }
-                  : { border: '1px solid var(--line)', color: 'var(--ink)' }}
-              >
-                {c.name}
-              </button>
-            ))}
-          </div>
+          <ClientBoard key={'board' + refreshKey} clients={realClients} selectedId={viewClientId} onSelect={setViewClientId} />
 
-          {!viewClientId && <div className="text-sm pp-sub">Pick a client.</div>}
+          {!viewClientId && <div className="text-sm pp-sub">Tap a client to open their inventory, shipments and invoices.</div>}
 
           {viewClientId && (
             <>
-              <div className="flex justify-end">
+              <div className="flex items-center justify-between gap-3 pt-2 border-t" style={{ borderColor: 'var(--line)' }}>
+                <div className="font-semibold">{viewedClient?.name}</div>
                 <a href={`/portal?as=${viewClientId}`} target="_blank" rel="noreferrer" className="pp-btn-ghost px-3 py-1.5 text-sm flex items-center gap-1.5"><Eye size={14} /> View their portal</a>
               </div>
               <div className="flex items-end justify-between gap-3 flex-wrap border-b" style={{ borderColor: 'var(--line)' }}>
