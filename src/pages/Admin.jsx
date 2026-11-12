@@ -308,14 +308,17 @@ export default function Admin() {
       {/* ---------- CLIENTS ---------- */}
       {tab === 'clients' && (
         <section className="pp-card p-4 space-y-4">
-          <ClientBoard key={'board' + refreshKey} clients={realClients} selectedId={viewClientId} onSelect={setViewClientId} />
-
-          {!viewClientId && <div className="text-sm pp-sub">Tap a client to open their inventory, shipments and invoices.</div>}
+          {!viewClientId && (
+            <ClientBoard key={'board' + refreshKey} clients={realClients} selectedId={viewClientId} onSelect={id => { setViewClientId(id); try { window.scrollTo({ top: 0, behavior: 'smooth' }) } catch {} }} />
+          )}
 
           {viewClientId && (
             <>
-              <div className="flex items-center justify-between gap-3 pt-2 border-t" style={{ borderColor: 'var(--line)' }}>
-                <div className="font-semibold">{viewedClient?.name}</div>
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2 min-w-0">
+                  <button onClick={() => setViewClientId('')} className="pp-btn-ghost px-2.5 py-1.5 text-sm flex items-center gap-1 shrink-0"><ArrowLeft size={14} /> All clients</button>
+                  <div className="font-semibold truncate">{viewedClient?.name}</div>
+                </div>
                 <a href={`/portal?as=${viewClientId}`} target="_blank" rel="noreferrer" className="pp-btn-ghost px-3 py-1.5 text-sm flex items-center gap-1.5"><Eye size={14} /> View their portal</a>
               </div>
               <div className="flex items-end justify-between gap-3 flex-wrap border-b" style={{ borderColor: 'var(--line)' }}>
