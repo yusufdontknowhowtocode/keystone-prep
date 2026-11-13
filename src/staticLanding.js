@@ -97,13 +97,7 @@ export function mountStaticLanding() {
   }
   window.KP_SUBMIT = submitLead
 
-  // Text / WhatsApp / email clicks count as the secondary 'Contact' conversion, as before.
-  document.addEventListener('click', (e) => {
-    const a = e.target.closest && e.target.closest('a[href^="sms:"], a[href^="https://wa.me"], a[href^="mailto:"], a[href^="tel:"]')
-    if (a && typeof window.gtag === 'function') {
-      window.gtag('event', 'conversion', { send_to: 'AW-18227583658/GBCbCLurnckcEKq1y_ND' })
-    }
-  })
+  // Text / WhatsApp / email / call clicks are tracked site-wide in main.jsx.
 
   const root = document.getElementById('root')
   root.insertAdjacentHTML('beforebegin', landingHtml)
