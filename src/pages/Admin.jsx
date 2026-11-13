@@ -5,6 +5,7 @@ import { LoadingCard, ErrorCard } from '../components/PortalUI.jsx'
 import PhotoUploader from '../components/PhotoUploader.jsx'
 import AdminOverview from '../components/AdminOverview.jsx'
 import GoalTracker from '../components/GoalTracker.jsx'
+import MarketingTab from '../components/MarketingTab.jsx'
 import StorageOverview from '../components/StorageTab.jsx'
 import ClientBoard from '../components/ClientBoard.jsx'
 
@@ -285,7 +286,7 @@ export default function Admin() {
   return (
     <AdminShell onRefresh={() => { loadAdmin(); if (viewClientId) loadRecords(viewClientId); setRefreshKey(k => k + 1) }}>
       <TabBar
-        tabs={[['home', 'Home'], ['clients', 'Clients'], ['storage', 'Storage'], ['pipeline', 'Pipeline'], ['goal', 'Goal'], ['log', '+ Log entry']]}
+        tabs={[['home', 'Home'], ['clients', 'Clients'], ['storage', 'Storage'], ['pipeline', 'Pipeline'], ['marketing', 'Marketing'], ['goal', 'Goal'], ['log', '+ Log entry']]}
         value={tab}
         onChange={go}
       />
@@ -303,6 +304,7 @@ export default function Admin() {
 
       {tab === 'storage' && <StorageOverview key={'stor' + refreshKey} clients={realClients} />}
 
+      {tab === 'marketing' && <MarketingTab key={'mkt' + refreshKey} />}
       {tab === 'goal' && <GoalTracker key={'goal' + refreshKey} />}
 
       {/* ---------- CLIENTS ---------- */}

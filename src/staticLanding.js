@@ -2,7 +2,7 @@
 // The quote form calls window.KP_SUBMIT, which saves the lead to Supabase, emails it via
 // Web3Forms and fires the Google Ads conversion (same as QuoteEstimator.jsx).
 import landingHtml from './landing.html?raw'
-import { getAttribution } from './lib/attribution.js'
+import { getAttribution, channelFromAttribution } from './lib/attribution.js'
 
 const WEB3FORMS_KEY = import.meta.env.VITE_WEB3FORMS_KEY
 const money = (n) => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })
@@ -30,6 +30,7 @@ async function submitLead(d) {
     if (hasSupabaseConfig) {
       const { error } = await supabase.from('leads').insert({
         source: attribution.source,
+        channel: channelFromAttribution(attribution),
         name: d.name || null,
         email: d.email,
         brand: d.brand || null,
