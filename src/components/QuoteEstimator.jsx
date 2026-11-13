@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react'
 import { Calculator, Check, Loader2, Send } from 'lucide-react'
 import { hasSupabaseConfig, supabase } from '../lib/supabase.js'
-import { getAttribution } from '../lib/attribution.js'
+import { getAttribution, channelFromAttribution } from '../lib/attribution.js'
 
 /* ============================================================
    RATE SHEET — keep in sync with src/pages/Admin.jsx
@@ -113,6 +113,7 @@ export default function QuoteEstimator() {
     const dtcSummary = `DTC fulfillment: ${orders} orders/mo, avg ${itemCount} items/order, platform ${platform}`
     const payload = {
         source,
+        channel: channelFromAttribution(attribution),
         name: form.name.trim() || null,
         email: form.email.trim(),
         brand: form.brand.trim() || null,

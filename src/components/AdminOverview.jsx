@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { Loader2, Plus, ChevronRight, X, PhoneCall } from 'lucide-react'
 import { supabase } from '../lib/supabase.js'
+import { CHANNELS } from './MarketingTab.jsx'
 
 /* ============================================================
    ADMIN OVERVIEW — two views, both live from Supabase.
@@ -12,7 +13,7 @@ import { supabase } from '../lib/supabase.js'
 const PAYMENT_TERMS_DAYS = 7 // invoices are due within 7 days of the invoice date
 const LEAD_STAGES = ['new', 'quoted', 'agreement_sent', 'signed', 'lost']
 const CLOSED = ['signed', 'lost']
-const blankLead = { brand: '', email: '', source: '', stage: 'new', est_monthly: '', next_action: '', next_date: '' }
+const blankLead = { brand: '', email: '', source: '', channel: '', stage: 'new', est_monthly: '', next_action: '', next_date: '' }
 
 function useOverviewData() {
   const [data, setData] = useState({ skus: [], inbound: [], invoices: [], leads: [] })
@@ -207,7 +208,7 @@ function Pipeline({ clients = [], leads, leadsMissing, setData, setError, reload
     e.preventDefault()
     if (!form.brand.trim()) return
     setSaving(true)
-    const payload = { ...form, email: form.email.trim() || 'unknown@manual.entry', source: form.source || 'manual', est_monthly: form.est_monthly === '' ? null : Number(form.est_monthly), next_date: form.next_date || null, last_contact: localISO(new Date()) }
+    const payload = { ...form, email: form.email.trim() || 'unknown@manual.entry', source: form.source || 'manual', channel: form.channel || null, est_monthly: form.est_monthly === '' ? null : Number(form.est_monthly), next_date: form.next_date || null, last_contact: localISO(new Date()) }
     const { error: err } = await supabase.from('leads').insert(payload)
     setSaving(false)
     if (err) return setError(err.message)
@@ -285,7 +286,11 @@ function Pipeline({ clients = [], leads, leadsMissing, setData, setError, reload
         <form onSubmit={addLead} className="grid grid-cols-1 sm:grid-cols-2 gap-2 p-3 rounded" style={{ border: '1px solid var(--line)' }}>
           <input className="pp-input" placeholder="Brand / company *" value={form.brand} onChange={e => setForm({ ...form, brand: e.target.value })} autoFocus />
           <input className="pp-input" placeholder="Email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
-          <input className="pp-input" placeholder="Where they came from" value={form.source} onChange={e => setForm({ ...form, source: e.target.value })} />
+          <input className="pp-input" placeholder="How they contacted us (email, WhatsApp…)" value={form.source} onChange={e => setForm({ ...form, source: e.target.value })} />
+          <select className="pp-input" value={form.channel} onChange={e => setForm({ ...form, channel: e.target.value })}>
+            <option value="">What brought them? (channel)</option>
+            {CHANNELS.map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
           <input className="pp-input" type="number" placeholder="Est $/mo" value={form.est_monthly} onChange={e => setForm({ ...form, est_monthly: e.target.value })} />
           <input className="pp-input" placeholder="Next step" value={form.next_action} onChange={e => setForm({ ...form, next_action: e.target.value })} />
           <input className="pp-input" type="date" value={form.next_date} onChange={e => setForm({ ...form, next_date: e.target.value })} />
