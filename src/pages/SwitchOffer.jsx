@@ -67,7 +67,7 @@ const STEPS = [
 
 export default function SwitchOffer() {
   useEffect(() => {
-    document.title = 'Switch your fulfillment — first month of pick & pack free | Keystone Prep'
+    document.title = 'Switch your fulfillment — first month of pick & pack free | Keystone Prep Center'
     const desc = document.querySelector('meta[name="description"]')
     if (desc) {
       desc.setAttribute(

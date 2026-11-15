@@ -67,7 +67,7 @@ const FAQS = [
 export default function ShopifyFulfillmentPennsylvania() {
   useEffect(() => {
     document.title =
-      'Shopify Fulfillment in Pennsylvania — Keystone Prep, Lansdale PA'
+      'Shopify Fulfillment in Pennsylvania | Keystone Prep Center, Lansdale PA'
 
     const desc = document.querySelector('meta[name="description"]')
 

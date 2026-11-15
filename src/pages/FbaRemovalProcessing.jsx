@@ -57,7 +57,7 @@ const FAQS = [
 export default function FbaRemovalProcessing() {
   useEffect(() => {
     document.title =
-      'Amazon FBA Removal Order Processing — Keystone Prep, Lansdale PA'
+      'Amazon FBA Removal Order Processing | Keystone Prep Center, Lansdale PA'
 
     const desc = document.querySelector('meta[name="description"]')
 

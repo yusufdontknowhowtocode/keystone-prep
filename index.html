@@ -7,8 +7,13 @@
         "@context": "https://schema.org",
         "@type": "LocalBusiness",
         "name": "Keystone Prep Center",
-        "description": "Amazon FBA prep center and 3PL in Lansdale, PA — receiving, inspection, FNSKU labeling, storage, and fulfillment.",
+        "alternateName": "Keystone Prep",
+        "description": "Amazon FBA prep center and 3PL in Lansdale, Pennsylvania (Philadelphia area): receiving, inspection, FNSKU labeling, storage, Shopify and DTC order fulfillment, container receiving, and FBA removal processing.",
         "url": "https://keystoneprepcenter.com",
+        "areaServed": "US",
+        "sameAs": [
+          "https://prepmarketplace.com/providers/6108f84a-fcbf-4fc9-a92f-0b2c557b67f0"
+        ],
         "telephone": "+12675171112",
         "email": "hello@keystoneprepcenter.com",
         "image": "https://keystoneprepcenter.com/warehouse.jpg",
@@ -57,8 +62,20 @@
       // Homepage styles load up front so the static page doesn't flash unstyled.
       if ((location.pathname.replace(/\/$/, '') || '/') === '/') {
         document.write('<link rel="stylesheet" href="/kp/fonts.css"><link rel="stylesheet" href="/kp/site.css"><meta name="theme-color" content="#16181d">')
+      } else {
+        // Any other path that gets the homepage file: keep its prerendered markup hidden.
+        document.documentElement.classList.add('kp-app')
       }
+      document.documentElement.classList.add('kp-js')
     </script>
+    <style>
+      /* Prerendered markup (tools/prerender.mjs) is there for crawlers and the homepage's
+         first paint. With JavaScript on, a page's static copy stays hidden until React
+         renders the real one. */
+      #kp-prerender { display: contents }
+      .kp-app #kp-prerender,
+      .kp-js #root[data-kp-static] > * { display: none }
+    </style>
 
     <meta
       name="viewport"
@@ -67,7 +84,7 @@
 
     <meta
       name="description"
-      content="East Coast 3PL & FBA prep in Lansdale, PA — receiving, inspection, FNSKU labeling, prep, storage, and order fulfillment for Amazon FBA, Shopify, and TikTok Shop sellers, with photo check-ins and a live client portal."
+      content="Keystone Prep Center is an Amazon FBA prep center and 3PL in Lansdale, Pennsylvania, near Philadelphia: receiving, inspection, FNSKU labeling, storage, and order fulfillment for Amazon FBA, Shopify, and TikTok Shop sellers, with photo check-ins and a live client portal."
     />
 
     <link
@@ -78,13 +95,13 @@
     />
 
     <title>
-      Keystone Prep — East Coast 3PL & FBA Prep in Lansdale, PA
+      Keystone Prep Center | FBA Prep & 3PL in Lansdale, Pennsylvania
     </title>
 
     <!-- Open Graph / Link Preview -->
     <meta
       property="og:title"
-      content="Keystone Prep — East Coast 3PL & FBA Prep in Lansdale, PA"
+      content="Keystone Prep Center | FBA Prep & 3PL in Lansdale, Pennsylvania"
     />
 
     <meta

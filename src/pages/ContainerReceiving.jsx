@@ -57,7 +57,7 @@ const FAQS = [
 export default function ContainerReceiving() {
   useEffect(() => {
     document.title =
-      'Container Receiving for Amazon FBA — Keystone Prep, Lansdale PA'
+      'Container Receiving for Amazon FBA | Keystone Prep Center, Lansdale PA'
 
     const desc = document.querySelector('meta[name="description"]')
 
