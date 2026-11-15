@@ -24,7 +24,7 @@ function drawBars(svg,text){
 /* state */
 var S={mode:'fba',units:500,orders:200,items:1,adds:{},brand:''};
 var money=function(n){return '$'+Math.round(n).toLocaleString('en-US')},cents=function(n){return '$'+n.toFixed(2)};
-function fbaRate(u){return +(u<=1000?R.fba_to_1000:u<=5000?R.fba_to_5000:R.fba_over_5000)}
+function fbaRate(u){return +(u<500&&R.fba_under_500?R.fba_under_500:u<=1000?R.fba_to_1000:u<=5000?R.fba_to_5000:R.fba_over_5000)}
 function calc(){
   if(S.mode==='fba'){
     var base=fbaRate(S.units),add=0;for(var k in S.adds)if(S.adds[k])add+=+R[k];

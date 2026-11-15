@@ -24,7 +24,7 @@
 
 ## Pricing
 
-- FBA prep, all-in per unit (receiving, inspection, FNSKU label, box prep): $0.65 up to 1,000 units a month, $0.60 from 1,001 to 5,000, $0.55 above 5,000
+- FBA prep, all-in per unit (receiving, inspection, FNSKU label, box prep): $0.70 under 500 units a month, $0.65 from 500 to 1,000, $0.60 from 1,001 to 5,000, $0.55 above 5,000
 - First test shipment, up to 100 units, is free
 - Shopify and DTC fulfillment: $3.50 per order plus $0.75 per additional item; $3.25 plus $0.50 from 500 orders a month; custom quote at 1,000+ orders a month
 - Storage: from $35 per pallet per month

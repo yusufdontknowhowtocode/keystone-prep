@@ -7,7 +7,8 @@ import { getAttribution, channelFromAttribution } from '../lib/attribution.js'
    RATE SHEET — keep in sync with src/pages/Admin.jsx
    ============================================================ */
 const TIERS = [
-  { max: 1000, rate: 0.65, label: 'Up to 1,000 units/mo' },
+  { max: 499, rate: 0.70, label: 'Under 500 units/mo' },
+  { max: 1000, rate: 0.65, label: '500–1,000 units/mo' },
   { max: 5000, rate: 0.60, label: '1,001–5,000 units/mo' },
   { max: Infinity, rate: 0.55, label: '5,000+ units/mo' },
 ]
