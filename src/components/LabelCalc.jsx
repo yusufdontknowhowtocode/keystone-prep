@@ -3,6 +3,7 @@ import { Boxes } from 'lucide-react'
 
 /* Rate sheet: keep in sync with QuoteEstimator.jsx and the pricing section in Landing.jsx */
 const FBA_TIERS = [
+  { max: 499, rate: 0.7 },
   { max: 1000, rate: 0.65 },
   { max: 5000, rate: 0.6 },
   { max: Infinity, rate: 0.55 },

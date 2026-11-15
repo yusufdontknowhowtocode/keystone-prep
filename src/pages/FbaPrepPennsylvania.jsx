@@ -15,7 +15,8 @@ const PHONE_DISPLAY = '267-517-1112'
 const WHATSAPP_URL = 'https://wa.me/12675171112'
 
 const RATES = [
-  ['Up to 1,000 units / mo', '$0.65/unit'],
+  ['Under 500 units / mo', '$0.70/unit'],
+  ['500–1,000 units / mo', '$0.65/unit'],
   ['1,001–5,000 units / mo', '$0.60/unit'],
   ['5,001+ units / mo', '$0.55/unit'],
 ]
@@ -60,7 +61,7 @@ export default function FbaPrepPennsylvania() {
     if (desc) {
       desc.setAttribute(
         'content',
-        'Pennsylvania FBA prep center in Lansdale, PA — dock-high receiving, 53-ft trailer access, FNSKU labeling, polybagging, bundling, and storage. $0.55–$0.65/unit all-in. Minutes from the PA Amazon FC corridor.'
+        'Pennsylvania FBA prep center in Lansdale, PA — dock-high receiving, 53-ft trailer access, FNSKU labeling, polybagging, bundling, and storage. $0.55–$0.70/unit all-in. Minutes from the PA Amazon FC corridor.'
       )
     }
 

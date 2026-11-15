@@ -37,7 +37,8 @@ const DTC_RATES = [
 ]
 
 const STANDARD_PREP = [
-  ['Up to 1,000 units / mo', '$0.65/unit'],
+  ['Under 500 units / mo', '$0.70/unit'],
+  ['500–1,000 units / mo', '$0.65/unit'],
   ['1,001–5,000 units / mo', '$0.60/unit'],
   ['5,001+ units / mo', '$0.55/unit'],
 ]

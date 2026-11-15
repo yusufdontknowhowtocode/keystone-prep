@@ -14,7 +14,8 @@ import ClientBoard from '../components/ClientBoard.jsx'
    Rates are only defaults; every line stays editable on the invoice.
    ============================================================ */
 const RATE_PRESETS = [
-  { label: 'Base prep — under 1,000/mo', description: 'Base prep (receive, inspect, FNSKU, box prep)', rate: 0.65 },
+  { label: 'Base prep — under 500/mo', description: 'Base prep (receive, inspect, FNSKU, box prep)', rate: 0.70 },
+  { label: 'Base prep — 500–1,000/mo', description: 'Base prep (receive, inspect, FNSKU, box prep)', rate: 0.65 },
   { label: 'Base prep — 1,000–5,000/mo', description: 'Base prep (receive, inspect, FNSKU, box prep)', rate: 0.60 },
   { label: 'Base prep — 5,000+/mo', description: 'Base prep (receive, inspect, FNSKU, box prep)', rate: 0.55 },
   { label: 'Bundling (per unit bundled)', description: 'Bundling — multipack assembly', rate: 0.50 },

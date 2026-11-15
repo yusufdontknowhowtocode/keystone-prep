@@ -38,7 +38,7 @@ const FAQS = [
   },
   {
     q: 'What does removal processing cost?',
-    a: 'Receiving is $2 per box, waived for boxes with 5+ units. Units we re-prep for FBA are billed at our standard all-in prep rate of $0.55–$0.65 per unit, depending on volume. Inspection-only sorting and anything unusual is quoted in advance. Storage: first 30 days included, then from $35 per pallet per month.',
+    a: 'Receiving is $2 per box, waived for boxes with 5+ units. Units we re-prep for FBA are billed at our standard all-in prep rate of $0.55–$0.70 per unit, depending on volume. Inspection-only sorting and anything unusual is quoted in advance. Storage: first 30 days included, then from $35 per pallet per month.',
   },
   {
     q: 'Can you handle damaged or unsellable units?',
