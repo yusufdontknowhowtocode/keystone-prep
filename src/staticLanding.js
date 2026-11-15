@@ -100,8 +100,12 @@ export function mountStaticLanding() {
 
   // Text / WhatsApp / email / call clicks are tracked site-wide in main.jsx.
 
+  // The production build already wrote the homepage markup into the HTML, inside
+  // #kp-prerender (tools/prerender.mjs). Unwrap it instead of inserting a second copy.
   const root = document.getElementById('root')
-  root.insertAdjacentHTML('beforebegin', landingHtml)
+  const prerendered = document.getElementById('kp-prerender')
+  if (prerendered) prerendered.replaceWith(...prerendered.childNodes)
+  else root.insertAdjacentHTML('beforebegin', landingHtml)
   root.remove()
 
   const s = document.createElement('script')

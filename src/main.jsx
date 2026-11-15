@@ -17,9 +17,19 @@ if (path === '/') {
   // Homepage is a static page (public/kp + src/landing.html), without React/Tailwind.
   import('./staticLanding.js').then((m) => m.mountStaticLanding())
 } else {
+  // The build writes page text into the HTML for crawlers (tools/prerender.mjs). If this
+  // path was served the homepage file, drop its markup; React renders the page below.
+  document.getElementById('kp-prerender')?.remove()
+
   Promise.all([import('react'), import('react-dom/client'), import('./App.jsx'), import('./styles.css')]).then(
     ([React, { createRoot }, { default: App }]) => {
-      createRoot(document.getElementById('root')).render(
+      const root = document.getElementById('root')
+      if (root.hasAttribute('data-kp-static')) {
+        // Prerendered copy of this page: clear it so React starts from an empty root.
+        root.replaceChildren()
+        root.removeAttribute('data-kp-static')
+      }
+      createRoot(root).render(
         React.createElement(React.StrictMode, null, React.createElement(App)),
       )
     },

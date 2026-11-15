@@ -53,7 +53,7 @@ const FAQS = [
 export default function FbaPrepPennsylvania() {
   useEffect(() => {
     document.title =
-      'FBA Prep Center in Pennsylvania — Keystone Prep, Lansdale PA'
+      'FBA Prep Center in Pennsylvania | Keystone Prep Center, Lansdale PA'
 
     const desc = document.querySelector('meta[name="description"]')
 
