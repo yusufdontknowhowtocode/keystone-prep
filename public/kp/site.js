@@ -46,7 +46,7 @@ function render(){
   $('#l-month').textContent=money(c.month);
   $('#l-first-row').style.display=fba?'':'none';
   if(fba)$('#l-first').textContent=money(c.first);
-  $('#l-note').textContent=fba?'Up to 100 units on us. Estimate only, before postage.':(c.custom?'1,000+ orders a month get a custom quote, at or below this estimate. Before postage.':'Estimate only, before postage. Postage is billed at cost.');
+  $('#l-note').textContent=fba?'First 100 units free at 1,000+ units a month. Estimate only, before postage.':(c.custom?'1,000+ orders a month get a custom quote, at or below this estimate. Before postage.':'Estimate only, before postage. Postage is billed at cost.');
   var brand=S.brand.trim();
   $('#l-brand').textContent=brand||'Your brand';
   var code=(brand?brand.toUpperCase().replace(/[^A-Z0-9]+/g,'').slice(0,8)+'-':'KP-')+c.vol+(fba?'U':'O')+'-'+Math.round(c.rate*100);

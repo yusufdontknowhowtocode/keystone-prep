@@ -232,8 +232,8 @@ export default function ShopifyFulfillmentPennsylvania() {
 
           <p className="text-sm pp-sub mt-3">
             Postage is billed at carrier cost, or ship on your own UPS, FedEx,
-            or USPS account. Storage includes the first 30 days. $25 minimum
-            per inbound shipment ($50 for container/trailer freight).
+            or USPS account. Storage includes the first 30 days. $50 minimum
+            for container/trailer freight.
           </p>
         </section>
 
