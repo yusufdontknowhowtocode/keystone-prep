@@ -221,8 +221,8 @@ export default function FbaPrepPennsylvania() {
 
           <p className="text-sm pp-sub mt-3">
             Add-ons only when a SKU needs them: polybagging $0.25/unit, bubble
-            wrap $0.40/unit, bundling $0.50 per unit bundled, first 30 days included, then from $35/pallet/month based on dwell time. Your first test shipment — up to 100 units — is on
-            us, valid 30 days from account setup - $25 minimum per inbound shipment ($50 for container/trailer freight).
+            wrap $0.40/unit, bundling $0.50 per unit bundled, first 30 days included, then from $35/pallet/month based on dwell time. Sellers sending 1,000+ units a month get their first 100 units
+            free, valid 30 days from account setup. $50 minimum for container/trailer freight.
           </p>
         </section>
 

@@ -48,7 +48,7 @@ const ADD_ONS = [
   ['Bubble wrap', '$0.40/unit'],
   ['Bundling / kitting', '$0.50 per unit bundled'],
   ['Pallet storage', 'First 30 days included · then from $35/pallet/mo'],
-  ['Inbound minimum', '$25/shipment · $50 freight'],
+  ['Freight minimum', '$50 container or trailer'],
 ]
 
 const TRUST_LINES = [
@@ -377,7 +377,7 @@ export default function Landing() {
                 Get a rough number in seconds, then send it over and we'll confirm your exact rate. If it's a good fit we'll schedule a quick call and walk through the portal.
               </p>
               <p className="text-sm font-medium mt-2">
-                Your first test shipment — up to 100 units — is on us, so you can see the work before you commit volume.
+                Sending 1,000+ units a month? Your first 100 units are on us, so you can see the work before you commit volume.
               </p>
             </div>
 
