@@ -60,13 +60,13 @@ const TRUST_LINES = [
 const TESTIMONIALS = [
   {
     name: 'Ryan D.',
-    company: 'Dooley Core Enterprise LLC',
+    company: 'Amazon FBA seller',
     source: '★★★★★ Google review',
     quote: 'Excellent communication with my company. They kept on top of everything and were able to provide additional information when I needed it for my suppliers and for Amazon as well. Due to his quick response, even after hours, they responded to several inquiries. I look forward to continuing my partnership with Keystone.',
   },
   {
     name: 'Liubomyr',
-    company: 'NordPeak Distribution',
+    company: 'Amazon FBA seller',
     source: '★★★★★ Client review',
     quote: 'Thanks a lot for the great work and smooth process. I really appreciate your help with relabeling and handling everything so cleanly. Thanks again for the top-notch service!',
   },
