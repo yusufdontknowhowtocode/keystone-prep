@@ -92,9 +92,9 @@ async function submitLead(d) {
 }
 
 export function mountStaticLanding() {
-  if (!document.querySelector('link[href="/kp/site.css?v=20261118"]')) {
+  if (!document.querySelector('link[href="/kp/site.css?v=20261118b"]')) {
     addCss('/kp/fonts.css')
-    addCss('/kp/site.css?v=20261118')
+    addCss('/kp/site.css?v=20261118b')
   }
   window.KP_SUBMIT = submitLead
 

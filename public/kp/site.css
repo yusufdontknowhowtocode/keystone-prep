@@ -361,3 +361,18 @@ address{font-style:normal;margin-top:24px;line-height:1.45}
   .k-track{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding-left:clamp(32px,5vw,72px);gap:16px;padding-bottom:12px;margin-right:calc(-1 * var(--gut));padding-right:var(--gut)}
   .tk{flex:0 0 78%;scroll-snap-align:start}
 }
+/* reviews: compact cards scrolling side by side */
+.said{padding:clamp(40px,5vw,72px) 0}
+.said-marquee{overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent);mask-image:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent)}
+.said-track{display:flex;align-items:stretch;width:max-content;animation:said-scroll 70s linear infinite}
+.said-marquee:hover .said-track,.said-marquee:focus-within .said-track{animation-play-state:paused}
+.said-track .review{flex:0 0 clamp(280px,28vw,400px);margin-right:24px;padding:24px 24px 22px;border:1px solid rgba(255,255,255,.14);border-radius:4px;background:rgba(255,255,255,.03);display:flex;flex-direction:column}
+.said-track .review blockquote{font:800 clamp(18px,1.45vw,22px)/1.3 var(--body);letter-spacing:0;flex:1}
+.said-track .review figcaption{margin-top:16px;font-size:16px}
+.said-track .k-reply{margin-top:14px;font-size:15px}
+@keyframes said-scroll{to{transform:translateX(-50%)}}
+@media (prefers-reduced-motion:reduce){
+  .said-marquee{overflow-x:auto;-webkit-mask-image:none;mask-image:none;padding:0 var(--gut)}
+  .said-track{animation:none}
+  .said-track .review[aria-hidden]{display:none}
+}
