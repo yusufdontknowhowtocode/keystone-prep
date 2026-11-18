@@ -288,6 +288,7 @@ function LoginScreen({ onDemo }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [notice, setNotice] = useState('')
   const [busy, setBusy] = useState(false)
 
   async function submit(e) {
@@ -297,6 +298,19 @@ function LoginScreen({ onDemo }) {
     const { error: loginError } = await supabase.auth.signInWithPassword({ email, password })
     if (loginError) setError(loginError.message)
     setBusy(false)
+  }
+
+  async function forgot() {
+    if (!hasSupabaseConfig) return
+    setError(''); setNotice('')
+    if (!email.trim()) return setError('Enter your email above, then tap "Forgot password?" again.')
+    setBusy(true)
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+      redirectTo: `${window.location.origin}/portal`,
+    })
+    setBusy(false)
+    if (resetError) return setError(resetError.message)
+    setNotice('Check your email for a link to set a new password. It can take a minute, and check spam too.')
   }
 
   return (
@@ -311,6 +325,10 @@ function LoginScreen({ onDemo }) {
           <input className="pp-input" type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} />
           <button className="pp-btn pp-btn-accent w-full py-3" disabled={busy}>{busy ? 'Logging in…' : 'Log in'}</button>
         </form>
+        {hasSupabaseConfig && (
+          <button type="button" onClick={forgot} disabled={busy} className="text-sm pp-sub underline mt-3">Forgot password?</button>
+        )}
+        {notice && <div className="mt-3 text-sm p-3 rounded" style={{ background: '#F0FDF4', color: 'var(--ok)' }}>{notice}</div>}
         <button onClick={onDemo} className="pp-btn-ghost w-full py-3 mt-3">Open demo portal</button>
         {!hasSupabaseConfig && <p className="text-xs pp-sub mt-3">No Supabase env vars found, so live login is disabled locally.</p>}
       </div>
