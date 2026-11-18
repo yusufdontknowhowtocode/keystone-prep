@@ -132,8 +132,8 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;background:var(--whit
 .said-list{display:grid;grid-template-columns:minmax(0,1.32fr) minmax(0,1fr);gap:clamp(36px,6vw,96px);align-items:start}
 .review{margin:0}
 .review-wide{grid-column:1/-1}
-.review blockquote{margin:0;font:800 clamp(25px,2.4vw,38px)/1.16 var(--body);letter-spacing:-.01em;text-wrap:pretty}
-.review figcaption{margin-top:20px;display:flex;flex-wrap:wrap;gap:4px 12px;font-size:17px;align-items:baseline}
+.review blockquote{margin:0;font:800 clamp(28px,2.9vw,46px)/1.14 var(--body);letter-spacing:-.01em;text-wrap:pretty}
+.review figcaption{margin-top:22px;display:flex;flex-wrap:wrap;gap:4px 12px;font-size:19px;align-items:baseline}
 .r-name{color:var(--ye)}
 .r-co{color:var(--white)}
 .r-src{font:500 13px var(--mono);color:var(--soft)}
