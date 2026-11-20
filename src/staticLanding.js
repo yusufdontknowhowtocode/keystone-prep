@@ -30,7 +30,7 @@ async function submitLead(d) {
     if (hasSupabaseConfig) {
       const { error } = await supabase.from('leads').insert({
         source: attribution.source,
-        channel: channelFromAttribution(attribution),
+        channel: channelFromAttribution(attribution, { dtc }),
         name: d.name || null,
         email: d.email,
         brand: d.brand || null,
