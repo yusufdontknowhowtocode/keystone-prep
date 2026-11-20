@@ -92,3 +92,31 @@ export function channelFromAttribution(a, { dtc = false } = {}) {
   // mixing with hand-entered leads nobody has tagged yet.
   return 'Website – unattributed'
 }
+
+// Short code added to prefilled text / WhatsApp / email messages for visitors who came
+// from a Google ad, so leads that message instead of using the form can still be traced.
+// KP-A = Google Ads FBA, KP-D = Google Ads DTC. Everyone else gets no code.
+export function contactRef() {
+  const a = getAttribution()
+  if (String(a?.source || '').toLowerCase() !== 'google_ads') return null
+  return channelFromAttribution(a) === 'Google Ads – DTC' ? 'KP-D' : 'KP-A'
+}
+
+// Returns the sms: / wa.me / mailto: link with "(ref: CODE)" added to its message.
+export function tagContactHref(href, code) {
+  if (!href || !code || href.startsWith('tel:')) return href
+  const param = href.startsWith('https://wa.me') ? 'text' : 'body'
+  const suffix = `(ref: ${code})`
+  const re = new RegExp('([?&])' + param + '=([^&]*)')
+  const m = href.match(re)
+  try {
+    if (m) {
+      const current = decodeURIComponent(m[2])
+      if (current.includes(suffix)) return href
+      return href.replace(re, m[1] + param + '=' + encodeURIComponent(current + '\n\n' + suffix))
+    }
+  } catch { return href }
+  const text = encodeURIComponent('Hi Keystone Prep,\n\n' + suffix)
+  if (href.startsWith('sms:')) return href + (href.includes('?') ? '&' : '?&') + 'body=' + text
+  return href + (href.includes('?') ? '&' : '?') + param + '=' + text
+}
