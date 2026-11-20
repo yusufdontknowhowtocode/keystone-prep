@@ -360,6 +360,9 @@ address{font-style:normal;margin-top:24px;line-height:1.45}
 .tk-approve .under{display:inline-block;margin-top:14px}
 @media(max-width:1080px){.k-track{grid-template-columns:repeat(2,minmax(0,1fr))}.tk-approve{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:700px){
-  .k-track{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding-left:clamp(32px,5vw,72px);gap:16px;padding-bottom:12px;margin-right:calc(-1 * var(--gut));padding-right:var(--gut)}
-  .tk{flex:0 0 78%;scroll-snap-align:start}
+  /* phones: steps stack, photo beside its text, no sideways scrolling */
+  .k-track{grid-template-columns:minmax(0,1fr);gap:28px}
+  .tk{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,3fr);grid-template-rows:auto auto 1fr;column-gap:16px}
+  .tk-pic{grid-row:1/span 3;margin:0;align-self:start}
+  .tk-n,.tk h3,.tk p{grid-column:2}
 }
