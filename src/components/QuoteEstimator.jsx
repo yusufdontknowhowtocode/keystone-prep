@@ -114,7 +114,7 @@ export default function QuoteEstimator() {
     const dtcSummary = `DTC fulfillment: ${orders} orders/mo, avg ${itemCount} items/order, platform ${platform}`
     const payload = {
         source,
-        channel: channelFromAttribution(attribution),
+        channel: channelFromAttribution(attribution, { dtc: isDtc }),
         name: form.name.trim() || null,
         email: form.email.trim(),
         brand: form.brand.trim() || null,
