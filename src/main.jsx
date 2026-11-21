@@ -20,7 +20,17 @@ document.addEventListener('click', (e) => {
 
 const path = window.location.pathname.replace(/\/$/, '') || '/'
 
-if (path === '/') {
+// Pages that exist besides the homepage. Keep in step with src/App.jsx.
+const KNOWN_PATHS = [
+  '/portal', '/admin', '/pack', '/fba-prep-pennsylvania', '/container-receiving',
+  '/shopify-fulfillment-pennsylvania', '/fba-removal-processing', '/switch',
+]
+
+if (path !== '/' && !KNOWN_PATHS.includes(path)) {
+  // Dead or mistyped address: send the visitor to the real homepage, keeping any
+  // ad parameters (?gclid=...) so attribution still works.
+  window.location.replace('/' + window.location.search + window.location.hash)
+} else if (path === '/') {
   // Homepage is a static page (public/kp + src/landing.html), without React/Tailwind.
   import('./staticLanding.js').then((m) => m.mountStaticLanding())
 } else {
