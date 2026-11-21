@@ -40,10 +40,12 @@
       }
     </script>
 
-    <!-- Google tag (gtag.js) -->
+    <!-- Google tag (gtag.js), loaded through the Google tag gateway on our own domain
+         (Cloudflare, path /kmt4). If that path fails, fall back to Google's domain. -->
     <script
       async
-      src="https://www.googletagmanager.com/gtag/js?id=AW-18227583658"
+      src="/kmt4/?id=AW-18227583658"
+      onerror="var s=document.createElement('script');s.async=true;s.src='https://www.googletagmanager.com/gtag/js?id=AW-18227583658';document.head.appendChild(s)"
     ></script>
 
     <script>
